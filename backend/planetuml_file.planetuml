@@ -1,0 +1,76 @@
+@startuml
+!define Table(name,desc) class name as "desc" << (T,#FFAAAA) >>
+!define PrimaryKey(x) <u>x</u>
+!define ForeignKey(x) x
+
+
+Table(LOCATIONS, "locations") {
+    PrimaryKey(location_id) : int
+    location_name : varchar
+    location_root : int
+    location_desc : varchar
+    latitude : decimal
+    longitude : decimal
+    address_id : int
+}
+
+Table(DEVICES, "devices") {
+    PrimaryKey(device_id) : int
+    device_type : varchar
+    image_path : varchar
+    ForeignKey(location_id) : int
+    device_serial_number : int
+    description : varchar
+}
+
+Table(USERS, "users") {
+    PrimaryKey(user_id) : int
+    use_group : varchar
+    user_role : varchar
+    user_rights : varchar
+    user_name : varchar
+    user_email : varchar
+}
+
+Table(TAGS, "tags") {
+    PrimaryKey(tag_id) : int
+    description : varchar
+    unit : int
+}
+
+Table(DEVICE_TAGS, "device_tags") {
+    PrimaryKey(ID) : int
+    ForeignKey(device_id) : int
+    ForeignKey(tag_id) : int
+}
+
+Table(HISTORY_ALERTS, "history_alerts") {
+    PrimaryKey(ID) : int
+    ForeignKey(device_id) : int
+    Time_Stamp : timestamp
+    Alert_status : varchar
+    ForeignKey(Action_id) : int
+}
+
+Table(HISTORY_DATA, "history_data") {
+    PrimaryKey(ID) : int
+    ForeignKey(tag_id) : int
+    Value : int
+    Time_Stamp : timestamp
+}
+
+Table(ACTION_ALERTS, "actions_alert") {
+    PrimaryKey(Action_id) : int
+    action_desc : varchar
+    alert_action : int
+}
+
+DEVICES  -- HISTORY_ALERTS
+ACTION_ALERTS -- HISTORY_ALERTS
+TAGS -- HISTORY_ALERTS
+LOCATIONS -- DEVICES
+DEVICES -- DEVICE_TAGS
+DEVICES -- DEVICE_TYPE
+TAGS -- DEVICE_TAGS
+
+@enduml
