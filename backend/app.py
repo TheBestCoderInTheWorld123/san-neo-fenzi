@@ -1,717 +1,1382 @@
-import sqlite3
-
-
-# Establish a database connection
-conn = sqlite3.connect('your_database.db')
-cursor = conn.cursor()
-
-# CREATE (Insert) operation for ADDRESSES table
-def create_address(address_id, address_line1, address_line2, city, state, postal_code, country, latitude, longitude, created_by, created_at, updated_by, updated_at):
-    cursor.execute("INSERT INTO ADDRESSES VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                   (address_id, address_line1, address_line2, city, state, postal_code, country, latitude, longitude, created_by, created_at, updated_by, updated_at))
-    conn.commit()
-
-# READ (Select) operation for ADDRESSES table
-def read_address(address_id):
-    cursor.execute("SELECT * FROM ADDRESSES WHERE address_id=?", (address_id,))
-    return cursor.fetchone()
-
-# UPDATE operation for ADDRESSES table
-def update_address(address_id, new_address_line1):
-    cursor.execute("UPDATE ADDRESSES SET address_line1=? WHERE address_id=?", (new_address_line1, address_id))
-    conn.commit()
-
-# DELETE operation for ADDRESSES table
-def delete_address(address_id):
-    cursor.execute("DELETE FROM ADDRESSES WHERE address_id=?", (address_id,))
-    conn.commit()
-
-
-# CREATE (Insert) operation for CONTACT_TYPES table
-def create_contact_type(contact_type_id, description, created_by, created_at, updated_by, updated_at):
-    cursor.execute("INSERT INTO CONTACT_TYPES VALUES (?, ?, ?, ?, ?, ?)",
-                   (contact_type_id, description, created_by, created_at, updated_by, updated_at))
-    conn.commit()
-
-# READ (Select) operation for CONTACT_TYPES table
-def read_contact_type(contact_type_id):
-    cursor.execute("SELECT * FROM CONTACT_TYPES WHERE contact_type_id=?", (contact_type_id,))
-    return cursor.fetchone()
-
-# UPDATE operation for CONTACT_TYPES table
-def update_contact_type(contact_type_id, new_description):
-    cursor.execute("UPDATE CONTACT_TYPES SET description=? WHERE contact_type_id=?", (new_description, contact_type_id))
-    conn.commit()
-
-# DELETE operation for CONTACT_TYPES table
-def delete_contact_type(contact_type_id):
-    cursor.execute("DELETE FROM CONTACT_TYPES WHERE contact_type_id=?", (contact_type_id,))
-    conn.commit()
-
-# CREATE (Insert) operation for CONTACTS table
-def create_contact(contact_id, contact_description, contact_type_id, created_by, created_at, updated_by, updated_at):
-    cursor.execute("INSERT INTO CONTACTS VALUES (?, ?, ?, ?, ?, ?, ?)",
-                   (contact_id, contact_description, contact_type_id, created_by, created_at, updated_by, updated_at))
-    conn.commit()
-
-# READ (Select) operation for CONTACTS table
-def read_contact(contact_id):
-    cursor.execute("SELECT * FROM CONTACTS WHERE contact_id=?", (contact_id,))
-    return cursor.fetchone()
-
-# UPDATE operation for CONTACTS table
-def update_contact(contact_id, new_description):
-    cursor.execute("UPDATE CONTACTS SET contact_description=? WHERE contact_id=?", (new_description, contact_id))
-    conn.commit()
-
-# DELETE operation for CONTACTS table
-def delete_contact(contact_id):
-    cursor.execute("DELETE FROM CONTACTS WHERE contact_id=?", (contact_id,))
-    conn.commit()
-
-
-
-
-# CREATE (Insert) operation for LOCATIONS table
-def create_location(location_id, location_name, location_desc, location_type_id, location_root, latitude, longitude, address_id, contact_id, created_by, created_at, updated_by, updated_at):
-    cursor.execute("INSERT INTO LOCATIONS VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                   (location_id, location_name, location_desc, location_type_id, location_root, latitude, longitude, address_id, contact_id, created_by, created_at, updated_by, updated_at))
-    conn.commit()
-
-# READ (Select) operation for LOCATIONS table
-def read_location(location_id):
-    cursor.execute("SELECT * FROM LOCATIONS WHERE location_id=?", (location_id,))
-    return cursor.fetchone()
-
-# UPDATE operation for LOCATIONS table
-def update_location(location_id, new_location_name):
-    cursor.execute("UPDATE LOCATIONS SET location_name=? WHERE location_id=?", (new_location_name, location_id))
-    conn.commit()
-
-# DELETE operation for LOCATIONS table
-def delete_location(location_id):
-    cursor.execute("DELETE FROM LOCATIONS WHERE location_id=?", (location_id,))
-    conn.commit()
-
-# CREATE (Insert) operation for LOCATION_CONTACTS table
-def create_location_contact(location_id, contact_id):
-    cursor.execute("INSERT INTO LOCATION_CONTACTS (location_id, contact_id) VALUES (?, ?)",
-                   (location_id, contact_id))
-    conn.commit()
-
-# READ (Select) operation for LOCATION_CONTACTS table
-def read_location_contact(location_id, contact_id):
-    cursor.execute("SELECT * FROM LOCATION_CONTACTS WHERE location_id=? AND contact_id=?", (location_id, contact_id))
-    return cursor.fetchone()
-
-# UPDATE operation for LOCATION_CONTACTS table
-def update_location_contact(location_id, contact_id, new_location_id, new_contact_id):
-    cursor.execute("UPDATE LOCATION_CONTACTS SET location_id=?, contact_id=? WHERE location_id=? AND contact_id=?",
-                   (new_location_id, new_contact_id, location_id, contact_id))
-    conn.commit()
-
-# DELETE operation for LOCATION_CONTACTS table
-def delete_location_contact(location_id, contact_id):
-    cursor.execute("DELETE FROM LOCATION_CONTACTS WHERE location_id=? AND contact_id=?", (location_id, contact_id))
-    conn.commit()
-
-# CREATE (Insert) operation for LOCATION_ADDRESSES table
-def create_location_address(location_id, address_id):
-    cursor.execute("INSERT INTO LOCATION_ADDRESSES (location_id, address_id) VALUES (?, ?)",
-                   (location_id, address_id))
-    conn.commit()
-
-# READ (Select) operation for LOCATION_ADDRESSES table
-def read_location_address(location_id, address_id):
-    cursor.execute("SELECT * FROM LOCATION_ADDRESSES WHERE location_id=? AND address_id=?", (location_id, address_id))
-    return cursor.fetchone()
-
-# UPDATE operation for LOCATION_ADDRESSES table
-def update_location_address(location_id, address_id, new_location_id, new_address_id):
-    cursor.execute("UPDATE LOCATION_ADDRESSES SET location_id=?, address_id=? WHERE location_id=? AND address_id=?",
-                   (new_location_id, new_address_id, location_id, address_id))
-    conn.commit()
-
-# DELETE operation for LOCATION_ADDRESSES table
-def delete_location_address(location_id, address_id):
-    cursor.execute("DELETE FROM LOCATION_ADDRESSES WHERE location_id=? AND address_id=?", (location_id, address_id))
-    conn.commit()
-
-# CREATE (Insert) operation for USERS table
-def create_user(user_id, email, hex_password, contact_id, address_id, is_active, is_verified, created_by, created_at, updated_by, updated_at):
-    cursor.execute("INSERT INTO USERS (user_id, email, hex_password, contact_id, address_id, is_active, is_verified, created_by, created_at, updated_by, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                   (user_id, email, hex_password, contact_id, address_id, is_active, is_verified, created_by, created_at, updated_by, updated_at))
-    conn.commit()
-
-# READ (Select) operation for USERS table
-def read_user(user_id):
-    cursor.execute("SELECT * FROM USERS WHERE user_id=?", (user_id,))
-    return cursor.fetchone()
-
-# UPDATE operation for USERS table
-def update_user(user_id, new_email, new_hex_password, new_contact_id, new_address_id, new_is_active, new_is_verified, new_updated_by, new_updated_at):
-    cursor.execute("UPDATE USERS SET email=?, hex_password=?, contact_id=?, address_id=?, is_active=?, is_verified=?, updated_by=?, updated_at=? WHERE user_id=?",
-                   (new_email, new_hex_password, new_contact_id, new_address_id, new_is_active, new_is_verified, new_updated_by, new_updated_at, user_id))
-    conn.commit()
-
-# DELETE operation for USERS table
-def delete_user(user_id):
-    cursor.execute("DELETE FROM USERS WHERE user_id=?", (user_id,))
-    conn.commit()
-
-# CREATE (Insert) operation for USER_CONTACTS table
-def create_user_contact(user_id, contact_id):
-    cursor.execute("INSERT INTO USER_CONTACTS (user_id, contact_id) VALUES (?, ?)",
-                   (user_id, contact_id))
-    conn.commit()
-
-# READ (Select) operation for USER_CONTACTS table
-def read_user_contact(user_id, contact_id):
-    cursor.execute("SELECT * FROM USER_CONTACTS WHERE user_id=? AND contact_id=?", (user_id, contact_id))
-    return cursor.fetchone()
-
-# UPDATE operation for USER_CONTACTS table
-def update_user_contact(user_id, contact_id, new_user_id, new_contact_id):
-    cursor.execute("UPDATE USER_CONTACTS SET user_id=?, contact_id=? WHERE user_id=? AND contact_id=?",
-                   (new_user_id, new_contact_id, user_id, contact_id))
-    conn.commit()
-
-# DELETE operation for USER_CONTACTS table
-def delete_user_contact(user_id, contact_id):
-    cursor.execute("DELETE FROM USER_CONTACTS WHERE user_id=? AND contact_id=?", (user_id, contact_id))
-    conn.commit()
-
-# CREATE (Insert) operation for USER_ADDRESSES table
-def create_user_address(user_id, address_id):
-    cursor.execute("INSERT INTO USER_ADDRESSES (user_id, address_id) VALUES (?, ?)",
-                   (user_id, address_id))
-    conn.commit()
-
-# READ (Select) operation for USER_ADDRESSES table
-def read_user_address(user_id, address_id):
-    cursor.execute("SELECT * FROM USER_ADDRESSES WHERE user_id=? AND address_id=?", (user_id, address_id))
-    return cursor.fetchone()
-
-# UPDATE operation for USER_ADDRESSES table
-def update_user_address(user_id, address_id, new_user_id, new_address_id):
-    cursor.execute("UPDATE USER_ADDRESSES SET user_id=?, address_id=? WHERE user_id=? AND address_id=?",
-                   (new_user_id, new_address_id, user_id, address_id))
-    conn.commit()
-
-# DELETE operation for USER_ADDRESSES table
-def delete_user_address(user_id, address_id):
-    cursor.execute("DELETE FROM USER_ADDRESSES WHERE user_id=? AND address_id=?", (user_id, address_id))
-    conn.commit()
-
-# CREATE (Insert) operation for USER_GROUP table
-def create_user_group(user_group_id, group_name, created_by, created_at, updated_by, updated_at):
-    cursor.execute("INSERT INTO USER_GROUP (user_group_id, group_name, created_by, created_at, updated_by, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
-                   (user_group_id, group_name, created_by, created_at, updated_by, updated_at))
-    conn.commit()
-
-# READ (Select) operation for USER_GROUP table
-def read_user_group(user_group_id):
-    cursor.execute("SELECT * FROM USER_GROUP WHERE user_group_id=?", (user_group_id,))
-    return cursor.fetchone()
-
-# UPDATE operation for USER_GROUP table
-def update_user_group(user_group_id, new_group_name, new_updated_by, new_updated_at):
-    cursor.execute("UPDATE USER_GROUP SET group_name=?, updated_by=?, updated_at=? WHERE user_group_id=?",
-                   (new_group_name, new_updated_by, new_updated_at, user_group_id))
-    conn.commit()
-
-# DELETE operation for USER_GROUP table
-def delete_user_group(user_group_id):
-    cursor.execute("DELETE FROM USER_GROUP WHERE user_group_id=?", (user_group_id,))
-    conn.commit()
-
-
-# CREATE (Insert) operation for USER_ROLE table
-def create_user_role(role_id, role_name, created_by, created_at, updated_by, updated_at):
-    cursor.execute("INSERT INTO USER_ROLE (role_id, role_name, created_by, created_at, updated_by, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
-                   (role_id, role_name, created_by, created_at, updated_by, updated_at))
-    conn.commit()
-
-# READ (Select) operation for USER_ROLE table
-def read_user_role(role_id):
-    cursor.execute("SELECT * FROM USER_ROLE WHERE role_id=?", (role_id,))
-    return cursor.fetchone()
-
-# UPDATE operation for USER_ROLE table
-def update_user_role(role_id, new_role_name, new_updated_by, new_updated_at):
-    cursor.execute("UPDATE USER_ROLE SET role_name=?, updated_by=?, updated_at=? WHERE role_id=?",
-                   (new_role_name, new_updated_by, new_updated_at, role_id))
-    conn.commit()
-
-# DELETE operation for USER_ROLE table
-def delete_user_role(role_id):
-    cursor.execute("DELETE FROM USER_ROLE WHERE role_id=?", (role_id,))
-    conn.commit()
-
-
-# CREATE (Insert) operation for USER_GROUP_MEMBERSHIP table
-def create_user_group_membership(user_id, user_group_id):
-    cursor.execute("INSERT INTO USER_GROUP_MEMBERSHIP (user_id, user_group_id) VALUES (?, ?)",
-                   (user_id, user_group_id))
-    conn.commit()
-
-# READ (Select) operation for USER_GROUP_MEMBERSHIP table
-def read_user_group_membership(user_id, user_group_id):
-    cursor.execute("SELECT * FROM USER_GROUP_MEMBERSHIP WHERE user_id=? AND user_group_id=?", (user_id, user_group_id))
-    return cursor.fetchone()
-
-# DELETE operation for USER_GROUP_MEMBERSHIP table
-def delete_user_group_membership(user_id, user_group_id):
-    cursor.execute("DELETE FROM USER_GROUP_MEMBERSHIP WHERE user_id=? AND user_group_id=?", (user_id, user_group_id))
-    conn.commit()
-
-    # CREATE (Insert) operation for USER_ROLE_ASSIGNMENT table
-def create_user_role_assignment(user_id, role_id):
-    cursor.execute("INSERT INTO USER_ROLE_ASSIGNMENT (user_id, role_id) VALUES (?, ?)",
-                   (user_id, role_id))
-    conn.commit()
-
-# READ (Select) operation for USER_ROLE_ASSIGNMENT table
-def read_user_role_assignment(user_id, role_id):
-    cursor.execute("SELECT * FROM USER_ROLE_ASSIGNMENT WHERE user_id=? AND role_id=?", (user_id, role_id))
-    return cursor.fetchone()
-
-# UPDATE operation for USER_ROLE_ASSIGNMENT table
-def update_user_role_assignment(user_id, role_id, new_user_id, new_role_id):
-    cursor.execute("UPDATE USER_ROLE_ASSIGNMENT SET user_id=?, role_id=? WHERE user_id=? AND role_id=?",
-                   (new_user_id, new_role_id, user_id, role_id))
-    conn.commit()
-
-# DELETE operation for USER_ROLE_ASSIGNMENT table
-def delete_user_role_assignment(user_id, role_id):
-    cursor.execute("DELETE FROM USER_ROLE_ASSIGNMENT WHERE user_id=? AND role_id=?", (user_id, role_id))
-    conn.commit()
-
-
-
-
-# CREATE (Insert) operation for ASSET_TYPES table
-def create_asset_type(asset_type_id, description, created_by, created_at, updated_by, updated_at):
-    cursor.execute("INSERT INTO ASSET_TYPES (asset_type_id, description, created_by, created_at, updated_by, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
-                   (asset_type_id, description, created_by, created_at, updated_by, updated_at))
-    conn.commit()
-
-# READ (Select) operation for ASSET_TYPES table
-def read_asset_type(asset_type_id):
-    cursor.execute("SELECT * FROM ASSET_TYPES WHERE asset_type_id=?", (asset_type_id,))
-    return cursor.fetchone()
-
-# UPDATE operation for ASSET_TYPES table
-def update_asset_type(asset_type_id, new_description, new_updated_by, new_updated_at):
-    cursor.execute("UPDATE ASSET_TYPES SET description=?, updated_by=?, updated_at=? WHERE asset_type_id=?",
-                   (new_description, new_updated_by, new_updated_at, asset_type_id))
-    conn.commit()
-
-# DELETE operation for ASSET_TYPES table
-def delete_asset_type(asset_type_id):
-    cursor.execute("DELETE FROM ASSET_TYPES WHERE asset_type_id=?", (asset_type_id,))
-    conn.commit()
-
-# CREATE (Insert) operation for ASSETS table
-def create_asset(asset_id, asset_type_id, created_by, created_at, updated_by, updated_at):
-    cursor.execute("INSERT INTO ASSETS (asset_id, asset_type_id, created_by, created_at, updated_by, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
-                   (asset_id, asset_type_id, created_by, created_at, updated_by, updated_at))
-    conn.commit()
-
-# READ (Select) operation for ASSETS table
-def read_asset(asset_id):
-    cursor.execute("SELECT * FROM ASSETS WHERE asset_id=?", (asset_id,))
-    return cursor.fetchone()
-
-# UPDATE operation for ASSETS table
-def update_asset(asset_id, new_asset_type_id, new_updated_by, new_updated_at):
-    cursor.execute("UPDATE ASSETS SET asset_type_id=?, updated_by=?, updated_at=? WHERE asset_id=?",
-                   (new_asset_type_id, new_updated_by, new_updated_at, asset_id))
-    conn.commit()
-
-# DELETE operation for ASSETS table
-def delete_asset(asset_id):
-    cursor.execute("DELETE FROM ASSETS WHERE asset_id=?", (asset_id,))
-    conn.commit()
-
-
-
-# CREATE (Insert) operation for RIGHTS table
-def create_right(right_id, asset_id, create_right, edit_right, delete_right, read_data, view_right, created_by, created_at, updated_by, updated_at):
-    cursor.execute("INSERT INTO RIGHTS (right_id, asset_id, create_right, edit_right, delete_right, read_data, view_right, created_by, created_at, updated_by, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                   (right_id, asset_id, create_right, edit_right, delete_right, read_data, view_right, created_by, created_at, updated_by, updated_at))
-    conn.commit()
-
-# READ (Select) operation for RIGHTS table
-def read_right(right_id):
-    cursor.execute("SELECT * FROM RIGHTS WHERE right_id=?", (right_id,))
-    return cursor.fetchone()
-
-# UPDATE operation for RIGHTS table
-def update_right(right_id, new_create_right, new_edit_right, new_delete_right, new_read_data, new_view_right, new_updated_by, new_updated_at):
-    cursor.execute("UPDATE RIGHTS SET create_right=?, edit_right=?, delete_right=?, read_data=?, view_right=?, updated_by=?, updated_at=? WHERE right_id=?",
-                   (new_create_right, new_edit_right, new_delete_right, new_read_data, new_view_right, new_updated_by, new_updated_at, right_id))
-    conn.commit()
-
-# DELETE operation for RIGHTS table
-def delete_right(right_id):
-    cursor.execute("DELETE FROM RIGHTS WHERE right_id=?", (right_id,))
-    conn.commit()
-
-
-# CREATE (Insert) operation for USER_RIGHTS table
-def create_user_right(user_id, right_id):
-    cursor.execute("INSERT INTO USER_RIGHTS (user_id, right_id) VALUES (?, ?)",
-                   (user_id, right_id))
-    conn.commit()
-
-# READ (Select) operation for USER_RIGHTS table
-def read_user_right(user_id, right_id):
-    cursor.execute("SELECT * FROM USER_RIGHTS WHERE user_id=? AND right_id=?", (user_id, right_id))
-    return cursor.fetchone()
-
-# DELETE operation for USER_RIGHTS table
-def delete_user_right(user_id, right_id):
-    cursor.execute("DELETE FROM USER_RIGHTS WHERE user_id=? AND right_id=?", (user_id, right_id))
-    conn.commit()
-
-# CREATE (Insert) operation for ROLE_RIGHTS table
-def create_role_right(role_id, right_id):
-    cursor.execute("INSERT INTO ROLE_RIGHTS (role_id, right_id) VALUES (?, ?)",
-                   (role_id, right_id))
-    conn.commit()
-
-# READ (Select) operation for ROLE_RIGHTS table
-def read_role_right(role_id, right_id):
-    cursor.execute("SELECT * FROM ROLE_RIGHTS WHERE role_id=? AND right_id=?", (role_id, right_id))
-    return cursor.fetchone()
-
-# DELETE operation for ROLE_RIGHTS table
-def delete_role_right(role_id, right_id):
-    cursor.execute("DELETE FROM ROLE_RIGHTS WHERE role_id=? AND right_id=?", (role_id, right_id))
-    conn.commit()
-
-
-# CREATE (Insert) operation for TAGS table
-def create_tag(tag_id, description, unit_of_measure, created_by, created_at, updated_by, updated_at):
-    cursor.execute("INSERT INTO TAGS (tag_id, description, unit_of_measure, created_by, created_at, updated_by, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                   (tag_id, description, unit_of_measure, created_by, created_at, updated_by, updated_at))
-    conn.commit()
-
-# READ (Select) operation for TAGS table
-def read_tag(tag_id):
-    cursor.execute("SELECT * FROM TAGS WHERE tag_id=?", (tag_id,))
-    return cursor.fetchone()
-
-# UPDATE operation for TAGS table
-def update_tag(tag_id, updated_description, updated_unit_of_measure, updated_updated_by, updated_updated_at):
-    cursor.execute("UPDATE TAGS SET description=?, unit_of_measure=?, updated_by=?, updated_at=? WHERE tag_id=?",
-                   (updated_description, updated_unit_of_measure, updated_updated_by, updated_updated_at, tag_id))
-    conn.commit()
-
-# DELETE operation for TAGS table
-def delete_tag(tag_id):
-    cursor.execute("DELETE FROM TAGS WHERE tag_id=?", (tag_id,))
-    conn.commit()
-
-
-# CREATE (Insert) operation for DEVICE_TYPE table
-def create_device_type(device_type_id, description, created_by, created_at, updated_by, updated_at):
-    cursor.execute("INSERT INTO DEVICE_TYPE (device_type_id, description, created_by, created_at, updated_by, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
-                   (device_type_id, description, created_by, created_at, updated_by, updated_at))
-    conn.commit()
-
-# READ (Select) operation for DEVICE_TYPE table
-def read_device_type(device_type_id):
-    cursor.execute("SELECT * FROM DEVICE_TYPE WHERE device_type_id=?", (device_type_id,))
-    return cursor.fetchone()
-
-# UPDATE operation for DEVICE_TYPE table
-def update_device_type(device_type_id, updated_description, updated_updated_by, updated_updated_at):
-    cursor.execute("UPDATE DEVICE_TYPE SET description=?, updated_by=?, updated_at=? WHERE device_type_id=?",
-                   (updated_description, updated_updated_by, updated_updated_at, device_type_id))
-    conn.commit()
-
-# DELETE operation for DEVICE_TYPE table
-def delete_device_type(device_type_id):
-    cursor.execute("DELETE FROM DEVICE_TYPE WHERE device_type_id=?", (device_type_id,))
-    conn.commit()
-
-
-# CREATE (Insert) operation for DEVICES table
-def create_device(device_id, device_root_id, device_type_id, location_id, device_serial_number, description, model_number, brand_name, is_active, created_by, created_at, updated_by, updated_at):
-    cursor.execute("INSERT INTO DEVICES (device_id, device_root_id, device_type_id, location_id, device_serial_number, description, model_number, brand_name, is_active, created_by, created_at, updated_by, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                   (device_id, device_root_id, device_type_id, location_id, device_serial_number, description, model_number, brand_name, is_active, created_by, created_at, updated_by, updated_at))
-    conn.commit()
-
-# READ (Select) operation for DEVICES table
-def read_device(device_id):
-    cursor.execute("SELECT * FROM DEVICES WHERE device_id=?", (device_id,))
-    return cursor.fetchone()
-
-# UPDATE operation for DEVICES table
-def update_device(device_id, updated_device_serial_number, updated_description, updated_updated_by, updated_updated_at):
-    cursor.execute("UPDATE DEVICES SET device_serial_number=?, description=?, updated_by=?, updated_at=? WHERE device_id=?",
-                   (updated_device_serial_number, updated_description, updated_updated_by, updated_updated_at, device_id))
-    conn.commit()
-
-# DELETE operation for DEVICES table
-def delete_device(device_id):
-    cursor.execute("DELETE FROM DEVICES WHERE device_id=?", (device_id,))
-    conn.commit()
-
-
-# CREATE (Insert) operation for DEVICE_TAGS table
-def create_device_tag(device_id, tag_id):
-    cursor.execute("INSERT INTO DEVICE_TAGS (device_id, tag_id) VALUES (?, ?)",
-                   (device_id, tag_id))
-    conn.commit()
-
-# READ (Select) operation for DEVICE_TAGS table
-def read_device_tag(device_id, tag_id):
-    cursor.execute("SELECT * FROM DEVICE_TAGS WHERE device_id=? AND tag_id=?", (device_id, tag_id))
-    return cursor.fetchone()
-
-# DELETE operation for DEVICE_TAGS table
-def delete_device_tag(device_id, tag_id):
-    cursor.execute("DELETE FROM DEVICE_TAGS WHERE device_id=? AND tag_id=?", (device_id, tag_id))
-    conn.commit()
-
-
-
-# CREATE (Insert) operation for CONNECTION_TYPES table
-def create_connection_type(connection_type_id, description, created_by, created_at, updated_by, updated_at):
-    cursor.execute("INSERT INTO CONNECTION_TYPES (connection_type_id, description, created_by, created_at, updated_by, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
-                   (connection_type_id, description, created_by, created_at, updated_by, updated_at))
-    conn.commit()
-
-# READ (Select) operation for CONNECTION_TYPES table
-def read_connection_type(connection_type_id):
-    cursor.execute("SELECT * FROM CONNECTION_TYPES WHERE connection_type_id=?", (connection_type_id,))
-    return cursor.fetchone()
-
-# UPDATE operation for CONNECTION_TYPES table
-def update_connection_type(connection_type_id, new_description, new_updated_by, new_updated_at):
-    cursor.execute("UPDATE CONNECTION_TYPES SET description=?, updated_by=?, updated_at=? WHERE connection_type_id=?",
-                   (new_description, new_updated_by, new_updated_at, connection_type_id))
-    conn.commit()
-
-# DELETE operation for CONNECTION_TYPES table
-def delete_connection_type(connection_type_id):
-    cursor.execute("DELETE FROM CONNECTION_TYPES WHERE connection_type_id=?", (connection_type_id,))
-    conn.commit()
-
-# CREATE (Insert) operation for CONNECTIONS table
-def create_connection(connection_id, connection_type_id, device_id, created_by, created_at, updated_by, updated_at):
-    cursor.execute("INSERT INTO CONNECTIONS (connection_id, connection_type_id, device_id, created_by, created_at, updated_by, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                   (connection_id, connection_type_id, device_id, created_by, created_at, updated_by, updated_at))
-    conn.commit()
-
-# READ (Select) operation for CONNECTIONS table
-def read_connection(connection_id):
-    cursor.execute("SELECT * FROM CONNECTIONS WHERE connection_id=?", (connection_id,))
-    return cursor.fetchone()
-
-# UPDATE operation for CONNECTIONS table
-def update_connection(connection_id, new_connection_type_id, new_device_id, new_updated_by, new_updated_at):
-    cursor.execute("UPDATE CONNECTIONS SET connection_type_id=?, device_id=?, updated_by=?, updated_at=? WHERE connection_id=?",
-                   (new_connection_type_id, new_device_id, new_updated_by, new_updated_at, connection_id))
-    conn.commit()
-
-# DELETE operation for CONNECTIONS table
-def delete_connection(connection_id):
-    cursor.execute("DELETE FROM CONNECTIONS WHERE connection_id=?", (connection_id,))
-    conn.commit()
-
-# CREATE (Insert) operation for CONNECTION_DETAILS table
-def create_connection_detail(connection_detail_id, connection_id, field_type, field_value, created_by, created_at, updated_by, updated_at):
-    cursor.execute("INSERT INTO CONNECTION_DETAILS (connection_detail_id, connection_id, field_type, field_value, created_by, created_at, updated_by, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                   (connection_detail_id, connection_id, field_type, field_value, created_by, created_at, updated_by, updated_at))
-    conn.commit()
-
-# READ (Select) operation for CONNECTION_DETAILS table
-def read_connection_detail(connection_detail_id):
-    cursor.execute("SELECT * FROM CONNECTION_DETAILS WHERE connection_detail_id=?", (connection_detail_id,))
-    return cursor.fetchone()
-
-# UPDATE operation for CONNECTION_DETAILS table
-def update_connection_detail(connection_detail_id, new_connection_id, new_field_type, new_field_value, new_updated_by, new_updated_at):
-    cursor.execute("UPDATE CONNECTION_DETAILS SET connection_id=?, field_type=?, field_value=?, updated_by=?, updated_at=? WHERE connection_detail_id=?",
-                   (new_connection_id, new_field_type, new_field_value, new_updated_by, new_updated_at, connection_detail_id))
-    conn.commit()
-
-# DELETE operation for CONNECTION_DETAILS table
-def delete_connection_detail(connection_detail_id):
-    cursor.execute("DELETE FROM CONNECTION_DETAILS WHERE connection_detail_id=?", (connection_detail_id,))
-    conn.commit()
-
-
-# CREATE (Insert) operation for USER_LOG_HISTORY table
-def create_user_log_history(log_id, remote_host, identity, user_name, time_received, request_line, status_code, response_size, referer, user_agent, user_id, created_by, created_at, updated_by, updated_at):
-    cursor.execute("INSERT INTO USER_LOG_HISTORY (log_id, remote_host, identity, user_name, time_received, request_line, status_code, response_size, referer, user_agent, user_id, created_by, created_at, updated_by, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                   (log_id, remote_host, identity, user_name, time_received, request_line, status_code, response_size, referer, user_agent, user_id, created_by, created_at, updated_by, updated_at))
-    conn.commit()
-
-# READ (Select) operation for USER_LOG_HISTORY table
-def read_user_log_history(log_id):
-    cursor.execute("SELECT * FROM USER_LOG_HISTORY WHERE log_id=?", (log_id,))
-    return cursor.fetchone()
-
-# UPDATE operation for USER_LOG_HISTORY table
-def update_user_log_history(log_id, new_remote_host, new_identity, new_user_name, new_time_received, new_request_line, new_status_code, new_response_size, new_referer, new_user_agent, new_user_id, new_updated_by, new_updated_at):
-    cursor.execute("UPDATE USER_LOG_HISTORY SET remote_host=?, identity=?, user_name=?, time_received=?, request_line=?, status_code=?, response_size=?, referer=?, user_agent=?, user_id=?, updated_by=?, updated_at=? WHERE log_id=?",
-                   (new_remote_host, new_identity, new_user_name, new_time_received, new_request_line, new_status_code, new_response_size, new_referer, new_user_agent, new_user_id, new_updated_by, new_updated_at, log_id))
-    conn.commit()
-
-# DELETE operation for USER_LOG_HISTORY table
-def delete_user_log_history(log_id):
-    cursor.execute("DELETE FROM USER_LOG_HISTORY WHERE log_id=?", (log_id,))
-    conn.commit()
-
-# CREATE (Insert) operation for ALERTS table
-def create_alert(alert_id, device_id, alert_description, created_by, created_at, updated_by, updated_at):
-    cursor.execute("INSERT INTO ALERTS (alert_id, device_id, alert_description, created_by, created_at, updated_by, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                   (alert_id, device_id, alert_description, created_by, created_at, updated_by, updated_at))
-    conn.commit()
-
-# READ (Select) operation for ALERTS table
-def read_alert(alert_id):
-    cursor.execute("SELECT * FROM ALERTS WHERE alert_id=?", (alert_id,))
-    return cursor.fetchone()
-
-# UPDATE operation for ALERTS table
-def update_alert(alert_id, new_device_id, new_alert_description, new_updated_by, new_updated_at):
-    cursor.execute("UPDATE ALERTS SET device_id=?, alert_description=?, updated_by=?, updated_at=? WHERE alert_id=?",
-                   (new_device_id, new_alert_description, new_updated_by, new_updated_at, alert_id))
-    conn.commit()
-
-# DELETE operation for ALERTS table
-def delete_alert(alert_id):
-    cursor.execute("DELETE FROM ALERTS WHERE alert_id=?", (alert_id,))
-    conn.commit()
-
-
-# CREATE (Insert) operation for ALERT_EXPRESSIONS table
-def create_alert_expression(expression_id, alert_id, expression, input_field_name, arithmetic_operator, constant_value, brace_value, logical_operator, description, created_by, created_at, updated_by, updated_at):
-    cursor.execute("INSERT INTO ALERT_EXPRESSIONS (expression_id, alert_id, expression, input_field_name, arithmetic_operator, constant_value, brace_value, logical_operator, description, created_by, created_at, updated_by, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                   (expression_id, alert_id, expression, input_field_name, arithmetic_operator, constant_value, brace_value, logical_operator, description, created_by, created_at, updated_by, updated_at))
-    conn.commit()
-
-# READ (Select) operation for ALERT_EXPRESSIONS table
-def read_alert_expression(expression_id):
-    cursor.execute("SELECT * FROM ALERT_EXPRESSIONS WHERE expression_id=?", (expression_id,))
-    return cursor.fetchone()
-
-# UPDATE operation for ALERT_EXPRESSIONS table
-def update_alert_expression(expression_id, new_expression, new_updated_by, new_updated_at):
-    cursor.execute("UPDATE ALERT_EXPRESSIONS SET expression=?, updated_by=?, updated_at=? WHERE expression_id=?", 
-                   (new_expression, new_updated_by, new_updated_at, expression_id))
-    conn.commit()
-
-# DELETE operation for ALERT_EXPRESSIONS table
-def delete_alert_expression(expression_id):
-    cursor.execute("DELETE FROM ALERT_EXPRESSIONS WHERE expression_id=?", (expression_id,))
-    conn.commit()
-
-
-# CREATE (Insert) operation for HISTORY table
-def create_history(history_id, device_id, value, status, datetime, alert_id, created_by, created_at, updated_by, updated_at):
-    cursor.execute("INSERT INTO HISTORY (history_id, device_id, value, status, datetime, alert_id, created_by, created_at, updated_by, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                   (history_id, device_id, value, status, datetime, alert_id, created_by, created_at, updated_by, updated_at))
-    conn.commit()
-
-# READ (Select) operation for HISTORY table
-def read_history(history_id):
-    cursor.execute("SELECT * FROM HISTORY WHERE history_id=?", (history_id,))
-    return cursor.fetchone()
-
-# UPDATE operation for HISTORY table
-def update_history(history_id, new_status, new_updated_by, new_updated_at):
-    cursor.execute("UPDATE HISTORY SET status=?, updated_by=?, updated_at=? WHERE history_id=?", 
-                   (new_status, new_updated_by, new_updated_at, history_id))
-    conn.commit()
-
-# DELETE operation for HISTORY table
-def delete_history(history_id):
-    cursor.execute("DELETE FROM HISTORY WHERE history_id=?", (history_id,))
-    conn.commit()
-
-# CREATE (Insert) operation for ACTION_TYPES table
-def create_action_type(action_type_id, description, created_by, created_at, updated_by, updated_at):
-    cursor.execute("INSERT INTO ACTION_TYPES (action_type_id, description, created_by, created_at, updated_by, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
-                   (action_type_id, description, created_by, created_at, updated_by, updated_at))
-    conn.commit()
-
-# READ (Select) operation for ACTION_TYPES table
-def read_action_type(action_type_id):
-    cursor.execute("SELECT * FROM ACTION_TYPES WHERE action_type_id=?", (action_type_id,))
-    return cursor.fetchone()
-
-# UPDATE operation for ACTION_TYPES table
-def update_action_type(action_type_id, new_description, new_updated_by, new_updated_at):
-    cursor.execute("UPDATE ACTION_TYPES SET description=?, updated_by=?, updated_at=? WHERE action_type_id=?", 
-                   (new_description, new_updated_by, new_updated_at, action_type_id))
-    conn.commit()
-
-# DELETE operation for ACTION_TYPES table
-def delete_action_type(action_type_id):
-    cursor.execute("DELETE FROM ACTION_TYPES WHERE action_type_id=?", (action_type_id,))
-    conn.commit()
-
-# CREATE (Insert) operation for ACTIONS table
-def create_action(action_id, description, action_type_id, action_taken_datetime, created_by, created_at, updated_by, updated_at):
-    cursor.execute("INSERT INTO ACTIONS (action_id, description, action_type_id, action_taken_datetime, created_by, created_at, updated_by, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                   (action_id, description, action_type_id, action_taken_datetime, created_by, created_at, updated_by, updated_at))
-    conn.commit()
-
-# READ (Select) operation for ACTIONS table
-def read_action(action_id):
-    cursor.execute("SELECT * FROM ACTIONS WHERE action_id=?", (action_id,))
-    return cursor.fetchone()
-
-# UPDATE operation for ACTIONS table
-def update_action(action_id, new_description, new_action_type_id, new_action_taken_datetime, new_updated_by, new_updated_at):
-    cursor.execute("UPDATE ACTIONS SET description=?, action_type_id=?, action_taken_datetime=?, updated_by=?, updated_at=? WHERE action_id=?", 
-                   (new_description, new_action_type_id, new_action_taken_datetime, new_updated_by, new_updated_at, action_id))
-    conn.commit()
-
-# DELETE operation for ACTIONS table
-def delete_action(action_id):
-    cursor.execute("DELETE FROM ACTIONS WHERE action_id=?", (action_id,))
-    conn.commit()
-
-# CREATE (Insert) operation for ACTIONS_HISTORY table
-def create_action_history(action_id, history_id):
-    cursor.execute("INSERT INTO ACTIONS_HISTORY (action_id, history_id) VALUES (?, ?)",
-                   (action_id, history_id))
-    conn.commit()
-
-# READ (Select) operation for ACTIONS_HISTORY table
-def read_action_history(action_id, history_id):
-    cursor.execute("SELECT * FROM ACTIONS_HISTORY WHERE action_id=? AND history_id=?", (action_id, history_id))
-    return cursor.fetchone()
-
-# DELETE operation for ACTIONS_HISTORY table
-def delete_action_history(action_id, history_id):
-    cursor.execute("DELETE FROM ACTIONS_HISTORY WHERE action_id=? AND history_id=?", (action_id, history_id))
-    conn.commit()
-
-# CREATE (Insert) operation for ACTIONS_ALERT table
-def create_action_alert(action_id, alert_id):
-    cursor.execute("INSERT INTO ACTIONS_ALERT (action_id, alert_id) VALUES (?, ?)",
-                   (action_id, alert_id))
-    conn.commit()
-
-# READ (Select) operation for ACTIONS_ALERT table
-def read_action_alert(action_id, alert_id):
-    cursor.execute("SELECT * FROM ACTIONS_ALERT WHERE action_id=? AND alert_id=?", (action_id, alert_id))
-    return cursor.fetchone()
-
-# DELETE operation for ACTIONS_ALERT table
-def delete_action_alert(action_id, alert_id):
-    cursor.execute("DELETE FROM ACTIONS_ALERT WHERE action_id=? AND alert_id=?", (action_id, alert_id))
-    conn.commit()
-
-
-
-conn.close()
+from backend.model import *
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.orm import Session
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+db_username = 'postgres'
+db_password = 'admin_1'
+db_host = '162.216.113.6'
+db_name = 'iot_db'
+db_port = '5423'
+db_url = f'postgresql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}'
+engine = create_engine(db_url)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+app = FastAPI()
+
+@app.post("/addresses/", response_model=Address)
+def create_address(address: Address, db: Session = Depends(get_db)):
+    db.add(address)
+    db.commit()
+    db.refresh(address)
+    return address
+
+
+@app.get("/addresses/{address_id}", response_model=Address)
+def read_address(address_id: int, db: Session = Depends(get_db)):
+    db_address = db.query(Address).filter(Address.address_id == address_id).first()
+    if db_address is None:
+        raise HTTPException(status_code=404, detail="Address not found")
+    return db_address
+
+
+@app.put("/addresses/{address_id}", response_model=Address)
+def update_address(address_id: int, address: Address, db: Session = Depends(get_db)):
+    db_address = db.query(Address).filter(Address.address_id == address_id).first()
+    if db_address is None:
+        raise HTTPException(status_code=404, detail="Address not found")
+    for field, value in address.dict().items():
+        setattr(db_address, field, value)
+    db.commit()
+    db.refresh(db_address)
+    return db_address
+
+
+@app.delete("/addresses/{address_id}", response_model=Address)
+def delete_address(address_id: int, db: Session = Depends(get_db)):
+    db_address = db.query(Address).filter(Address.address_id == address_id).first()
+    if db_address is None:
+        raise HTTPException(status_code=404, detail="Address not found")
+    db.delete(db_address)
+    db.commit()
+    return db_address
+
+
+@app.post("/contact_types/", response_model=ContactType)
+def create_contact_type(contact_type: ContactType, db: Session = Depends(get_db)):
+    db.add(contact_type)
+    db.commit()
+    db.refresh(contact_type)
+    return contact_type
+
+
+@app.get("/contact_types/", response_model=List[ContactType])
+def read_contact_types(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return db.query(ContactType).offset(skip).limit(limit).all()
+
+
+@app.get("/contact_types/{contact_type_id}", response_model=ContactType)
+def read_contact_type(contact_type_id: int, db: Session = Depends(get_db)):
+    db_contact_type = db.query(ContactType).filter(ContactType.contact_type_id == contact_type_id).first()
+    if db_contact_type is None:
+        raise HTTPException(status_code=404, detail="Contact type not found")
+    return db_contact_type
+
+
+@app.put("/contact_types/{contact_type_id}", response_model=ContactType)
+def update_contact_type(contact_type_id: int, description: str, db: Session = Depends(get_db)):
+    db_contact_type = db.query(ContactType).filter(ContactType.contact_type_id == contact_type_id).first()
+    if db_contact_type is None:
+        raise HTTPException(status_code=404, detail="Contact type not found")
+    db_contact_type.description = description
+    db.commit()
+    db.refresh(db_contact_type)
+    return db_contact_type
+
+
+@app.delete("/contact_types/{contact_type_id}", response_model=ContactType)
+def delete_contact_type(contact_type_id: int, db: Session = Depends(get_db)):
+    db_contact_type = db.query(ContactType).filter(ContactType.contact_type_id == contact_type_id).first()
+    if db_contact_type is None:
+        raise HTTPException(status_code=404, detail="Contact type not found")
+    db.delete(db_contact_type)
+    db.commit()
+    return db_contact_type
+
+
+@app.post("/contacts/", response_model=Contact)
+def create_contact(contact: Contact, db: Session = Depends(get_db)):
+    db.add(contact)
+    db.commit()
+    db.refresh(contact)
+    return contact
+
+
+@app.get("/contacts/", response_model=List[Contact])
+def read_contacts(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return db.query(Contact).offset(skip).limit(limit).all()
+
+
+@app.get("/contacts/{contact_id}", response_model=Contact)
+def read_contact(contact_id: int, db: Session = Depends(get_db)):
+    db_contact = db.query(Contact).filter(Contact.contact_id == contact_id).first()
+    if db_contact is None:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    return db_contact
+
+
+@app.put("/contacts/{contact_id}", response_model=Contact)
+def update_contact(contact_id: int, contact: Contact, db: Session = Depends(get_db)):
+    db_contact = db.query(Contact).filter(Contact.contact_id == contact_id).first()
+    if db_contact is None:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    for field, value in contact.dict().items():
+        setattr(db_contact, field, value)
+    db.commit()
+    db.refresh(db_contact)
+    return db_contact
+
+
+@app.delete("/contacts/{contact_id}", response_model=Contact)
+def delete_contact(contact_id: int, db: Session = Depends(get_db)):
+    db_contact = db.query(Contact).filter(Contact.contact_id == contact_id).first()
+    if db_contact is None:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    db.delete(db_contact)
+    db.commit()
+    return db_contact
+
+
+
+@app.post("/locations/", response_model=Location)
+def create_location(location: Location, db: Session = Depends(get_db)):
+    db.add(location)
+    db.commit()
+    db.refresh(location)
+    return location
+
+
+@app.get("/locations/", response_model=List[Location])
+def read_locations(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return db.query(Location).offset(skip).limit(limit).all()
+
+
+@app.get("/locations/{location_id}", response_model=Location)
+def read_location(location_id: int, db: Session = Depends(get_db)):
+    db_location = db.query(Location).filter(Location.location_id == location_id).first()
+    if db_location is None:
+        raise HTTPException(status_code=404, detail="Location not found")
+    return db_location
+
+
+@app.put("/locations/{location_id}", response_model=Location)
+def update_location(location_id: int, location: Location, db: Session = Depends(get_db)):
+    db_location = db.query(Location).filter(Location.location_id == location_id).first()
+    if db_location is None:
+        raise HTTPException(status_code=404, detail="Location not found")
+    for field, value in location.dict().items():
+        setattr(db_location, field, value)
+    db.commit()
+    db.refresh(db_location)
+    return db_location
+
+
+@app.delete("/locations/{location_id}", response_model=Location)
+def delete_location(location_id: int, db: Session = Depends(get_db)):
+    db_location = db.query(Location).filter(Location.location_id == location_id).first()
+    if db_location is None:
+        raise HTTPException(status_code=404, detail="Location not found")
+    db.delete(db_location)
+    db.commit()
+    return db_location
+
+
+@app.post("/location_contacts/", response_model=LocationContact)
+def create_location_contact(
+    location_id: int, contact_id: int, db: Session = Depends(get_db)
+):
+    db_location = db.query(Location).filter(Location.location_id == location_id).first()
+    db_contact = db.query(Contact).filter(Contact.contact_id == contact_id).first()
+
+    if not db_location or not db_contact:
+        raise HTTPException(status_code=404, detail="Location or Contact not found")
+
+    location_contact = LocationContact(location_id=location_id, contact_id=contact_id)
+    db.add(location_contact)
+    db.commit()
+    db.refresh(location_contact)
+    return location_contact
+
+
+@app.delete("/location_contacts/")
+def delete_location_contact(
+    location_id: int, contact_id: int, db: Session = Depends(get_db)
+):
+    location_contact = (
+        db.query(LocationContact)
+        .filter(
+            LocationContact.location_id == location_id,
+            LocationContact.contact_id == contact_id,
+        )
+        .first()
+    )
+
+    if location_contact is None:
+        raise HTTPException(
+            status_code=404, detail="Location-Contact relationship not found"
+        )
+
+    db.delete(location_contact)
+    db.commit()
+    return {"detail": "Location-Contact relationship deleted"}
+
+
+
+
+@app.post("/users/", response_model=User)
+def create_user(user: User, db: Session = Depends(get_db)):
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+@app.get("/users/", response_model=list[User])
+def read_users(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return db.query(User).offset(skip).limit(limit).all()
+
+
+@app.get("/users/{user_id}", response_model=User)
+def read_user(user_id: int, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.user_id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db_user
+
+
+@app.put("/users/{user_id}", response_model=User)
+def update_user(user_id: int, user: User, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.user_id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    for field, value in user.dict().items():
+        setattr(db_user, field, value)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+
+@app.delete("/users/{user_id}", response_model=User)
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.user_id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    db.delete(db_user)
+    db.commit()
+    return db_user
+
+@app.post("/user_contacts/", response_model=UserContact)
+def create_user_contact(
+    user_id: int, contact_id: int, db: Session = Depends(get_db)
+):
+    db_user = db.query(User).filter(User.user_id == user_id).first()
+    db_contact = db.query(Contact).filter(Contact.contact_id == contact_id).first()
+
+    if not db_user or not db_contact:
+        raise HTTPException(status_code=404, detail="User or Contact not found")
+
+    user_contact = UserContact(user_id=user_id, contact_id=contact_id)
+    db.add(user_contact)
+    db.commit()
+    db.refresh(user_contact)
+    return user_contact
+
+
+@app.delete("/user_contacts/")
+def delete_user_contact(
+    user_id: int, contact_id: int, db: Session = Depends(get_db)
+):
+    user_contact = (
+        db.query(UserContact)
+        .filter(
+            UserContact.user_id == user_id,
+            UserContact.contact_id == contact_id,
+        )
+        .first()
+    )
+
+    if user_contact is None:
+        raise HTTPException(
+            status_code=404, detail="User-Contact relationship not found"
+        )
+
+    db.delete(user_contact)
+    db.commit()
+    return {"detail": "User-Contact relationship deleted"}
+
+
+@app.post("/user_addresses/", response_model=UserAddress)
+def create_user_address(
+    user_id: int, address_id: int, db: Session = Depends(get_db)
+):
+    db_user = db.query(User).filter(User.user_id == user_id).first()
+    db_address = db.query(Address).filter(Address.address_id == address_id).first()
+
+    if not db_user or not db_address:
+        raise HTTPException(status_code=404, detail="User or Address not found")
+
+    user_address = UserAddress(user_id=user_id, address_id=address_id)
+    db.add(user_address)
+    db.commit()
+    db.refresh(user_address)
+    return user_address
+
+
+@app.delete("/user_addresses/")
+def delete_user_address(
+    user_id: int, address_id: int, db: Session = Depends(get_db)
+):
+    user_address = (
+        db.query(UserAddress)
+        .filter(
+            UserAddress.user_id == user_id,
+            UserAddress.address_id == address_id,
+        )
+        .first()
+    )
+
+    if user_address is None:
+        raise HTTPException(
+            status_code=404, detail="User-Address relationship not found"
+        )
+
+    db.delete(user_address)
+    db.commit()
+    return {"detail": "User-Address relationship deleted"}
+
+
+@app.post("/user_groups/", response_model=UserGroup)
+def create_user_group(user_group: UserGroup, db: Session = Depends(get_db)):
+    db.add(user_group)
+    db.commit()
+    db.refresh(user_group)
+    return user_group
+
+
+@app.get("/user_groups/", response_model=list[UserGroup])
+def read_user_groups(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return db.query(UserGroup).offset(skip).limit(limit).all()
+
+
+@app.get("/user_groups/{user_group_id}", response_model=UserGroup)
+def read_user_group(user_group_id: int, db: Session = Depends(get_db)):
+    db_user_group = db.query(UserGroup).filter(UserGroup.user_group_id == user_group_id).first()
+    if db_user_group is None:
+        raise HTTPException(status_code=404, detail="User Group not found")
+    return db_user_group
+
+
+@app.put("/user_groups/{user_group_id}", response_model=UserGroup)
+def update_user_group(user_group_id: int, user_group: UserGroup, db: Session = Depends(get_db)):
+    db_user_group = db.query(UserGroup).filter(UserGroup.user_group_id == user_group_id).first()
+    if db_user_group is None:
+        raise HTTPException(status_code=404, detail="User Group not found")
+    for field, value in user_group.dict().items():
+        setattr(db_user_group, field, value)
+    db.commit()
+    db.refresh(db_user_group)
+    return db_user_group
+
+
+@app.delete("/user_groups/{user_group_id}", response_model=UserGroup)
+def delete_user_group(user_group_id: int, db: Session = Depends(get_db)):
+    db_user_group = db.query(UserGroup).filter(UserGroup.user_group_id == user_group_id).first()
+    if db_user_group is None:
+        raise HTTPException(status_code=404, detail="User Group not found")
+    db.delete(db_user_group)
+    db.commit()
+    return db_user_group
+
+
+
+@app.post("/user_roles/", response_model=UserRole)
+def create_user_role(user_role: UserRole, db: Session = Depends(get_db)):
+    db.add(user_role)
+    db.commit()
+    db.refresh(user_role)
+    return user_role
+
+
+@app.get("/user_roles/", response_model=list[UserRole])
+def read_user_roles(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return db.query(UserRole).offset(skip).limit(limit).all()
+
+
+@app.get("/user_roles/{role_id}", response_model=UserRole)
+def read_user_role(role_id: int, db: Session = Depends(get_db)):
+    db_user_role = db.query(UserRole).filter(UserRole.role_id == role_id).first()
+    if db_user_role is None:
+        raise HTTPException(status_code=404, detail="User Role not found")
+    return db_user_role
+
+
+@app.put("/user_roles/{role_id}", response_model=UserRole)
+def update_user_role(role_id: int, user_role: UserRole, db: Session = Depends(get_db)):
+    db_user_role = db.query(UserRole).filter(UserRole.role_id == role_id).first()
+    if db_user_role is None:
+        raise HTTPException(status_code=404, detail="User Role not found")
+    for field, value in user_role.dict().items():
+        setattr(db_user_role, field, value)
+    db.commit()
+    db.refresh(db_user_role)
+    return db_user_role
+
+
+@app.delete("/user_roles/{role_id}", response_model=UserRole)
+def delete_user_role(role_id: int, db: Session = Depends(get_db)):
+    db_user_role = db.query(UserRole).filter(UserRole.role_id == role_id).first()
+    if db_user_role is None:
+        raise HTTPException(status_code=404, detail="User Role not found")
+    db.delete(db_user_role)
+    db.commit()
+    return db_user_role
+
+
+@app.post("/user_group_memberships/", response_model=UserGroupMembership)
+def create_user_group_membership(
+    user_id: int, user_group_id: int, db: Session = Depends(get_db)
+):
+    db_user = db.query(User).filter(User.user_id == user_id).first()
+    db_user_group = db.query(UserGroup).filter(UserGroup.user_group_id == user_group_id).first()
+
+    if not db_user or not db_user_group:
+        raise HTTPException(status_code=404, detail="User or User Group not found")
+
+    user_group_membership = UserGroupMembership(user_id=user_id, user_group_id=user_group_id)
+    db.add(user_group_membership)
+    db.commit()
+    db.refresh(user_group_membership)
+    return user_group_membership
+
+
+@app.delete("/user_group_memberships/")
+def delete_user_group_membership(
+    user_id: int, user_group_id: int, db: Session = Depends(get_db)
+):
+    user_group_membership = (
+        db.query(UserGroupMembership)
+        .filter(
+            UserGroupMembership.user_id == user_id,
+            UserGroupMembership.user_group_id == user_group_id,
+        )
+        .first()
+    )
+
+    if user_group_membership is None:
+        raise HTTPException(
+            status_code=404, detail="User-UserGroup Membership not found"
+        )
+
+    db.delete(user_group_membership)
+    db.commit()
+    return {"detail": "User-UserGroup Membership deleted"}
+
+
+@app.post("/user_role_assignments/", response_model=UserRoleAssignment)
+def create_user_role_assignment(
+    user_id: int, role_id: int, db: Session = Depends(get_db)
+):
+    db_user = db.query(User).filter(User.user_id == user_id).first()
+    db_role = db.query(UserRole).filter(UserRole.role_id == role_id).first()
+
+    if not db_user or not db_role:
+        raise HTTPException(status_code=404, detail="User or UserRole not found")
+
+    user_role_assignment = UserRoleAssignment(user_id=user_id, role_id=role_id)
+    db.add(user_role_assignment)
+    db.commit()
+    db.refresh(user_role_assignment)
+    return user_role_assignment
+
+
+@app.delete("/user_role_assignments/")
+def delete_user_role_assignment(
+    user_id: int, role_id: int, db: Session = Depends(get_db)
+):
+    user_role_assignment = (
+        db.query(UserRoleAssignment)
+        .filter(
+            UserRoleAssignment.user_id == user_id,
+            UserRoleAssignment.role_id == role_id,
+        )
+        .first()
+    )
+
+    if user_role_assignment is None:
+        raise HTTPException(
+            status_code=404, detail="User-UserRole Assignment not found"
+        )
+
+    db.delete(user_role_assignment)
+    db.commit()
+    return {"detail": "User-UserRole Assignment deleted"}
+
+
+@app.post("/asset_types/", response_model=AssetType)
+def create_asset_type(asset_type: AssetType, db: Session = Depends(get_db)):
+    db.add(asset_type)
+    db.commit()
+    db.refresh(asset_type)
+    return asset_type
+
+
+@app.get("/asset_types/", response_model=list[AssetType])
+def read_asset_types(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return db.query(AssetType).offset(skip).limit(limit).all()
+
+
+@app.get("/asset_types/{asset_type_id}", response_model=AssetType)
+def read_asset_type(asset_type_id: int, db: Session = Depends(get_db)):
+    db_asset_type = db.query(AssetType).filter(AssetType.asset_type_id == asset_type_id).first()
+    if db_asset_type is None:
+        raise HTTPException(status_code=404, detail="Asset Type not found")
+    return db_asset_type
+
+
+@app.put("/asset_types/{asset_type_id}", response_model=AssetType)
+def update_asset_type(asset_type_id: int, asset_type: AssetType, db: Session = Depends(get_db)):
+    db_asset_type = db.query(AssetType).filter(AssetType.asset_type_id == asset_type_id).first()
+    if db_asset_type is None:
+        raise HTTPException(status_code=404, detail="Asset Type not found")
+    for field, value in asset_type.dict().items():
+        setattr(db_asset_type, field, value)
+    db.commit()
+    db.refresh(db_asset_type)
+    return db_asset_type
+
+
+@app.delete("/asset_types/{asset_type_id}", response_model=AssetType)
+def delete_asset_type(asset_type_id: int, db: Session = Depends(get_db)):
+    db_asset_type = db.query(AssetType).filter(AssetType.asset_type_id == asset_type_id).first()
+    if db_asset_type is None:
+        raise HTTPException(status_code=404, detail="Asset Type not found")
+    db.delete(db_asset_type)
+    db.commit()
+    return db_asset_type
+
+
+
+
+
+@app.post("/assets/", response_model=Asset)
+def create_asset(asset: Asset, db: Session = Depends(get_db)):
+    db.add(asset)
+    db.commit()
+    db.refresh(asset)
+    return asset
+
+
+@app.get("/assets/", response_model=list[Asset])
+def read_assets(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return db.query(Asset).offset(skip).limit(limit).all()
+
+
+@app.get("/assets/{asset_id}", response_model=Asset)
+def read_asset(asset_id: int, db: Session = Depends(get_db)):
+    db_asset = db.query(Asset).filter(Asset.asset_id == asset_id).first()
+    if db_asset is None:
+        raise HTTPException(status_code=404, detail="Asset not found")
+    return db_asset
+
+
+@app.put("/assets/{asset_id}", response_model=Asset)
+def update_asset(asset_id: int, asset: Asset, db: Session = Depends(get_db)):
+    db_asset = db.query(Asset).filter(Asset.asset_id == asset_id).first()
+    if db_asset is None:
+        raise HTTPException(status_code=404, detail="Asset not found")
+    for field, value in asset.dict().items():
+        setattr(db_asset, field, value)
+    db.commit()
+    db.refresh(db_asset)
+    return db_asset
+
+
+@app.delete("/assets/{asset_id}", response_model=Asset)
+def delete_asset(asset_id: int, db: Session = Depends(get_db)):
+    db_asset = db.query(Asset).filter(Asset.asset_id == asset_id).first()
+    if db_asset is None:
+        raise HTTPException(status_code=404, detail="Asset not found")
+    db.delete(db_asset)
+    db.commit()
+    return db_asset
+
+
+@app.post("/rights/", response_model=Right)
+def create_right(right: Right, db: Session = Depends(get_db)):
+    db.add(right)
+    db.commit()
+    db.refresh(right)
+    return right
+
+
+@app.get("/rights/", response_model=list[Right])
+def read_rights(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return db.query(Right).offset(skip).limit(limit).all()
+
+
+@app.get("/rights/{right_id}", response_model=Right)
+def read_right(right_id: int, db: Session = Depends(get_db)):
+    db_right = db.query(Right).filter(Right.right_id == right_id).first()
+    if db_right is None:
+        raise HTTPException(status_code=404, detail="Right not found")
+    return db_right
+
+
+@app.put("/rights/{right_id}", response_model=Right)
+def update_right(right_id: int, right: Right, db: Session = Depends(get_db)):
+    db_right = db.query(Right).filter(Right.right_id == right_id).first()
+    if db_right is None:
+        raise HTTPException(status_code=404, detail="Right not found")
+    for field, value in right.dict().items():
+        setattr(db_right, field, value)
+    db.commit()
+    db.refresh(db_right)
+    return db_right
+
+
+@app.delete("/rights/{right_id}", response_model=Right)
+def delete_right(right_id: int, db: Session = Depends(get_db)):
+    db_right = db.query(Right).filter(Right.right_id == right_id).first()
+    if db_right is None:
+        raise HTTPException(status_code=404, detail="Right not found")
+    db.delete(db_right)
+    db.commit()
+    return db_right
+
+
+
+@app.post("/user_rights/", response_model=UserRight)
+def create_user_right(
+    user_id: int, right_id: int, db: Session = Depends(get_db)
+):
+    db_user = db.query(User).filter(User.user_id == user_id).first()
+    db_right = db.query(Right).filter(Right.right_id == right_id).first()
+
+    if not db_user or not db_right:
+        raise HTTPException(status_code=404, detail="User or Right not found")
+
+    user_right = UserRight(user_id=user_id, right_id=right_id)
+    db.add(user_right)
+    db.commit()
+    db.refresh(user_right)
+    return user_right
+
+
+@app.delete("/user_rights/")
+def delete_user_right(
+    user_id: int, right_id: int, db: Session = Depends(get_db)
+):
+    user_right = (
+        db.query(UserRight)
+        .filter(
+            UserRight.user_id == user_id,
+            UserRight.right_id == right_id,
+        )
+        .first()
+    )
+
+    if user_right is None:
+        raise HTTPException(
+            status_code=404, detail="User-Right Relationship not found"
+        )
+
+    db.delete(user_right)
+    db.commit()
+    return {"detail": "User-Right Relationship deleted"}
+
+
+
+
+@app.post("/role_rights/", response_model=RoleRight)
+def create_role_right(
+    role_id: int, right_id: int, db: Session = Depends(get_db)
+):
+    db_role = db.query(UserRole).filter(UserRole.role_id == role_id).first()
+    db_right = db.query(Right).filter(Right.right_id == right_id).first()
+
+    if not db_role or not db_right:
+        raise HTTPException(status_code=404, detail="Role or Right not found")
+
+    role_right = RoleRight(role_id=role_id, right_id=right_id)
+    db.add(role_right)
+    db.commit()
+    db.refresh(role_right)
+    return role_right
+
+
+@app.delete("/role_rights/")
+def delete_role_right(
+    role_id: int, right_id: int, db: Session = Depends(get_db)
+):
+    role_right = (
+        db.query(RoleRight)
+        .filter(
+            RoleRight.role_id == role_id,
+            RoleRight.right_id == right_id,
+        )
+        .first()
+    )
+
+    if role_right is None:
+        raise HTTPException(
+            status_code=404, detail="Role-Right Relationship not found"
+        )
+
+    db.delete(role_right)
+    db.commit()
+    return {"detail": "Role-Right Relationship deleted"}
+
+
+
+@app.post("/tags/", response_model=Tag)
+def create_tag(tag: Tag, db: Session = Depends(get_db)):
+    db.add(tag)
+    db.commit()
+    db.refresh(tag)
+    return tag
+
+
+@app.get("/tags/", response_model=list[Tag])
+def read_tags(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return db.query(Tag).offset(skip).limit(limit).all()
+
+
+@app.get("/tags/{tag_id}", response_model=Tag)
+def read_tag(tag_id: int, db: Session = Depends(get_db)):
+    db_tag = db.query(Tag).filter(Tag.tag_id == tag_id).first()
+    if db_tag is None:
+        raise HTTPException(status_code=404, detail="Tag not found")
+    return db_tag
+
+
+@app.put("/tags/{tag_id}", response_model=Tag)
+def update_tag(tag_id: int, tag: Tag, db: Session = Depends(get_db)):
+    db_tag = db.query(Tag).filter(Tag.tag_id == tag_id).first()
+    if db_tag is None:
+        raise HTTPException(status_code=404, detail="Tag not found")
+    for field, value in tag.dict().items():
+        setattr(db_tag, field, value)
+    db.commit()
+    db.refresh(db_tag)
+    return db_tag
+
+
+@app.delete("/tags/{tag_id}", response_model=Tag)
+def delete_tag(tag_id: int, db: Session = Depends(get_db)):
+    db_tag = db.query(Tag).filter(Tag.tag_id == tag_id).first()
+    if db_tag is None:
+        raise HTTPException(status_code=404, detail="Tag not found")
+    db.delete(db_tag)
+    db.commit()
+    return db_tag
+
+
+@app.post("/device_types/", response_model=DeviceType)
+def create_device_type(device_type: DeviceType, db: Session = Depends(get_db)):
+    db.add(device_type)
+    db.commit()
+    db.refresh(device_type)
+    return device_type
+
+
+@app.get("/device_types/", response_model=list[DeviceType])
+def read_device_types(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return db.query(DeviceType).offset(skip).limit(limit).all()
+
+
+@app.get("/device_types/{device_type_id}", response_model=DeviceType)
+def read_device_type(device_type_id: int, db: Session = Depends(get_db)):
+    db_device_type = db.query(DeviceType).filter(DeviceType.device_type_id == device_type_id).first()
+    if db_device_type is None:
+        raise HTTPException(status_code=404, detail="Device Type not found")
+    return db_device_type
+
+
+@app.put("/device_types/{device_type_id}", response_model=DeviceType)
+def update_device_type(device_type_id: int, device_type: DeviceType, db: Session = Depends(get_db)):
+    db_device_type = db.query(DeviceType).filter(DeviceType.device_type_id == device_type_id).first()
+    if db_device_type is None:
+        raise HTTPException(status_code=404, detail="Device Type not found")
+    for field, value in device_type.dict().items():
+        setattr(db_device_type, field, value)
+    db.commit()
+    db.refresh(db_device_type)
+    return db_device_type
+
+
+@app.delete("/device_types/{device_type_id}", response_model=DeviceType)
+def delete_device_type(device_type_id: int, db: Session = Depends(get_db)):
+    db_device_type = db.query(DeviceType).filter(DeviceType.device_type_id == device_type_id).first()
+    if db_device_type is None:
+        raise HTTPException(status_code=404, detail="Device Type not found")
+    db.delete(db_device_type)
+    db.commit()
+    return db_device_type
+
+
+@app.post("/devices/", response_model=Device)
+def create_device(device: Device, db: Session = Depends(get_db)):
+    db.add(device)
+    db.commit()
+    db.refresh(device)
+    return device
+
+
+@app.get("/devices/", response_model=list[Device])
+def read_devices(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return db.query(Device).offset(skip).limit(limit).all()
+
+
+@app.get("/devices/{device_id}", response_model=Device)
+def read_device(device_id: int, db: Session = Depends(get_db)):
+    db_device = db.query(Device).filter(Device.device_id == device_id).first()
+    if db_device is None:
+        raise HTTPException(status_code=404, detail="Device not found")
+    return db_device
+
+
+@app.put("/devices/{device_id}", response_model=Device)
+def update_device(device_id: int, device: Device, db: Session = Depends(get_db)):
+    db_device = db.query(Device).filter(Device.device_id == device_id).first()
+    if db_device is None:
+        raise HTTPException(status_code=404, detail="Device not found")
+    for field, value in device.dict().items():
+        setattr(db_device, field, value)
+    db.commit()
+    db.refresh(db_device)
+    return db_device
+
+
+@app.delete("/devices/{device_id}", response_model=Device)
+def delete_device(device_id: int, db: Session = Depends(get_db)):
+    db_device = db.query(Device).filter(Device.device_id == device_id).first()
+    if db_device is None:
+        raise HTTPException(status_code=404, detail="Device not found")
+    db.delete(db_device)
+    db.commit()
+    return db_device
+
+
+
+@app.post("/device_tags/", response_model=DeviceTag)
+def create_device_tag(
+    device_id: int, tag_id: int, db: Session = Depends(get_db)
+):
+    db_device = db.query(Device).filter(Device.device_id == device_id).first()
+    db_tag = db.query(Tag).filter(Tag.tag_id == tag_id).first()
+
+    if not db_device or not db_tag:
+        raise HTTPException(status_code=404, detail="Device or Tag not found")
+
+    device_tag = DeviceTag(device_id=device_id, tag_id=tag_id)
+    db.add(device_tag)
+    db.commit()
+    db.refresh(device_tag)
+    return device_tag
+
+
+@app.delete("/device_tags/")
+def delete_device_tag(
+    device_id: int, tag_id: int, db: Session = Depends(get_db)
+):
+    device_tag = (
+        db.query(DeviceTag)
+        .filter(
+            DeviceTag.device_id == device_id,
+            DeviceTag.tag_id == tag_id,
+        )
+        .first()
+    )
+
+    if device_tag is None:
+        raise HTTPException(
+            status_code=404, detail="Device-Tag Relationship not found"
+        )
+
+    db.delete(device_tag)
+    db.commit()
+    return {"detail": "Device-Tag Relationship deleted"}
+
+
+
+@app.post("/connection_types/", response_model=ConnectionType)
+def create_connection_type(connection_type: ConnectionType, db: Session = Depends(get_db)):
+    db.add(connection_type)
+    db.commit()
+    db.refresh(connection_type)
+    return connection_type
+
+
+@app.get("/connection_types/", response_model=list[ConnectionType])
+def read_connection_types(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return db.query(ConnectionType).offset(skip).limit(limit).all()
+
+
+@app.get("/connection_types/{connection_type_id}", response_model=ConnectionType)
+def read_connection_type(connection_type_id: int, db: Session = Depends(get_db)):
+    db_connection_type = db.query(ConnectionType).filter(ConnectionType.connection_type_id == connection_type_id).first()
+    if db_connection_type is None:
+        raise HTTPException(status_code=404, detail="Connection Type not found")
+    return db_connection_type
+
+
+@app.put("/connection_types/{connection_type_id}", response_model=ConnectionType)
+def update_connection_type(connection_type_id: int, connection_type: ConnectionType, db: Session = Depends(get_db)):
+    db_connection_type = db.query(ConnectionType).filter(ConnectionType.connection_type_id == connection_type_id).first()
+    if db_connection_type is None:
+        raise HTTPException(status_code=404, detail="Connection Type not found")
+    for field, value in connection_type.dict().items():
+        setattr(db_connection_type, field, value)
+    db.commit()
+    db.refresh(db_connection_type)
+    return db_connection_type
+
+
+@app.delete("/connection_types/{connection_type_id}", response_model=ConnectionType)
+def delete_connection_type(connection_type_id: int, db: Session = Depends(get_db)):
+    db_connection_type = db.query(ConnectionType).filter(ConnectionType.connection_type_id == connection_type_id).first()
+    if db_connection_type is None:
+        raise HTTPException(status_code=404, detail="Connection Type not found")
+    db.delete(db_connection_type)
+    db.commit()
+    return db_connection_type
+
+
+
+@app.post("/connections/", response_model=Connection)
+def create_connection(connection: Connection, db: Session = Depends(get_db)):
+    db.add(connection)
+    db.commit()
+    db.refresh(connection)
+    return connection
+
+
+@app.get("/connections/", response_model=list[Connection])
+def read_connections(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return db.query(Connection).offset(skip).limit(limit).all()
+
+
+@app.get("/connections/{connection_id}", response_model=Connection)
+def read_connection(connection_id: int, db: Session = Depends(get_db)):
+    db_connection = db.query(Connection).filter(Connection.connection_id == connection_id).first()
+    if db_connection is None:
+        raise HTTPException(status_code=404, detail="Connection not found")
+    return db_connection
+
+
+@app.put("/connections/{connection_id}", response_model=Connection)
+def update_connection(connection_id: int, connection: Connection, db: Session = Depends(get_db)):
+    db_connection = db.query(Connection).filter(Connection.connection_id == connection_id).first()
+    if db_connection is None:
+        raise HTTPException(status_code=404, detail="Connection not found")
+    for field, value in connection.dict().items():
+        setattr(db_connection, field, value)
+    db.commit()
+    db.refresh(db_connection)
+    return db_connection
+
+
+@app.delete("/connections/{connection_id}", response_model=Connection)
+def delete_connection(connection_id: int, db: Session = Depends(get_db)):
+    db_connection = db.query(Connection).filter(Connection.connection_id == connection_id).first()
+    if db_connection is None:
+        raise HTTPException(status_code=404, detail="Connection not found")
+    db.delete(db_connection)
+    db.commit()
+    return db_connection
+
+
+
+
+
+@app.post("/connection_details/", response_model=ConnectionDetail)
+def create_connection_detail(connection_detail: ConnectionDetail, db: Session = Depends(get_db)):
+    db.add(connection_detail)
+    db.commit()
+    db.refresh(connection_detail)
+    return connection_detail
+
+
+@app.get("/connection_details/", response_model=list[ConnectionDetail])
+def read_connection_details(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return db.query(ConnectionDetail).offset(skip).limit(limit).all()
+
+
+@app.get("/connection_details/{connection_detail_id}", response_model=ConnectionDetail)
+def read_connection_detail(connection_detail_id: int, db: Session = Depends(get_db)):
+    db_connection_detail = db.query(ConnectionDetail).filter(ConnectionDetail.connection_detail_id == connection_detail_id).first()
+    if db_connection_detail is None:
+        raise HTTPException(status_code=404, detail="Connection Detail not found")
+    return db_connection_detail
+
+
+@app.put("/connection_details/{connection_detail_id}", response_model=ConnectionDetail)
+def update_connection_detail(connection_detail_id: int, connection_detail: ConnectionDetail, db: Session = Depends(get_db)):
+    db_connection_detail = db.query(ConnectionDetail).filter(ConnectionDetail.connection_detail_id == connection_detail_id).first()
+    if db_connection_detail is None:
+        raise HTTPException(status_code=404, detail="Connection Detail not found")
+    for field, value in connection_detail.dict().items():
+        setattr(db_connection_detail, field, value)
+    db.commit()
+    db.refresh(db_connection_detail)
+    return db_connection_detail
+
+
+@app.delete("/connection_details/{connection_detail_id}", response_model=ConnectionDetail)
+def delete_connection_detail(connection_detail_id: int, db: Session = Depends(get_db)):
+    db_connection_detail = db.query(ConnectionDetail).filter(ConnectionDetail.connection_detail_id == connection_detail_id).first()
+    if db_connection_detail is None:
+        raise HTTPException(status_code=404, detail="Connection Detail not found")
+    db.delete(db_connection_detail)
+    db.commit()
+    return db_connection_detail
+
+
+@app.post("/user_log_history/", response_model=UserLogHistory)
+def create_user_log_history(user_log_history: UserLogHistory, db: Session = Depends(get_db)):
+    db.add(user_log_history)
+    db.commit()
+    db.refresh(user_log_history)
+    return user_log_history
+
+
+@app.get("/user_log_history/", response_model=list[UserLogHistory])
+def read_user_log_history(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return db.query(UserLogHistory).offset(skip).limit(limit).all()
+
+
+@app.get("/user_log_history/{log_id}", response_model=UserLogHistory)
+def read_user_log_by_id(log_id: int, db: Session = Depends(get_db)):
+    db_user_log = db.query(UserLogHistory).filter(UserLogHistory.log_id == log_id).first()
+    if db_user_log is None:
+        raise HTTPException(status_code=404, detail="User Log not found")
+    return db_user_log
+
+
+@app.put("/user_log_history/{log_id}", response_model=UserLogHistory)
+def update_user_log_history(log_id: int, user_log_history: UserLogHistory, db: Session = Depends(get_db)):
+    db_user_log = db.query(UserLogHistory).filter(UserLogHistory.log_id == log_id).first()
+    if db_user_log is None:
+        raise HTTPException(status_code=404, detail="User Log not found")
+    for field, value in user_log_history.dict().items():
+        setattr(db_user_log, field, value)
+    db.commit()
+    db.refresh(db_user_log)
+    return db_user_log
+
+
+@app.delete("/user_log_history/{log_id}", response_model=UserLogHistory)
+def delete_user_log_history(log_id: int, db: Session = Depends(get_db)):
+    db_user_log = db.query(UserLogHistory).filter(UserLogHistory.log_id == log_id).first()
+    if db_user_log is None:
+        raise HTTPException(status_code=404, detail="User Log not found")
+    db.delete(db_user_log)
+    db.commit()
+    return db_user_log
+
+
+    
+
+@app.post("/alerts/", response_model=Alert)
+def create_alert(alert: Alert, db: Session = Depends(get_db)):
+    db.add(alert)
+    db.commit()
+    db.refresh(alert)
+    return alert
+
+
+@app.get("/alerts/", response_model=list[Alert])
+def read_alerts(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return db.query(Alert).offset(skip).limit(limit).all()
+
+
+@app.get("/alerts/{alert_id}", response_model=Alert)
+def read_alert(alert_id: int, db: Session = Depends(get_db)):
+    db_alert = db.query(Alert).filter(Alert.alert_id == alert_id).first()
+    if db_alert is None:
+        raise HTTPException(status_code=404, detail="Alert not found")
+    return db_alert
+
+
+@app.put("/alerts/{alert_id}", response_model=Alert)
+def update_alert(alert_id: int, alert: Alert, db: Session = Depends(get_db)):
+    db_alert = db.query(Alert).filter(Alert.alert_id == alert_id).first()
+    if db_alert is None:
+        raise HTTPException(status_code=404, detail="Alert not found")
+    for field, value in alert.dict().items():
+        setattr(db_alert, field, value)
+    db.commit()
+    db.refresh(db_alert)
+    return db_alert
+
+
+@app.delete("/alerts/{alert_id}", response_model=Alert)
+def delete_alert(alert_id: int, db: Session = Depends(get_db)):
+    db_alert = db.query(Alert).filter(Alert.alert_id == alert_id).first()
+    if db_alert is None:
+        raise HTTPException(status_code=404, detail="Alert not found")
+    db.delete(db_alert)
+    db.commit()
+    return db_alert
+
+
+
+@app.post("/alert_expressions/", response_model=AlertExpression)
+def create_alert_expression(alert_expression: AlertExpression, db: Session = Depends(get_db)):
+    db.add(alert_expression)
+    db.commit()
+    db.refresh(alert_expression)
+    return alert_expression
+
+
+@app.get("/alert_expressions/", response_model=list[AlertExpression])
+def read_alert_expressions(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return db.query(AlertExpression).offset(skip).limit(limit).all()
+
+
+@app.get("/alert_expressions/{expression_id}", response_model=AlertExpression)
+def read_alert_expression(expression_id: int, db: Session = Depends(get_db)):
+    db_alert_expression = db.query(AlertExpression).filter(AlertExpression.expression_id == expression_id).first()
+    if db_alert_expression is None:
+        raise HTTPException(status_code=404, detail="Alert Expression not found")
+    return db_alert_expression
+
+
+@app.put("/alert_expressions/{expression_id}", response_model=AlertExpression)
+def update_alert_expression(expression_id: int, alert_expression: AlertExpression, db: Session = Depends(get_db)):
+    db_alert_expression = db.query(AlertExpression).filter(AlertExpression.expression_id == expression_id).first()
+    if db_alert_expression is None:
+        raise HTTPException(status_code=404, detail="Alert Expression not found")
+    for field, value in alert_expression.dict().items():
+        setattr(db_alert_expression, field, value)
+    db.commit()
+    db.refresh(db_alert_expression)
+    return db_alert_expression
+
+
+@app.delete("/alert_expressions/{expression_id}", response_model=AlertExpression)
+def delete_alert_expression(expression_id: int, db: Session = Depends(get_db)):
+    db_alert_expression = db.query(AlertExpression).filter(AlertExpression.expression_id == expression_id).first()
+    if db_alert_expression is None:
+        raise HTTPException(status_code=404, detail="Alert Expression not found")
+    db.delete(db_alert_expression)
+    db.commit()
+    return db_alert_expression
+
+
+
+
+@app.post("/history/", response_model=History)
+def create_history(history: History, db: Session = Depends(get_db)):
+    db.add(history)
+    db.commit()
+    db.refresh(history)
+    return history
+
+
+@app.get("/history/", response_model=list[History])
+def read_history(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return db.query(History).offset(skip).limit(limit).all()
+
+
+@app.get("/history/{history_id}", response_model=History)
+def read_history_by_id(history_id: int, db: Session = Depends(get_db)):
+    db_history = db.query(History).filter(History.history_id == history_id).first()
+    if db_history is None:
+        raise HTTPException(status_code=404, detail="History not found")
+    return db_history
+
+
+@app.put("/history/{history_id}", response_model=History)
+def update_history(history_id: int, history: History, db: Session = Depends(get_db)):
+    db_history = db.query(History).filter(History.history_id == history_id).first()
+    if db_history is None:
+        raise HTTPException(status_code=404, detail="History not found")
+    for field, value in history.dict().items():
+        setattr(db_history, field, value)
+    db.commit()
+    db.refresh(db_history)
+    return db_history
+
+
+@app.delete("/history/{history_id}", response_model=History)
+def delete_history(history_id: int, db: Session = Depends(get_db)):
+    db_history = db.query(History).filter(History.history_id == history_id).first()
+    if db_history is None:
+        raise HTTPException(status_code=404, detail="History not found")
+    db.delete(db_history)
+    db.commit()
+    return db_history
+
+
+@app.post("/action_types/", response_model=ActionType)
+def create_action_type(action_type: ActionType, db: Session = Depends(get_db)):
+    db.add(action_type)
+    db.commit()
+    db.refresh(action_type)
+    return action_type
+
+
+@app.get("/action_types/", response_model=list[ActionType])
+def read_action_types(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return db.query(ActionType).offset(skip).limit(limit).all()
+
+
+@app.get("/action_types/{action_type_id}", response_model=ActionType)
+def read_action_type(action_type_id: int, db: Session = Depends(get_db)):
+    db_action_type = db.query(ActionType).filter(ActionType.action_type_id == action_type_id).first()
+    if db_action_type is None:
+        raise HTTPException(status_code=404, detail="Action Type not found")
+    return db_action_type
+
+
+@app.put("/action_types/{action_type_id}", response_model=ActionType)
+def update_action_type(action_type_id: int, action_type: ActionType, db: Session = Depends(get_db)):
+    db_action_type = db.query(ActionType).filter(ActionType.action_type_id == action_type_id).first()
+    if db_action_type is None:
+        raise HTTPException(status_code=404, detail="Action Type not found")
+    for field, value in action_type.dict().items():
+        setattr(db_action_type, field, value)
+    db.commit()
+    db.refresh(db_action_type)
+    return db_action_type
+
+
+@app.delete("/action_types/{action_type_id}", response_model=ActionType)
+def delete_action_type(action_type_id: int, db: Session = Depends(get_db)):
+    db_action_type = db.query(ActionType).filter(ActionType.action_type_id == action_type_id).first()
+    if db_action_type is None:
+        raise HTTPException(status_code=404, detail="Action Type not found")
+    db.delete(db_action_type)
+    db.commit()
+    return db_action_type
+
+
+
+
+@app.post("/actions/", response_model=Action)
+def create_action(action: Action, db: Session = Depends(get_db)):
+    db.add(action)
+    db.commit()
+    db.refresh(action)
+    return action
+
+
+@app.get("/actions/", response_model=list[Action])
+def read_actions(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return db.query(Action).offset(skip).limit(limit).all()
+
+
+@app.get("/actions/{action_id}", response_model=Action)
+def read_action(action_id: int, db: Session = Depends(get_db)):
+    db_action = db.query(Action).filter(Action.action_id == action_id).first()
+    if db_action is None:
+        raise HTTPException(status_code=404, detail="Action not found")
+    return db_action
+
+
+@app.put("/actions/{action_id}", response_model=Action)
+def update_action(action_id: int, action: Action, db: Session = Depends(get_db)):
+    db_action = db.query(Action).filter(Action.action_id == action_id).first()
+    if db_action is None:
+        raise HTTPException(status_code=404, detail="Action not found")
+    for field, value in action.dict().items():
+        setattr(db_action, field, value)
+    db.commit()
+    db.refresh(db_action)
+    return db_action
+
+
+@app.delete("/actions/{action_id}", response_model=Action)
+def delete_action(action_id: int, db: Session = Depends(get_db)):
+    db_action = db.query(Action).filter(Action.action_id == action_id).first()
+    if db_action is None:
+        raise HTTPException(status_code=404, detail="Action not found")
+    db.delete(db_action)
+    db.commit()
+    return db_action
+
+
+@app.post("/action_history/")
+def create_action_history(action_id: int, history_id: int, db: Session = Depends(get_db)):
+    action = db.query(Action).filter(Action.action_id == action_id).first()
+    history = db.query(History).filter(History.history_id == history_id).first()
+    if action is None or history is None:
+        raise HTTPException(status_code=404, detail="Action or History not found")
+
+    # Check if the association already exists
+    existing_association = (
+        db.query(ActionHistory)
+        .filter(ActionHistory.action_id == action_id, ActionHistory.history_id == history_id)
+        .first()
+    )
+    if existing_association:
+        raise HTTPException(status_code=400, detail="Association already exists")
+
+    new_association = ActionHistory(action_id=action_id, history_id=history_id)
+    db.add(new_association)
+    db.commit()
+    return {"message": "Association created successfully"}
+
+
+@app.delete("/action_history/")
+def delete_action_history(action_id: int, history_id: int, db: Session = Depends(get_db)):
+    association = (
+        db.query(ActionHistory)
+        .filter(ActionHistory.action_id == action_id, ActionHistory.history_id == history_id)
+        .first()
+    )
+    if association is None:
+        raise HTTPException(status_code=404, detail="Association not found")
+
+    db.delete(association)
+    db.commit()
+    return {"message": "Association deleted successfully"}
+
+
+
+@app.post("/action_alert/")
+def create_action_alert(action_id: int, alert_id: int, db: Session = Depends(get_db)):
+    action = db.query(Action).filter(Action.action_id == action_id).first()
+    alert = db.query(Alert).filter(Alert.alert_id == alert_id).first()
+    if action is None or alert is None:
+        raise HTTPException(status_code=404, detail="Action or Alert not found")
+
+    # Check if the association already exists
+    existing_association = (
+        db.query(ActionAlert)
+        .filter(ActionAlert.action_id == action_id, ActionAlert.alert_id == alert_id)
+        .first()
+    )
+    if existing_association:
+        raise HTTPException(status_code=400, detail="Association already exists")
+
+    new_association = ActionAlert(action_id=action_id, alert_id=alert_id)
+    db.add(new_association)
+    db.commit()
+    return {"message": "Association created successfully"}
+
+
+@app.delete("/action_alert/")
+def delete_action_alert(action_id: int, alert_id: int, db: Session = Depends(get_db)):
+    association = (
+        db.query(ActionAlert)
+        .filter(ActionAlert.action_id == action_id, ActionAlert.alert_id == alert_id)
+        .first()
+    )
+    if association is None:
+        raise HTTPException(status_code=404, detail="Association not found")
+
+    db.delete(association)
+    db.commit()
+    return {"message": "Association deleted successfully"}
