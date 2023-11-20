@@ -1,19 +1,18 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, DECIMAL
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-db_username = 'postgres'
-db_password = 'admin_1'
-db_host = '162.216.113.6'
-db_name = 'iot_db'
-db_port = '5423'
+# Update the database connection information
+db_host = '51.20.144.184'
+db_username = 'iot_dev'
+db_password = 'iod@developer'
+db_name = 'iot_penguin'
 
-db_url = f'postgresql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}'
+# Adjust the connection URL
+db_url = f'postgresql://{db_username}:{db_password}@{db_host}/{db_name}'
 
 engine = create_engine(db_url)
-
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
