@@ -1,9 +1,9 @@
 from backend.model import *
+from typing import List
 from fastapi import FastAPI, Depends, HTTPException
-from sqlalchemy.orm import Session
-from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, Integer, String, DateTime, ForeignKey, Boolean
+from sqlalchemy.orm import sessionmaker, relationship, Session
 db_username = 'postgres'
 db_password = 'admin_1'
 db_host = '162.216.113.6'
