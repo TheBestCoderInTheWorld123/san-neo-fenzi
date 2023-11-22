@@ -15,7 +15,7 @@ const TablePage = () => {
             <Card className="mb-3 px-6 ">
               <CardHeader className = "font-extrabold text-lg pt-6">Table</CardHeader>
               <div className="card card-body">
-                <table className="table table-hover w-3/5">
+                <table className="table table-hover w-full">
                   <thead>
                     <tr>
                       <th>#</th>
