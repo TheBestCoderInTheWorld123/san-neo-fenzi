@@ -1477,7 +1477,10 @@ def get_devices_history(db: Session = Depends(get_db)):
             func.row_number().over(
                 partition_by=History.device_tag_id,
                 order_by=History.recorded_date_time.desc()
-            ).label("row_number")
+            ).label("row_number"),
+            func.max(Device.device_id).label("device_id"),
+            func.max(Device.device_serial_number).label("device_serial_number")
+
         )
         .join(DeviceTag, DeviceTag.tag_id == History.device_tag_id)
         .join(Tag, DeviceTag.tag_id == Tag.tag_id)
