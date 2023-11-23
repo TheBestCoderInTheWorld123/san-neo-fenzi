@@ -10,7 +10,7 @@ from typing import Optional
 from urllib.parse import quote_plus
 
 from sqlalchemy import MetaData
-
+from sqlalchemy import select
 # Create an instance of MetaData
 metadata = MetaData()
 
@@ -471,31 +471,28 @@ t_actions_history = Table(
     Column('history_id', ForeignKey('history.history_id'), primary_key=True, nullable=False)
 )
 
-# Reflect the view into a SQLAlchemy Table object
-# metadata = MetaData()
-device_latest_records = Table('device_latest_records', metadata,
-    Column('devices_device_id', Integer),
-    Column('devices_device_serial_number', String),
-    Column('tag_description', String),
-    Column('tag_value', String),
-    Column('anon_1_latest_recorded_date', DateTime)
-)
-
 # Define a SQLAlchemy class representing the view
 class DeviceLatestRecord:
     def __repr__(self):
         return f"<DeviceLatestRecord(device_id='{self.devices_device_id}', device_serial_number='{self.devices_device_serial_number}', tag_description='{self.tag_description}', tag_value='{self.tag_value}', latest_recorded_date='{self.anon_1_latest_recorded_date}')>"
 
-# Reflect the view structure into the class
-# mapper = DeviceLatestRecord()
+# Map the DeviceLatestRecord class with the device_latest_records Table
+mapper = select([
+    device_latest_records.c.devices_device_id,
+    device_latest_records.c.devices_device_serial_number,
+    device_latest_records.c.tag_description,
+    device_latest_records.c.tag_value,
+    device_latest_records.c.anon_1_latest_recorded_date
+]).apply_labels().alias()
 
-mapper(DeviceLatestRecord, device_latest_records)
-# mapper.device_id = device_latest_records.columns.device_id
-# mapper.device_serial_number = device_latest_records.columns.device_serial_number
-# mapper.tag_description = device_latest_records.columns.tag_description
-# mapper.tag_value = device_latest_records.columns.tag_value
-# mapper.latest_recorded_date = device_latest_records.columns.latest_recorded_date
+DeviceLatestRecord = mapper.class_(name='DeviceLatestRecord')
 
+# Add the attributes to the class
+DeviceLatestRecord.devices_device_id = mapper.c.devices_device_id
+DeviceLatestRecord.devices_device_serial_number = mapper.c.devices_device_serial_number
+DeviceLatestRecord.tag_description = mapper.c.tag_description
+DeviceLatestRecord.tag_value = mapper.c.tag_value
+DeviceLatestRecord.anon_1_latest_recorded_date = mapper.c.anon_1_latest_recorded_date
 #################################################
 from pydantic import BaseModel
 from datetime import datetime
