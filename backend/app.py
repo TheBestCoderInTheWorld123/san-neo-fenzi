@@ -1475,7 +1475,7 @@ def get_devices_history(db: Session = Depends(get_db)):
         db.query(
             History,
             func.row_number().over(
-                partition_by=History.device_id,
+                partition_by=History.device_tag_id,
                 order_by=History.recorded_date_time.desc()
             ).label("row_number")
         )
