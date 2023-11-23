@@ -1532,11 +1532,11 @@ def get_latest_devices_data(db: Session = Depends(get_db)):
         )
         .join(DeviceTag, DeviceTag.device_id == Device.device_id)
         .join(Tag, Tag.tag_id == DeviceTag.tag_id)
-        .join(History, and_(
-            History.device_tag_id == DeviceTag.tag_id,
+        .join(subq, and_(
+            subq.c.device_tag_id == DeviceTag.tag_id,
             History.recorded_date_time == subq.c.latest_recorded_date
         ))
-        .join(subq, subq.c.device_tag_id == History.device_tag_id)
+        .join(History, History.device_tag_id == subq.c.device_tag_id)
         .filter(Device.is_active == True)
         .filter(Tag.description.in_(["AQ", "TMP", "HUM"]))
         .order_by(desc(subq.c.latest_recorded_date))
