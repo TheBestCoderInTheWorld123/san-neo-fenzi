@@ -1466,3 +1466,52 @@ def get_active_devices(db: Session = Depends(get_db)):
         result[recorded_date_time]['tags'].append(tag_info)
 
     return result
+
+@app.get("/get_devices_history/")
+def get_active_devices(db: Session = Depends(get_db)):
+    history_alias = aliased(History)
+
+    latest_records_subq = (
+        select([
+            func.row_number().over(
+                partition_by=[History.device_id, History.device_serial_number],
+                order_by=History.recorded_date_time.desc()
+            ).label("row_num"),
+            History.device_id,
+            History.device_serial_number,
+            History.recorded_date_time,
+            History.device_tag_id
+        ])
+        .select_from(History)
+        .where(Device.is_active == True)
+        .alias()
+    )
+
+    query = (
+        db.query(
+            latest_records_subq.c.device_id,
+            latest_records_subq.c.device_serial_number,
+            Tag.description.label("tag_description"),
+            func.array_agg(History.value).label("tag_values")
+        )
+        .join(DeviceTag, DeviceTag.tag_id == latest_records_subq.c.device_tag_id)
+        .join(Tag, DeviceTag.tag_id == Tag.tag_id)
+        .filter(latest_records_subq.c.row_num == 1)
+        .group_by(
+            latest_records_subq.c.device_id,
+            latest_records_subq.c.device_serial_number,
+            Tag.description
+        )
+        .order_by(latest_records_subq.c.device_id)  # Optional: Order by device_id
+        .all()
+    )
+
+    result = {}
+    for device_id, device_serial_number, tag_description, tag_values in query:
+        if (device_id, device_serial_number) not in result:
+            result[(device_id, device_serial_number)] = {'tags': []}
+
+        tag_info = {'description': tag_description, 'values': tag_values}
+        result[(device_id, device_serial_number)]['tags'].append(tag_info)
+
+    return result
