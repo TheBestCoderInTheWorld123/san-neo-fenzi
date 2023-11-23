@@ -8,6 +8,7 @@ from sqlalchemy.orm import sessionmaker
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 from urllib.parse import quote_plus
+from sqlalchemy.orm import mapper
 
 from sqlalchemy import MetaData
 from sqlalchemy import select
@@ -470,7 +471,6 @@ t_actions_history = Table(
     Column('action_id', ForeignKey('actions.action_id'), primary_key=True, nullable=False),
     Column('history_id', ForeignKey('history.history_id'), primary_key=True, nullable=False)
 )
-
 # Define your device_latest_records table or view
 device_latest_records = Table(
     'device_latest_records', metadata,
@@ -483,26 +483,12 @@ device_latest_records = Table(
 
 # Define a SQLAlchemy class representing the view
 class DeviceLatestRecord:
-    def __repr__(self):
-        return f"<DeviceLatestRecord(device_id='{self.devices_device_id}', device_serial_number='{self.devices_device_serial_number}', tag_description='{self.tag_description}', tag_value='{self.tag_value}', latest_recorded_date='{self.anon_1_latest_recorded_date}')>"
+    pass  # an empty class that will be mapped to the view
 
 # Map the DeviceLatestRecord class with the device_latest_records Table
-mapper = select([
-    device_latest_records.c.devices_device_id,
-    device_latest_records.c.devices_device_serial_number,
-    device_latest_records.c.tag_description,
-    device_latest_records.c.tag_value,
-    device_latest_records.c.anon_1_latest_recorded_date
-]).apply_labels().alias()
+mapper(DeviceLatestRecord, device_latest_records)
 
-DeviceLatestRecord = mapper.class_(name='DeviceLatestRecord')
-
-# Add the attributes to the class
-DeviceLatestRecord.devices_device_id = mapper.c.devices_device_id
-DeviceLatestRecord.devices_device_serial_number = mapper.c.devices_device_serial_number
-DeviceLatestRecord.tag_description = mapper.c.tag_description
-DeviceLatestRecord.tag_value = mapper.c.tag_value
-DeviceLatestRecord.anon_1_latest_recorded_date = mapper.c.anon_1_latest_recorded_date
+# Now you can use DeviceLatestRecord class to query the view
 #################################################
 from pydantic import BaseModel
 from datetime import datetime
