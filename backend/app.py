@@ -1513,15 +1513,44 @@ def get_devices_history(db: Session = Depends(get_db)):
 
 @app.get("/get_latest_devices_data/")
 def get_latest_devices_data(db: Session = Depends(get_db)):
+#     subq = (
+#         db.query(
+#             History.device_tag_id,
+#             func.max(History.recorded_date_time).label("latest_recorded_date")
+#         )
+#         .group_by(History.device_tag_id)
+#         .subquery()
+#     )
+# 
+#     latest_data = (
+#         db.query(
+#             Device.device_id,
+#             Device.device_serial_number,
+#             Tag.description.label("tag_description"),
+#             History.value.label("tag_value"),
+#             subq.c.latest_recorded_date
+#         )
+#         .join(DeviceTag, DeviceTag.device_id == Device.device_id)
+#         .join(Tag, Tag.tag_id == DeviceTag.tag_id)
+#         .join(subq, subq.c.device_tag_id == DeviceTag.tag_id)
+#         .join(History, and_(
+#             History.device_tag_id == subq.c.device_tag_id,
+#             History.recorded_date_time == subq.c.latest_recorded_date
+#         ))
+#         .filter(Device.is_active == True)
+# #        .filter(Tag.description.in_(["AQ", "TMP", "HUM"]))
+#         .order_by(desc(subq.c.latest_recorded_date))
+#         .all()
+#     )
     subq = (
         db.query(
-            History.device_tag_id,
+            History.device_tag_id.label('device_tag_id'),
             func.max(History.recorded_date_time).label("latest_recorded_date")
         )
         .group_by(History.device_tag_id)
         .subquery()
     )
-
+    
     latest_data = (
         db.query(
             Device.device_id,
@@ -1532,27 +1561,15 @@ def get_latest_devices_data(db: Session = Depends(get_db)):
         )
         .join(DeviceTag, DeviceTag.device_id == Device.device_id)
         .join(Tag, Tag.tag_id == DeviceTag.tag_id)
-        .join(subq, subq.c.device_tag_id == DeviceTag.tag_id)
+        .join(subq, subq.c.device_tag_id == DeviceTag.ID)
         .join(History, and_(
             History.device_tag_id == subq.c.device_tag_id,
-            History.recorded_date_time == subq.c.latest_recorded_date
+            History.recorded_date_time == subq.c.latest_recorded_date,
+            Device.is_active == True
         ))
-        .filter(Device.is_active == True)
-#        .filter(Tag.description.in_(["AQ", "TMP", "HUM"]))
         .order_by(desc(subq.c.latest_recorded_date))
         .all()
     )
-
-    # result = {}
-    # for device_id, device_serial_number, tag_description, tag_value, latest_recorded_date in latest_data:
-    #     if device_id not in result:
-    #         result[device_id] = {'device_serial_number': device_serial_number, 'tags': {}}
-    #
-    #     result[device_id]['tags'][tag_description] = tag_value
-    #     result[device_id]['latest_recorded_date'] = latest_recorded_date
-    #
-    # return result
-
     result = {}
     for device_id, device_serial_number, tag_description, tag_value, latest_recorded_date in latest_data:
         if device_id not in result:

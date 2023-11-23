@@ -447,12 +447,55 @@ class History(Base):
     # alert = relationship('Alert')
     # device_tag = relationship('DeviceTag')
 
+class DeviceLatestRecord(Base):
+    __tablename__ = 'device_latest_records'
+
+    history_id = Column(Integer, primary_key=True, server_default=text("nextval('history_history_id_seq'::regclass)"))
+    device_tag_id = Column(ForeignKey('device_tags.ID'))
+    value = Column(DECIMAL)
+    status = Column(String(255))
+    recorded_date_time = Column(DateTime)
+    alert_id = Column(ForeignKey('alerts.alert_id'))
+    created_by = Column(String(255))
+    created_at = Column(DateTime)
+    updated_by = Column(String(255))
+    updated_at = Column(DateTime)
+
+    # alert = relationship('Alert')
+    # device_tag = relationship('DeviceTag')
+
 
 t_actions_history = Table(
     'actions_history', metadata,
     Column('action_id', ForeignKey('actions.action_id'), primary_key=True, nullable=False),
     Column('history_id', ForeignKey('history.history_id'), primary_key=True, nullable=False)
 )
+
+# Reflect the view into a SQLAlchemy Table object
+# metadata = MetaData()
+device_latest_records = Table('device_latest_records', metadata,
+    Column('devices_device_id', Integer),
+    Column('devices_device_serial_number', String),
+    Column('tag_description', String),
+    Column('tag_value', String),
+    Column('anon_1_latest_recorded_date', DateTime)
+)
+
+# Define a SQLAlchemy class representing the view
+class DeviceLatestRecord:
+    def __repr__(self):
+        return f"<DeviceLatestRecord(device_id='{self.devices_device_id}', device_serial_number='{self.devices_device_serial_number}', tag_description='{self.tag_description}', tag_value='{self.tag_value}', latest_recorded_date='{self.anon_1_latest_recorded_date}')>"
+
+# Reflect the view structure into the class
+# mapper = DeviceLatestRecord()
+
+mapper(DeviceLatestRecord, device_latest_records)
+# mapper.device_id = device_latest_records.columns.device_id
+# mapper.device_serial_number = device_latest_records.columns.device_serial_number
+# mapper.tag_description = device_latest_records.columns.tag_description
+# mapper.tag_value = device_latest_records.columns.tag_value
+# mapper.latest_recorded_date = device_latest_records.columns.latest_recorded_date
+
 #################################################
 from pydantic import BaseModel
 from datetime import datetime
