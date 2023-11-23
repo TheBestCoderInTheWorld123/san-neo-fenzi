@@ -12,6 +12,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import text
 from sqlalchemy import desc, and_  # Add this import
+from fastapi.middleware.cors import CORSMiddleware
 
 db_host = '51.20.144.184'
 db_username = 'iot_dev'
@@ -34,6 +35,13 @@ def get_db():
 
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],  # You can specify specific HTTP methods here
+    allow_headers=["*"],  # You can specify specific headers here
+)
 
 @app.post("/addresses/", response_model=AddressPydantic)
 def create_address(address: AddressPydantic, db: Session = Depends(get_db)):
