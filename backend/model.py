@@ -454,11 +454,11 @@ t_actions_history = Table(
     Column('history_id', ForeignKey('history.history_id'), primary_key=True, nullable=False)
 )
 class DeviceLatestRecord(Base):
-    __tablename__ = 'device_latest_records'
+    __tablename__ = 'device_latest_records_1'
     _table_args_ = {'autoload_with': engine}
 
     # Assuming devices_device_id is unique and can act as a pseudo-primary key
-    view_id = Column(BIGINT, primary_key=True)
+    id = Column(BIGINT, primary_key=True)
     devices_device_id = Column(Integer)
     devices_device_serial_number = Column(String)
     tag_description = Column(String)
