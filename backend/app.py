@@ -1440,7 +1440,7 @@ def delete_action_alert(action_id: int, alert_id: int, db: Session = Depends(get
 @app.get("/active_devices/")
 def get_active_devices(db: Session = Depends(get_db)):
     # Join necessary tables to fetch required data
-        query = (
+    query = (
         db.query(
             History.recorded_date_time,
             func.max(Device.device_id).label("device_id"),
