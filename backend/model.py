@@ -471,6 +471,16 @@ t_actions_history = Table(
     Column('history_id', ForeignKey('history.history_id'), primary_key=True, nullable=False)
 )
 
+# Define your device_latest_records table or view
+device_latest_records = Table(
+    'device_latest_records', metadata,
+    Column('devices_device_id', Integer),
+    Column('devices_device_serial_number', String),
+    Column('tag_description', String),
+    Column('tag_value', String),
+    Column('anon_1_latest_recorded_date', DateTime)
+)
+
 # Define a SQLAlchemy class representing the view
 class DeviceLatestRecord:
     def __repr__(self):
