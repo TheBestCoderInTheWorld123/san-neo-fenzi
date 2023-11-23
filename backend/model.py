@@ -458,7 +458,8 @@ class DeviceLatestRecord(Base):
     _table_args_ = {'autoload_with': engine}
 
     # Assuming devices_device_id is unique and can act as a pseudo-primary key
-    devices_device_id = Column(Integer, primary_key=True)
+    view_id = Column(BIGINT, primary_key=True)
+    devices_device_id = Column(Integer)
     devices_device_serial_number = Column(String)
     tag_description = Column(String)
     tag_value = Column(String)
