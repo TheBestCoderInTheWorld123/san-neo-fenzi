@@ -1465,4 +1465,4 @@ def get_active_devices(db: Session = Depends(get_db)):
         tag_info = {'description': tag_description, 'value': tag_value}
         result[recorded_date_time]['tags'].append(tag_info)
 
-    return resul
+    return result
