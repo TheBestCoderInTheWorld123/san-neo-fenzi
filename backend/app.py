@@ -11,7 +11,7 @@ from starlette.status import HTTP_101_SWITCHING_PROTOCOLS, HTTP_401_UNAUTHORIZED
 from sqlalchemy import func, select
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import text
-
+from sqlalchemy import desc, and_  # Add this import
 
 db_host = '51.20.144.184'
 db_username = 'iot_dev'
