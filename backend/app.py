@@ -1543,12 +1543,22 @@ def get_latest_devices_data(db: Session = Depends(get_db)):
         .all()
     )
 
+    # result = {}
+    # for device_id, device_serial_number, tag_description, tag_value, latest_recorded_date in latest_data:
+    #     if device_id not in result:
+    #         result[device_id] = {'device_serial_number': device_serial_number, 'tags': {}}
+    #
+    #     result[device_id]['tags'][tag_description] = tag_value
+    #     result[device_id]['latest_recorded_date'] = latest_recorded_date
+    #
+    # return result
+
     result = {}
     for device_id, device_serial_number, tag_description, tag_value, latest_recorded_date in latest_data:
         if device_id not in result:
-            result[device_id] = {'device_serial_number': device_serial_number, 'tags': {}}
+            result[device_id] = {'device_serial_number': device_serial_number, 'tags': {}, 'latest_recorded_date': latest_recorded_date}
 
-        result[device_id]['tags'][tag_description] = tag_value
-        result[device_id]['latest_recorded_date'] = latest_recorded_date
+        if tag_description not in result[device_id]['tags']:
+            result[device_id]['tags'][tag_description] = tag_value
 
     return result
