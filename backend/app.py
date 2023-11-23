@@ -1470,50 +1470,41 @@ def get_active_devices(db: Session = Depends(get_db)):
     return result
 
 @app.get("/get_devices_history/")
-def get_active_devices(db: Session = Depends(get_db)):
-    history_alias = aliased(History)
-
-    latest_records_subq = (
-        select([
+def get_devices_history(db: Session = Depends(get_db)):
+    subq = (
+        db.query(
+            History,
             func.row_number().over(
-                partition_by=[History.device_id, History.device_serial_number],
+                partition_by=History.device_id,
                 order_by=History.recorded_date_time.desc()
-            ).label("row_num"),
-            History.device_id,
-            History.device_serial_number,
-            History.recorded_date_time,
-            History.device_tag_id
-        ])
-        .select_from(History)
-        .where(Device.is_active == True)
-        .alias()
+            ).label("row_number")
+        )
+        .join(DeviceTag, DeviceTag.tag_id == History.device_tag_id)
+        .join(Tag, DeviceTag.tag_id == Tag.tag_id)
+        .join(Device, DeviceTag.device_id == Device.device_id)
+        .filter(Device.is_active == True)
+        .subquery()
     )
 
     query = (
         db.query(
-            latest_records_subq.c.device_id,
-            latest_records_subq.c.device_serial_number,
-            Tag.description.label("tag_description"),
-            func.array_agg(History.value).label("tag_values")
+            subq.c.recorded_date_time,
+            subq.c.device_id,
+            subq.c.device_serial_number,
+            subq.c.description.label("tag_description"),
+            subq.c.value.label("tag_value")
         )
-        .join(DeviceTag, DeviceTag.tag_id == latest_records_subq.c.device_tag_id)
-        .join(Tag, DeviceTag.tag_id == Tag.tag_id)
-        .filter(latest_records_subq.c.row_num == 1)
-        .group_by(
-            latest_records_subq.c.device_id,
-            latest_records_subq.c.device_serial_number,
-            Tag.description
-        )
-        .order_by(latest_records_subq.c.device_id)  # Optional: Order by device_id
+        .filter(subq.c.row_number == 1)
+        .order_by(subq.c.recorded_date_time.desc())
         .all()
     )
 
     result = {}
-    for device_id, device_serial_number, tag_description, tag_values in query:
-        if (device_id, device_serial_number) not in result:
-            result[(device_id, device_serial_number)] = {'tags': []}
+    for recorded_date_time, device_id, device_serial_number, tag_description, tag_value in query:
+        if device_id not in result:
+            result[device_id] = {'device_serial_number': device_serial_number, 'tags': []}
 
-        tag_info = {'description': tag_description, 'values': tag_values}
-        result[(device_id, device_serial_number)]['tags'].append(tag_info)
+        tag_info = {'description': tag_description, 'value': tag_value}
+        result[device_id]['tags'].append(tag_info)
 
     return result
