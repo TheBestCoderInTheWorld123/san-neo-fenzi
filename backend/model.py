@@ -463,7 +463,7 @@ class DeviceLatestRecord(Base):
     devices_device_serial_number = Column(String)
     tag_description = Column(String)
     tag_value = Column(String)
-    anon_1_latest_recorded_date = Column(DateTime)
+    latest_recorded_date = Column(DateTime)
     
 #################################################
 from pydantic import BaseModel

@@ -1598,7 +1598,7 @@ async def get_device_latest_records(db: Session = Depends(get_db)):
         device_serial_number = record.devices_device_serial_number
         tag_description = record.tag_description
         tag_value = record.tag_value
-        latest_recorded_date = record.anon_1_latest_recorded_date.strftime("%Y-%m-%d %H:%M:%S")
+        latest_recorded_date = record.latest_recorded_date.strftime("%Y-%m-%d %H:%M:%S")
 
         if device_id not in result:
             result[device_id] = {'device_serial_number': device_serial_number, 'tags': {},
