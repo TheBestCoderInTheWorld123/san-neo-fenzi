@@ -1445,7 +1445,8 @@ def get_active_devices(db: Session = Depends(get_db)):
             History.recorded_date_time,
             func.max(Device.device_id).label("device_id"),
             func.max(Device.device_serial_number).label("device_serial_number"),
-            Tag.description
+            Tag.description.label("tag_description"),
+            func.max(History.value).label("tag_value")
         )
         .join(DeviceTag, DeviceTag.tag_id == History.device_tag_id)
         .join(Tag, DeviceTag.tag_id == Tag.tag_id)
@@ -1457,9 +1458,11 @@ def get_active_devices(db: Session = Depends(get_db)):
     )
 
     result = {}
-    for recorded_date_time, device_id, device_serial_number, description in query:
+    for recorded_date_time, device_id, device_serial_number, tag_description, tag_value in query:
         if recorded_date_time not in result:
             result[recorded_date_time] = {'device_id': device_id, 'device_serial_number': device_serial_number, 'tags': []}
-        result[recorded_date_time]['tags'].append(description)
+        
+        tag_info = {'description': tag_description, 'value': tag_value}
+        result[recorded_date_time]['tags'].append(tag_info)
 
-    return result
+    return resul
