@@ -1509,3 +1509,46 @@ def get_devices_history(db: Session = Depends(get_db)):
         result[recorded_date_time]['tags'].append(tag_info)
 
     return result
+
+
+@app.get("/get_latest_devices_data/")
+def get_latest_devices_data(db: Session = Depends(get_db)):
+    latest_records_subq = (
+        db.query(
+            History.device_tag_id,
+            func.max(History.recorded_date_time).label("latest_recorded_date")
+        )
+        .group_by(History.device_tag_id)
+        .subquery()
+    )
+
+    latest_data = (
+        db.query(
+            Device.device_id,
+            Device.device_serial_number,
+            Tag.description.label("tag_description"),
+            History.value.label("tag_value"),
+            latest_records_subq.c.latest_recorded_date
+        )
+        .join(DeviceTag, DeviceTag.device_id == Device.device_id)
+        .join(Tag, Tag.tag_id == DeviceTag.tag_id)
+        .join(History, and_(
+            History.device_tag_id == DeviceTag.tag_id,
+            History.recorded_date_time == latest_records_subq.c.latest_recorded_date
+        ))
+        .join(latest_records_subq, latest_records_subq.c.device_tag_id == History.device_tag_id)
+        .filter(Device.is_active == True)
+        .filter(Tag.description.in_(["AQ", "TMP", "HUM"]))
+        .order_by(desc(latest_records_subq.c.latest_recorded_date))
+        .all()
+    )
+
+    result = {}
+    for device_id, device_serial_number, tag_description, tag_value, latest_recorded_date in latest_data:
+        if device_id not in result:
+            result[device_id] = {'device_serial_number': device_serial_number, 'tags': {}}
+
+        result[device_id]['tags'][tag_description] = tag_value
+        result[device_id]['latest_recorded_date'] = latest_recorded_date
+
+    return result
