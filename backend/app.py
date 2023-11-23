@@ -1473,39 +1473,35 @@ def get_active_devices(db: Session = Depends(get_db)):
 def get_devices_history(db: Session = Depends(get_db)):
     subq = (
         db.query(
-            History,
+            History.device_tag_id,
             func.row_number().over(
                 partition_by=History.device_tag_id,
                 order_by=History.recorded_date_time.desc()
             ).label("row_number"),
-            func.max(Device.device_id).label("device_id"),
-            func.max(Device.device_serial_number).label("device_serial_number"),
-            Tag.description.label("tag_description"),
-            func.max(History.value).label("tag_value")
-
         )
-        .join(DeviceTag, DeviceTag.tag_id == History.device_tag_id)
-        .join(Tag, DeviceTag.tag_id == Tag.tag_id)
-        .join(Device, DeviceTag.device_id == Device.device_id)
-        .filter(Device.is_active == True)
         .subquery()
     )
 
     query = (
         db.query(
-            subq.c.recorded_date_time,
-            subq.c.device_id,
-            subq.c.device_serial_number,
-            subq.c.tag_description,
-            subq.c.tag_value
+            subq.c.row_number,
+            Device.device_id,
+            Device.device_serial_number,
+            Tag.description.label("tag_description"),
+            History.value.label("tag_value")
         )
+        .join(DeviceTag, DeviceTag.tag_id == subq.c.device_tag_id)
+        .join(Tag, DeviceTag.tag_id == Tag.tag_id)
+        .join(Device, DeviceTag.device_id == Device.device_id)
+        .join(subq, subq.c.device_tag_id == History.device_tag_id)
+        .filter(Device.is_active == True)
         .filter(subq.c.row_number == 1)
         .order_by(subq.c.recorded_date_time.desc())
         .all()
     )
 
     result = {}
-    for recorded_date_time, device_id, device_serial_number, tag_description, tag_value in query:
+    for _, device_id, device_serial_number, tag_description, tag_value in query:
         if device_id not in result:
             result[device_id] = {'device_serial_number': device_serial_number, 'tags': []}
 
