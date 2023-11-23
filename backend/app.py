@@ -1480,12 +1480,11 @@ def get_devices_history(db: Session = Depends(get_db)):
                 order_by=History.recorded_date_time.desc()
             ).label("row_number"),
         )
-        .subquery("subq_alias")
+        .subquery()
     )
 
     query = (
         db.query(
-            subq.c.row_number,
             subq.c.recorded_date_time,
             Device.device_id,
             Device.device_serial_number,
@@ -1503,11 +1502,11 @@ def get_devices_history(db: Session = Depends(get_db)):
     )
 
     result = {}
-    for _, device_id, device_serial_number, tag_description, tag_value in query:
-        if device_id not in result:
-            result[device_id] = {'device_serial_number': device_serial_number, 'tags': []}
+    for recorded_date_time, device_id, device_serial_number, tag_description, tag_value in query:
+        if recorded_date_time not in result:
+            result[recorded_date_time] = {'device_id': device_id, 'device_serial_number': device_serial_number, 'tags': []}
 
         tag_info = {'description': tag_description, 'value': tag_value}
-        result[device_id]['tags'].append(tag_info)
+        result[recorded_date_time]['tags'].append(tag_info)
 
     return result
