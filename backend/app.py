@@ -1536,7 +1536,10 @@ def get_latest_devices_data(db: Session = Depends(get_db)):
             subq.c.device_tag_id == DeviceTag.tag_id,
             History.recorded_date_time == subq.c.latest_recorded_date
         ))
-        .join(History, History.device_tag_id == subq.c.device_tag_id)
+        .join(History, and_(
+            History.device_tag_id == subq.c.device_tag_id,
+            History.recorded_date_time == subq.c.latest_recorded_date
+        ))
         .filter(Device.is_active == True)
         .filter(Tag.description.in_(["AQ", "TMP", "HUM"]))
         .order_by(desc(subq.c.latest_recorded_date))
