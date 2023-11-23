@@ -1474,6 +1474,7 @@ def get_devices_history(db: Session = Depends(get_db)):
     subq = (
         db.query(
             History.device_tag_id,
+            History.recorded_date_time,
             func.row_number().over(
                 partition_by=History.device_tag_id,
                 order_by=History.recorded_date_time.desc()
