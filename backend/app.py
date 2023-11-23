@@ -1480,7 +1480,7 @@ def get_devices_history(db: Session = Depends(get_db)):
                 order_by=History.recorded_date_time.desc()
             ).label("row_number"),
         )
-        .subquery()
+        .subquery("subq_alias")  # Using a unique alias for the subquery
     )
 
     query = (
@@ -1494,7 +1494,6 @@ def get_devices_history(db: Session = Depends(get_db)):
         .join(DeviceTag, DeviceTag.tag_id == subq.c.device_tag_id)
         .join(Tag, DeviceTag.tag_id == Tag.tag_id)
         .join(Device, DeviceTag.device_id == Device.device_id)
-        .join(subq, subq.c.device_tag_id == History.device_tag_id)
         .filter(Device.is_active == True)
         .filter(subq.c.row_number == 1)
         .order_by(subq.c.recorded_date_time.desc())
