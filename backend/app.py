@@ -1580,13 +1580,31 @@ def get_latest_devices_data(db: Session = Depends(get_db)):
 
     return result
 
+
 @app.get("/get_device_latest_records")
-async def get_device_latest_records():
-    conn = engine.connect()
-    query = select([
-        metadata.tables['device_latest_records']
-    ])
-    result = conn.execute(query)
-    records = [dict(r) for r in result]
-    conn.close()
-    return records
+async def get_device_latest_records(db: Session = Depends(get_db)):
+    deviceslatestrecords = db.query(DeviceLatestRecord).all()
+
+    # result = {}
+    # for devices_device_id, devices_device_serial_number, tag_description, tag_value, anon_1_latest_recorded_date in deviceslatestrecords:
+    #     if devices_device_id not in result:
+    #         result[devices_device_id] = {'device_serial_number': devices_device_serial_number, 'tags': {}, 'latest_recorded_date': anon_1_latest_recorded_date}
+
+    #     if tag_description not in result[devices_device_id]['tags']:
+    #         result[devices_device_id]['tags'][tag_description] = tag_value
+    result = {}
+    for record in deviceslatestrecords:
+        device_id = record.devices_device_id
+        device_serial_number = record.devices_device_serial_number
+        tag_description = record.tag_description
+        tag_value = record.tag_value
+        latest_recorded_date = record.anon_1_latest_recorded_date.strftime("%Y-%m-%d %H:%M:%S")
+
+        if device_id not in result:
+            result[device_id] = {'device_serial_number': device_serial_number, 'tags': {},
+                                 'latest_recorded_date': latest_recorded_date}
+
+        if tag_description not in result[device_id]['tags']:
+            result[device_id]['tags'][tag_description] = tag_value
+
+    return {"records": list(result.values())}

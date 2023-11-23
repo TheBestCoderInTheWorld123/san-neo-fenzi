@@ -448,48 +448,22 @@ class History(Base):
     # alert = relationship('Alert')
     # device_tag = relationship('DeviceTag')
 
-class DeviceLatestRecord(Base):
-    __tablename__ = 'device_latest_records'
-
-    history_id = Column(Integer, primary_key=True, server_default=text("nextval('history_history_id_seq'::regclass)"))
-    device_tag_id = Column(ForeignKey('device_tags.ID'))
-    value = Column(DECIMAL)
-    status = Column(String(255))
-    recorded_date_time = Column(DateTime)
-    alert_id = Column(ForeignKey('alerts.alert_id'))
-    created_by = Column(String(255))
-    created_at = Column(DateTime)
-    updated_by = Column(String(255))
-    updated_at = Column(DateTime)
-
-    # alert = relationship('Alert')
-    # device_tag = relationship('DeviceTag')
-
-
 t_actions_history = Table(
     'actions_history', metadata,
     Column('action_id', ForeignKey('actions.action_id'), primary_key=True, nullable=False),
     Column('history_id', ForeignKey('history.history_id'), primary_key=True, nullable=False)
 )
-mapper_registry = registry()
-# Define your device_latest_records table or view
-device_latest_records = Table(
-    'device_latest_records', metadata,
-    Column('devices_device_id', Integer),
-    Column('devices_device_serial_number', String),
-    Column('tag_description', String),
-    Column('tag_value', String),
-    Column('anon_1_latest_recorded_date', DateTime)
-)
+class DeviceLatestRecord(Base):
+    _tablename_ = 'device_latest_records'
+    _table_args_ = {'autoload_with': engine}
 
-# Define a SQLAlchemy class representing the view
-class DeviceLatestRecord:
-    pass  # an empty class that will be mapped to the view
-
-# Map the DeviceLatestRecord class with the device_latest_records Table
-mapper_registry.map_imperatively(DeviceLatestRecord, device_latest_records)
-
-# Now you can use DeviceLatestRecord class to query the view
+    # Assuming devices_device_id is unique and can act as a pseudo-primary key
+    devices_device_id = Column(Integer, primary_key=True)
+    devices_device_serial_number = Column(String)
+    tag_description = Column(String)
+    tag_value = Column(String)
+    anon_1_latest_recorded_date = Column(DateTime)
+    
 #################################################
 from pydantic import BaseModel
 from datetime import datetime
