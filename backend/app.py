@@ -1579,3 +1579,14 @@ def get_latest_devices_data(db: Session = Depends(get_db)):
             result[device_id]['tags'][tag_description] = tag_value
 
     return result
+
+@app.get("/get_device_latest_records")
+async def get_device_latest_records():
+    conn = engine.connect()
+    query = select([
+        metadata.tables['device_latest_records']
+    ])
+    result = conn.execute(query)
+    records = [dict(r) for r in result]
+    conn.close()
+    return records
