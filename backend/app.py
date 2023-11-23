@@ -1480,7 +1480,6 @@ def get_devices_history(db: Session = Depends(get_db)):
             ).label("row_number"),
             func.max(Device.device_id).label("device_id"),
             func.max(Device.device_serial_number).label("device_serial_number"),
-            func.max(Device.device_id).label("device_id"),
             Tag.description.label("tag_description"),
             func.max(History.value).label("tag_value")
 
