@@ -9,7 +9,7 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional
 from urllib.parse import quote_plus
 from sqlalchemy.orm import mapper
-
+from sqlalchemy.orm import registry
 from sqlalchemy import MetaData
 from sqlalchemy import select
 # Create an instance of MetaData
@@ -471,6 +471,7 @@ t_actions_history = Table(
     Column('action_id', ForeignKey('actions.action_id'), primary_key=True, nullable=False),
     Column('history_id', ForeignKey('history.history_id'), primary_key=True, nullable=False)
 )
+mapper_registry = registry()
 # Define your device_latest_records table or view
 device_latest_records = Table(
     'device_latest_records', metadata,
@@ -486,7 +487,7 @@ class DeviceLatestRecord:
     pass  # an empty class that will be mapped to the view
 
 # Map the DeviceLatestRecord class with the device_latest_records Table
-mapper(DeviceLatestRecord, device_latest_records)
+mapper_registry.map_imperatively(DeviceLatestRecord, device_latest_records)
 
 # Now you can use DeviceLatestRecord class to query the view
 #################################################
