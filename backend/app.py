@@ -1241,7 +1241,7 @@ def create_history(history: HistoryPydantic, db: Session = Depends(get_db)):
 
 @app.get("/history/", response_model=list[HistoryPydantic])
 def read_history(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(HistoryPydantic).offset(skip).limit(limit).all()
+    return db.query(History).offset(skip).limit(limit).all()
 
 
 @app.get("/history/{history_id}", response_model=HistoryPydantic)

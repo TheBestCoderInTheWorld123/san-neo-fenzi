@@ -435,7 +435,7 @@ class History(Base):
 
     history_id = Column(Integer, primary_key=True, server_default=text("nextval('history_history_id_seq'::regclass)"))
     device_tag_id = Column(ForeignKey('device_tags.ID'))
-    value = Column(Integer)
+    value = Column(DECIMAL)
     status = Column(String(255))
     recorded_date_time = Column(DateTime)
     alert_id = Column(ForeignKey('alerts.alert_id'))
@@ -699,14 +699,11 @@ class ConnectionDetailPydantic(BaseModel):
 class HistoryPydantic(BaseModel):
     history_id: int
     device_tag_id: int  # ForeignKey relationship, represented as int
-    value: int
-    status: str
-    datetime: datetime
-    alert_id: int  # ForeignKey relationship, represented as int
-    created_by: str
-    created_at: datetime
-    updated_by: str
-    updated_at: datetime
+    value: float
+    status:  Optional[str] = None
+    recorded_date_time: datetime
+    alert_id: Optional[int] = None  # ForeignKey relationship, represented as int
+    
 
 class UserLoginPydantic(BaseModel):
     username: str
