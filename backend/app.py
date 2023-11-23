@@ -1480,12 +1480,13 @@ def get_devices_history(db: Session = Depends(get_db)):
                 order_by=History.recorded_date_time.desc()
             ).label("row_number"),
         )
-        .subquery()
+        .subquery("subq_alias")
     )
 
     query = (
         db.query(
             subq.c.row_number,
+            subq.c.recorded_date_time,
             Device.device_id,
             Device.device_serial_number,
             Tag.description.label("tag_description"),
