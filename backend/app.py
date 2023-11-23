@@ -1440,18 +1440,22 @@ def delete_action_alert(action_id: int, alert_id: int, db: Session = Depends(get
 @app.get("/active_devices/")
 def get_active_devices(db: Session = Depends(get_db)):
     # Join necessary tables to fetch required data
-    query = (
-        db.query(History.recorded_date_time, Device.device_id, Device.device_serial_number, Tag.description)
+        query = (
+        db.query(
+            History.recorded_date_time,
+            func.max(Device.device_id).label("device_id"),
+            func.max(Device.device_serial_number).label("device_serial_number"),
+            Tag.description
+        )
         .join(DeviceTag, DeviceTag.tag_id == History.device_tag_id)
         .join(Tag, DeviceTag.tag_id == Tag.tag_id)
         .join(Device, DeviceTag.device_id == Device.device_id)
-        .filter(Device.is_active == True)  # Assuming 'is_active' denotes active devices
-        .group_by(History.recorded_date_time)  # Group by 'recorded_date_time'
-        .order_by(History.recorded_date_time.desc())  # Optional: Order by 'recorded_date_time'
+        .filter(Device.is_active == True)
+        .group_by(History.recorded_date_time, Tag.description)
+        .order_by(History.recorded_date_time.desc())
         .all()
     )
 
-    # Process query results to create a dictionary with 'recorded_date_time' as keys
     result = {}
     for recorded_date_time, device_id, device_serial_number, description in query:
         if recorded_date_time not in result:
