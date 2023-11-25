@@ -1,8 +1,9 @@
+from datetime import datetime, timedelta
 from model import *
-from typing import List
+from typing import List, Dict
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine, Integer, String, DateTime, ForeignKey, Boolean
+from sqlalchemy import create_engine, Integer, String, DateTime, ForeignKey, Boolean, distinct
 from sqlalchemy.orm import sessionmaker, relationship, Session
 from urllib.parse import quote_plus
 import bcrypt
@@ -175,10 +176,34 @@ def create_location(location: LocationPydantic, db: Session = Depends(get_db)):
     return location
 
 
+def create_tree(locations: List[LocationPydantic]) -> List[Dict]:
+    location_dict = {location.location_id: location.dict() for location in locations}
+    tree = []
+    for location in locations:
+        if location.location_id == location.location_root:
+            tree.append(location.dict())
+        else:
+            parent = location_dict.get(location.location_root)
+            if parent is not None:
+                if 'children' not in parent:
+                    parent['children'] = []
+                parent['children'].append(location.dict())
+    return tree
 @app.get("/locations/", response_model=List[LocationPydantic])
 def read_locations(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(LocationPydantic).offset(skip).limit(limit).all()
-
+    locations = db.query(Location).offset(skip).limit(limit).all()
+    locations_data = [LocationPydantic.from_orm(location) for location in locations]
+    # filtered_data = [
+    #     {
+    #         "location_id": item.location_id,
+    #         "location_name": item.location_name,
+    #         "location_root": item.location_root,
+    #         "latitude": item.latitude,
+    #         "longitude": item.longitude
+    #     }
+    #     for item in locations_data
+    # ]
+    return locations_data
 
 @app.get("/locations/{location_id}", response_model=LocationPydantic)
 def read_location(location_id: int, db: Session = Depends(get_db)):
@@ -1593,26 +1618,109 @@ def get_latest_devices_data(db: Session = Depends(get_db)):
 async def get_device_latest_records(db: Session = Depends(get_db)):
     deviceslatestrecords = db.query(DeviceLatestRecord).all()
 
-    # result = {}
-    # for devices_device_id, devices_device_serial_number, tag_description, tag_value, anon_1_latest_recorded_date in deviceslatestrecords:
-    #     if devices_device_id not in result:
-    #         result[devices_device_id] = {'device_serial_number': devices_device_serial_number, 'tags': {}, 'latest_recorded_date': anon_1_latest_recorded_date}
-
-    #     if tag_description not in result[devices_device_id]['tags']:
-    #         result[devices_device_id]['tags'][tag_description] = tag_value
     result = {}
+    current_time = datetime.now()
     for record in deviceslatestrecords:
         device_id = record.devices_device_id
         device_serial_number = record.devices_device_serial_number
         tag_description = record.tag_description
         tag_value = record.tag_value
         latest_recorded_date = record.anon_1_latest_recorded_date.strftime("%Y-%m-%d %H:%M:%S")
+        # Assuming latest_recorded_date is in the format "YYYY-MM-DD HH:MM:SS"
+        latest_recorded_date_ = record.anon_1_latest_recorded_date  # Assuming this is a string
 
+        # Calculate the time difference between current_time and latest_recorded_date
+        time_difference = current_time - latest_recorded_date_
+        minutes_difference = time_difference.total_seconds() / 60  # Convert to minutes
+
+        # Assign comm_status based on time difference
+        if minutes_difference <= 31:
+            comm_status = 'green'
+        elif 31 < minutes_difference <= 61:
+            comm_status = 'orange'
+        else:
+            comm_status = 'red'
         if device_id not in result:
             result[device_id] = {'device_serial_number': device_serial_number, 'tags': {},
-                                 'latest_recorded_date': latest_recorded_date}
+                                 'latest_recorded_date': latest_recorded_date, 'comm_satus': comm_status}
 
         if tag_description not in result[device_id]['tags']:
             result[device_id]['tags'][tag_description] = tag_value
 
     return {"records": list(result.values())}
+
+@app.get("/get_device_pichart_data")
+async def get_device_pichart_data(db: Session = Depends(get_db)):
+    # deviceslatestrecords = db.query(DeviceLatestRecord).all()
+
+    dlr_alias = aliased(DeviceLatestRecord)
+
+    # Subquery to assign row numbers partitioned by devices_device_id
+    subq = (
+        select(
+            DeviceLatestRecord,
+            func.row_number()
+            .over(partition_by=DeviceLatestRecord.devices_device_id)
+            .label('rn')
+        )
+        .select_from(DeviceLatestRecord)
+        .cte('numbered')
+    )
+
+    # Query to fetch one row per unique devices_device_id
+    unique_records_query = (
+        select(subq.c)
+        .where(subq.c.rn == 1)
+        .order_by(subq.c.devices_device_id)
+    )
+
+    # Execute the query to get the unique rows
+    deviceslatestrecords = db.execute(unique_records_query).fetchall()
+    result = {}
+    current_time = datetime.now()
+    live_count = 0
+    offline_count = 0
+
+    for record in deviceslatestrecords:
+        device_id = record.devices_device_id
+        device_serial_number = record.devices_device_serial_number
+        tag_description = record.tag_description
+        tag_value = record.tag_value
+        latest_recorded_date = record.anon_1_latest_recorded_date.strftime("%Y-%m-%d %H:%M:%S")
+        # Assuming latest_recorded_date is in the format "YYYY-MM-DD HH:MM:SS"
+        latest_recorded_date_ = record.anon_1_latest_recorded_date  # Assuming this is a string
+
+        # Calculate the time difference between current_time and latest_recorded_date
+        time_difference = current_time - latest_recorded_date_
+        minutes_difference = time_difference.total_seconds() / 60  # Convert to minutes
+
+        # Assign comm_status based on time difference
+        if minutes_difference <= 31:
+            comm_status = 'green'
+            live_count += 1
+        elif 31 < minutes_difference <= 61:
+            comm_status = 'orange'
+            offline_count += 1
+        else:
+            comm_status = 'red'
+            offline_count += 1
+
+        if device_id not in result:
+            result[device_id] = {'device_serial_number': device_serial_number, 'tags': {},
+                                 'latest_recorded_date': latest_recorded_date, 'comm_satus': comm_status}
+
+        if tag_description not in result[device_id]['tags']:
+            result[device_id]['tags'][tag_description] = tag_value
+
+    total_devices = len(result)
+    live_percentage = (live_count / total_devices) * 100 if total_devices > 0 else 0
+    offline_percentage = (offline_count / total_devices) * 100 if total_devices > 0 else 0
+
+    return {
+        "total_devices": total_devices,
+        "live": live_count,
+        "offline": offline_count,
+        "live_perc": round(live_percentage, 2),
+        "offline_perc": round(offline_percentage, 2)
+    }
+    # return {"records": list(result.values())}

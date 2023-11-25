@@ -5,7 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 from urllib.parse import quote_plus
 from sqlalchemy.orm import mapper
@@ -579,14 +579,18 @@ class LocationPydantic(BaseModel):
     location_desc: str
     location_type_id: int
     location_root: int  # ForeignKey relationship, represented as int
-    latitude: Decimal
-    longitude: Decimal
+    latitude:  Optional[Decimal]  = Field(None, title="Latitude with up to 7 decimal places")
+    longitude:  Optional[Decimal]  = Field(None, title="Longitude with up to 7 decimal places")
     address_id: int  # ForeignKey relationship, represented as int
     contact_id: int  # ForeignKey relationship, represented as int
     created_by: str
     created_at: datetime
     updated_by: str
     updated_at: datetime
+
+    class Config:
+        from_orm = True
+        from_attributes = True
 
 class RightPydantic(BaseModel):
     right_id: int
