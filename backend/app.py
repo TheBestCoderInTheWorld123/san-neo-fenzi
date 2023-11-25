@@ -1680,7 +1680,6 @@ async def get_device_pichart_data(db: Session = Depends(get_db)):
     current_time = datetime.now()
     live_count = 0
     offline_count = 0
-
     for record in deviceslatestrecords:
         device_id = record.devices_device_id
         device_serial_number = record.devices_device_serial_number

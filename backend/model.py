@@ -456,7 +456,6 @@ t_actions_history = Table(
 class DeviceLatestRecord(Base):
     __tablename__ = 'device_latest_records'
     _table_args_ = {'autoload_with': engine}
-
     # Assuming devices_device_id is unique and can act as a pseudo-primary key
     id = Column(BIGINT, primary_key=True)
     devices_device_id = Column(Integer)
