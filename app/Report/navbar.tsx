@@ -14,6 +14,10 @@ import Link from "next/link";
 
 
 export default function Navbar() {
+    const goToLogIn = () => {
+        // router.push('/Login-SignUp/SignUp');
+        window.location.href = '/Login-SignUp/Login';
+    };
     return (
       <div id = "navbar" className="flex w-full h-full justify-between">
         <div className="flex mt-2">
@@ -43,7 +47,7 @@ export default function Navbar() {
                                       Settings
                                   </Link>  
                                   <Link
-                                  href={"/"}>
+                                  href={"/Login-SignUp/Login"}>
                                       Log Out
                                   </Link>                           
                               </div>
@@ -65,7 +69,8 @@ export default function Navbar() {
               </Button>
               <Button 
               className="text-md"
-              id = "button">
+              id = "button"
+              onClick={goToLogIn}>
                   Log Out
               </Button>  
           </div>

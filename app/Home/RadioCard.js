@@ -29,7 +29,6 @@ export default function RadioCard({ setRadioValue }) {
   }
 
   return (
-    <div className="px-4 py-16">
       <ChakraProvider>
         <HStack {...group}>
           {options.map((value) => {
@@ -40,16 +39,10 @@ export default function RadioCard({ setRadioValue }) {
             const checkboxProps = getCheckboxProps();
 
             return (
-              <div className="mt-8">
-                <Box as="label" key={value}>
+                <Box className="m-4" as="label" key={value}>
                   <input {...inputProps} />
-                  <Box
+                  <Box className="cursor-pointer border-spacing-4 display:inline-block border-black shadow-md border-1 rounded-md"
                     {...checkboxProps}
-                    cursor="pointer"
-                    borderWidth="1px"
-                    borderRadius="md"
-                    boxShadow="md"
-                    display="inline-block"
                     _checked={{
                       bg: "#2f455c",
                       color: "white",
@@ -64,11 +57,9 @@ export default function RadioCard({ setRadioValue }) {
                     {value}
                   </Box>
                 </Box>
-              </div>
             );
           })}
         </HStack>
       </ChakraProvider>
-    </div>
   );
 }
