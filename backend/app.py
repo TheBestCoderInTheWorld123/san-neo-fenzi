@@ -26,6 +26,8 @@ db_url = f'postgresql://{db_username}:{encoded_password}@{db_host}/{db_name}'
 engine = create_engine(db_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+session = SessionLocal()
+
 
 def get_db():
     db = SessionLocal()
@@ -44,136 +46,203 @@ app.add_middleware(
     allow_headers=["*"],  # You can specify specific headers here
 )
 
+
+def sqlalchemy_to_dict(obj):
+    """
+    Convert SQLAlchemy model instance to dictionary.
+    """
+    return {column.name: getattr(obj, column.name) for column in obj.__table__.columns}
+
+
 @app.post("/addresses/", response_model=AddressPydantic)
 def create_address(address: AddressPydantic, db: Session = Depends(get_db)):
-    db.add(address)
+    db_address = Address(
+        address_line1 = address.address_line1,
+        address_line2 = address.address_line2,
+        city = address.city,
+        state = address.state,
+        postal_code = address.postal_code,
+        country = address.country,
+        latitude = address.latitude,
+        longitude = address.longitude,
+        created_by = address.created_by,
+        created_at = address.created_at,
+        updated_by = address.updated_by,
+        updated_at = address.updated_at
+    )
+    db.add(db_address)
     db.commit()
-    db.refresh(address)
-    return address
+    db.refresh(db_address)
+    db_address_dict = sqlalchemy_to_dict(db_address)
+    return AddressPydantic(**db_address_dict)
 
 
 @app.get("/addresses/{address_id}", response_model=AddressPydantic)
 def read_address(address_id: int, db: Session = Depends(get_db)):
-    db_address = db.query(AddressPydantic).filter(AddressPydantic.address_id == address_id).first()
+    db_address = db.query(Address).filter(Address.address_id == address_id).first()
     if db_address is None:
         raise HTTPException(status_code=404, detail="Address not found")
-    return db_address
+    db_address_dict = sqlalchemy_to_dict(db_address)
+    return AddressPydantic(**db_address_dict)
 
 
 @app.put("/addresses/{address_id}", response_model=AddressPydantic)
 def update_address(address_id: int, address: AddressPydantic, db: Session = Depends(get_db)):
-    db_address = db.query(AddressPydantic).filter(AddressPydantic.address_id == address_id).first()
+    db_address = db.query(Address).filter(Address.address_id == address_id).first()
     if db_address is None:
         raise HTTPException(status_code=404, detail="Address not found")
     for field, value in address.dict().items():
         setattr(db_address, field, value)
     db.commit()
     db.refresh(db_address)
-    return db_address
+    db_address_dict = sqlalchemy_to_dict(db_address)
+    return AddressPydantic(**db_address_dict)
 
 
 @app.delete("/addresses/{address_id}", response_model=AddressPydantic)
 def delete_address(address_id: int, db: Session = Depends(get_db)):
-    db_address = db.query(AddressPydantic).filter(AddressPydantic.address_id == address_id).first()
+    db_address = db.query(Address).filter(Address.address_id == address_id).first()
     if db_address is None:
         raise HTTPException(status_code=404, detail="Address not found")
     db.delete(db_address)
     db.commit()
-    return db_address
+    db_address_dict = sqlalchemy_to_dict(db_address)
+    return AddressPydantic(**db_address_dict)
 
 
 @app.post("/contact_types/", response_model=ContactTypePydantic)
 def create_contact_type(contact_type: ContactTypePydantic, db: Session = Depends(get_db)):
-    db.add(contact_type)
+    contact_type_db = ContactType(
+        description=contact_type.description,
+        created_by=contact_type.created_by,
+        created_at=contact_type.created_at,
+        updated_by=contact_type.updated_by,
+        updated_at=contact_type.updated_at
+    )
+
+    db.add(contact_type_db)
     db.commit()
-    db.refresh(contact_type)
-    return contact_type
+    db.refresh(contact_type_db)
+    
+    return ContactTypePydantic.from_orm(contact_type_db)
 
 
 @app.get("/contact_types/", response_model=List[ContactTypePydantic])
-def read_contact_types(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(ContactTypePydantic).offset(skip).limit(limit).all()
+def read_contact_types(db: Session = Depends(get_db)):
+    contact_types = db.query(ContactType).all()
+    return [ContactTypePydantic.from_orm(contact_type) for contact_type in contact_types]
 
 
 @app.get("/contact_types/{contact_type_id}", response_model=ContactTypePydantic)
 def read_contact_type(contact_type_id: int, db: Session = Depends(get_db)):
-    db_contact_type = db.query(ContactTypePydantic).filter(ContactTypePydantic.contact_type_id == contact_type_id).first()
+    db_contact_type = db.query(ContactType).filter(ContactType.contact_type_id == contact_type_id).first()
     if db_contact_type is None:
         raise HTTPException(status_code=404, detail="Contact type not found")
-    return db_contact_type
+    db_contact_type = sqlalchemy_to_dict(db_contact_type)
+    return ContactTypePydantic(**db_contact_type)
 
 
 @app.put("/contact_types/{contact_type_id}", response_model=ContactTypePydantic)
 def update_contact_type(contact_type_id: int, description: str, db: Session = Depends(get_db)):
-    db_contact_type = db.query(ContactTypePydantic).filter(ContactTypePydantic.contact_type_id == contact_type_id).first()
+    db_contact_type = db.query(ContactType).filter(ContactType.contact_type_id == contact_type_id).first()
     if db_contact_type is None:
         raise HTTPException(status_code=404, detail="Contact type not found")
     db_contact_type.description = description
     db.commit()
     db.refresh(db_contact_type)
-    return db_contact_type
+    db_contact_type = sqlalchemy_to_dict(db_contact_type)
+    return ContactTypePydantic(**db_contact_type)
 
 
 @app.delete("/contact_types/{contact_type_id}", response_model=ContactTypePydantic)
 def delete_contact_type(contact_type_id: int, db: Session = Depends(get_db)):
-    db_contact_type = db.query(ContactTypePydantic).filter(ContactTypePydantic.contact_type_id == contact_type_id).first()
+    db_contact_type = db.query(ContactType).filter(ContactType.contact_type_id == contact_type_id).first()
     if db_contact_type is None:
         raise HTTPException(status_code=404, detail="Contact type not found")
     db.delete(db_contact_type)
     db.commit()
-    return db_contact_type
+    db_contact_type = sqlalchemy_to_dict(db_contact_type)
+    return ContactTypePydantic(**db_contact_type)
 
 
 @app.post("/contacts/", response_model=ContactPydantic)
 def create_contact(contact: ContactPydantic, db: Session = Depends(get_db)):
-    db.add(contact)
+    new_contact = Contact(
+        contact_description=contact.contact_description,
+        contact_type_id=contact.contact_type_id,
+        created_by=contact.created_by,
+        created_at=contact.created_at,
+        updated_by=contact.updated_by,
+        updated_at=contact.updated_at
+    )
+
+    db.add(new_contact)
     db.commit()
-    db.refresh(contact)
-    return contact
+    db.refresh(new_contact)
+
+    return ContactPydantic.from_orm(new_contact)
 
 
 @app.get("/contacts/", response_model=List[ContactPydantic])
-def read_contacts(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(ContactPydantic).offset(skip).limit(limit).all()
+def read_contacts(db: Session = Depends(get_db)):
+    contacts = db.query(Contact).all()
+    return [ContactPydantic.from_orm(contact) for contact in contacts]
 
 
 @app.get("/contacts/{contact_id}", response_model=ContactPydantic)
 def read_contact(contact_id: int, db: Session = Depends(get_db)):
-    db_contact = db.query(ContactPydantic).filter(ContactPydantic.contact_id == contact_id).first()
+    db_contact = db.query(Contact).filter(Contact.contact_id == contact_id).first()
     if db_contact is None:
         raise HTTPException(status_code=404, detail="Contact not found")
-    return db_contact
+    contact = sqlalchemy_to_dict(db_contact)
+    return ContactPydantic(**contact)
 
 
 @app.put("/contacts/{contact_id}", response_model=ContactPydantic)
 def update_contact(contact_id: int, contact: ContactPydantic, db: Session = Depends(get_db)):
-    db_contact = db.query(ContactPydantic).filter(ContactPydantic.contact_id == contact_id).first()
+    db_contact = db.query(Contact).filter(Contact.contact_id == contact_id).first()
     if db_contact is None:
         raise HTTPException(status_code=404, detail="Contact not found")
     for field, value in contact.dict().items():
         setattr(db_contact, field, value)
     db.commit()
     db.refresh(db_contact)
-    return db_contact
+    contact = sqlalchemy_to_dict(db_contact)
+    return ContactPydantic(**contact)
 
 
 @app.delete("/contacts/{contact_id}", response_model=ContactPydantic)
 def delete_contact(contact_id: int, db: Session = Depends(get_db)):
-    db_contact = db.query(ContactPydantic).filter(ContactPydantic.contact_id == contact_id).first()
+    db_contact = db.query(Contact).filter(Contact.contact_id == contact_id).first()
     if db_contact is None:
         raise HTTPException(status_code=404, detail="Contact not found")
     db.delete(db_contact)
     db.commit()
-    return db_contact
+    contact = sqlalchemy_to_dict(db_contact)
+    return ContactPydantic(**contact)
 
 
 
 @app.post("/locations/", response_model=LocationPydantic)
 def create_location(location: LocationPydantic, db: Session = Depends(get_db)):
+    location = Location(
+        location_name=location.location_name,
+        location_desc=location.location_desc,
+        location_type_id=location.location_type_id,
+        location_root=location.location_root,
+        latitude=location.latitude,
+        longitude=location.longitude,
+        address_id=location.address_id,
+        contact_id=location.contact_id,
+        created_by=location.created_by,
+        created_at=location.created_at,
+        updated_by=location.updated_by,
+        updated_at=location.updated_at
+    )
     db.add(location)
     db.commit()
     db.refresh(location)
-    return location
+    return LocationPydantic.from_orm(location)
 
 
 def create_tree(locations: List[LocationPydantic]) -> List[Dict]:
@@ -189,93 +258,120 @@ def create_tree(locations: List[LocationPydantic]) -> List[Dict]:
                     parent['children'] = []
                 parent['children'].append(location.dict())
     return tree
+
+
 @app.get("/locations/", response_model=List[LocationPydantic])
-def read_locations(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    locations = db.query(Location).offset(skip).limit(limit).all()
+def read_locations(db: Session = Depends(get_db)):
+    locations = db.query(Location).all()
     locations_data = [LocationPydantic.from_orm(location) for location in locations]
-    # filtered_data = [
-    #     {
-    #         "location_id": item.location_id,
-    #         "location_name": item.location_name,
-    #         "location_root": item.location_root,
-    #         "latitude": item.latitude,
-    #         "longitude": item.longitude
-    #     }
-    #     for item in locations_data
-    # ]
     return locations_data
+
 
 @app.get("/locations/{location_id}", response_model=LocationPydantic)
 def read_location(location_id: int, db: Session = Depends(get_db)):
-    db_location = db.query(LocationPydantic).filter(LocationPydantic.location_id == location_id).first()
+    db_location = db.query(Location).filter(Location.location_id == location_id).first()
     if db_location is None:
         raise HTTPException(status_code=404, detail="Location not found")
-    return db_location
+    location = sqlalchemy_to_dict(db_location)
+    return LocationPydantic(**location)
 
 
 @app.put("/locations/{location_id}", response_model=LocationPydantic)
 def update_location(location_id: int, location: LocationPydantic, db: Session = Depends(get_db)):
-    db_location = db.query(LocationPydantic).filter(LocationPydantic.location_id == location_id).first()
+    db_location = db.query(Location).filter(Location.location_id == location_id).first()
     if db_location is None:
         raise HTTPException(status_code=404, detail="Location not found")
     for field, value in location.dict().items():
         setattr(db_location, field, value)
     db.commit()
     db.refresh(db_location)
-    return db_location
+    location = sqlalchemy_to_dict(db_location)
+    return LocationPydantic(**location)
+
+
 
 
 @app.delete("/locations/{location_id}", response_model=LocationPydantic)
 def delete_location(location_id: int, db: Session = Depends(get_db)):
-    db_location = db.query(LocationPydantic).filter(LocationPydantic.location_id == location_id).first()
+    db_location = db.query(Location).filter(Location.location_id == location_id).first()
     if db_location is None:
         raise HTTPException(status_code=404, detail="Location not found")
     db.delete(db_location)
     db.commit()
-    return db_location
+    location = sqlalchemy_to_dict(db_location)
+    return LocationPydantic(**location)
 
 
 @app.post("/location_contacts/", response_model=LocationContactPydantic)
 def create_location_contact(
     location_id: int, contact_id: int, db: Session = Depends(get_db)
 ):
-    db_location = db.query(LocationPydantic).filter(LocationPydantic.location_id == location_id).first()
-    db_contact = db.query(ContactPydantic).filter(ContactPydantic.contact_id == contact_id).first()
-
-    if not db_location or not db_contact:
-        raise HTTPException(status_code=404, detail="Location or Contact not found")
-
-    location_contact = LocationContactPydantic(location_id=location_id, contact_id=contact_id)
-    db.add(location_contact)
+    insert_stmt = t_location_contacts.insert().values(location_id=location_id, contact_id=contact_id)
+    db.execute(insert_stmt)
     db.commit()
-    db.refresh(location_contact)
+    location_contact = LocationContactPydantic(location_id=location_id, contact_id=contact_id)
     return location_contact
-
 
 @app.delete("/location_contacts/")
 def delete_location_contact(
     location_id: int, contact_id: int, db: Session = Depends(get_db)
 ):
-    
-    location_contact = (
-        db.query(LocationContactPydantic)
-        .filter(
-            LocationContactPydantic.location_id == location_id,
-            LocationContactPydantic.contact_id == contact_id,
-        )
-        .first()
+    delete_stmt = t_location_contacts.delete().where(
+        (t_location_contacts.c.location_id == location_id) &
+        (t_location_contacts.c.contact_id == contact_id)
     )
-
-    if location_contact is None:
-        raise HTTPException(
-            status_code=404, detail="Location-Contact relationship not found"
-        )
-
-    db.delete(location_contact)
+    affected_rows = db.execute(delete_stmt)
     db.commit()
-    return {"detail": "Location-Contact relationship deleted"}
+    if affected_rows.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Record not found")
+    deleted_contact = LocationContactPydantic(location_id=location_id, contact_id=contact_id)
+    return deleted_contact
 
 
+
+def get_location_hierarchy(location_id):
+    result = []
+
+    def get_location_data(loc_id):
+        location = session.query(Location).filter(Location.location_id == loc_id).first()
+        if location:
+            result.append(location)
+
+            children = session.query(Location).filter(Location.location_root == loc_id).all()
+            for child in children:
+                get_location_data(child.location_id)
+
+    get_location_data(location_id)
+    return result
+
+@app.get("/location_hierarchy/{location_id}", response_model=list[LocationPydantic])
+def read_location_hierarchy(location_id: int):
+    location_hierarchy = get_location_hierarchy(location_id)
+    if not location_hierarchy:
+        raise HTTPException(status_code=404, detail="Location not found")
+    return location_hierarchy
+
+@app.get("/device_get_all", response_model = list[DevicePydantic])
+def get_all_device(db: Session = Depends(get_db)):
+    devices = db.query(Device).all()
+    return [DevicePydantic.from_orm(device) for device in devices]
+
+@app.get("/history_by_device_serial_no")
+def history_by_device_serial_no(sno: str, tdate: datetime, fdate: datetime, db: Session = Depends(get_db)):
+    dth = db.query(DeviceTagHistory).filter(DeviceTagHistory.sr_no == sno and DeviceTagHistory.recorded_date_time >= fdate and DeviceTagHistory.recorded_date_time <= tdate).all()
+    result = []
+    current_time = datetime.now()
+    for record in dth:
+        device_id = record.did
+        sr_no = record.sr_no
+        tag_description = record.tag_desc
+        tag_value = record.tag_value
+        tag_status = record.tag_status
+        
+        latest_recorded_date = record.recorded_date_time.strftime("%Y-%m-%d %H:%M:%S")
+        result.append({'device_serial_number': sr_no, 'tags': tag_description, "tag_value": tag_value, 'latest_recorded_date': latest_recorded_date, 'satus': tag_status})
+
+    return {"records": result}
 # Login API 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -332,13 +428,13 @@ def create_user(user: UserPydantic, db: Session = Depends(get_db)):
 
 
 @app.get("/users/", response_model=list[UserPydantic])
-def read_users(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(UserPydantic).offset(skip).limit(limit).all()
+def read_users(db: Session = Depends(get_db)):
+    return db.query(User).all()
 
 
 @app.get("/users/{user_id}", response_model=UserPydantic)
 def read_user(user_id: int, db: Session = Depends(get_db)):
-    db_user = db.query(UserPydantic).filter(UserPydantic.user_id == user_id).first()
+    db_user = db.query(User).filter(User.user_id == user_id).first()
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
@@ -346,7 +442,7 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
 
 @app.put("/users/{user_id}", response_model=UserPydantic)
 def update_user(user_id: int, user: UserPydantic, db: Session = Depends(get_db)):
-    db_user = db.query(UserPydantic).filter(UserPydantic.user_id == user_id).first()
+    db_user = db.query(User).filter(User.user_id == user_id).first()
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     for field, value in user.dict().items():
@@ -358,7 +454,7 @@ def update_user(user_id: int, user: UserPydantic, db: Session = Depends(get_db))
 
 @app.delete("/users/{user_id}", response_model=UserPydantic)
 def delete_user(user_id: int, db: Session = Depends(get_db)):
-    db_user = db.query(UserPydantic).filter(UserPydantic.user_id == user_id).first()
+    db_user = db.query(User).filter(User.user_id == user_id).first()
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     db.delete(db_user)
@@ -369,8 +465,8 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
 def create_user_contact(
     user_id: int, contact_id: int, db: Session = Depends(get_db)
 ):
-    db_user = db.query(UserPydantic).filter(UserPydantic.user_id == user_id).first()
-    db_contact = db.query(ContactPydantic).filter(ContactPydantic.contact_id == contact_id).first()
+    db_user = db.query(User).filter(User.user_id == user_id).first()
+    db_contact = db.query(Contact).filter(Contact.contact_id == contact_id).first()
 
     if not db_user or not db_contact:
         raise HTTPException(status_code=404, detail="User or Contact not found")
@@ -409,8 +505,8 @@ def delete_user_contact(
 def create_user_address(
     user_id: int, address_id: int, db: Session = Depends(get_db)
 ):
-    db_user = db.query(UserPydantic).filter(UserPydantic.user_id == user_id).first()
-    db_address = db.query(AddressPydantic).filter(AddressPydantic.address_id == address_id).first()
+    db_user = db.query(User).filter(User.user_id == user_id).first()
+    db_address = db.query(Address).filter(Address.address_id == address_id).first()
 
     if not db_user or not db_address:
         raise HTTPException(status_code=404, detail="User or Address not found")
@@ -454,13 +550,13 @@ def create_user_group(user_group: UserGroupPydantic, db: Session = Depends(get_d
 
 
 @app.get("/user_groups/", response_model=list[UserGroupPydantic])
-def read_user_groups(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(UserGroupPydantic).offset(skip).limit(limit).all()
+def read_user_groups(db: Session = Depends(get_db)):
+    return db.query(UserGroup).all()
 
 
 @app.get("/user_groups/{user_group_id}", response_model=UserGroupPydantic)
 def read_user_group(user_group_id: int, db: Session = Depends(get_db)):
-    db_user_group = db.query(UserGroupPydantic).filter(UserGroupPydantic.user_group_id == user_group_id).first()
+    db_user_group = db.query(UserGroup).filter(UserGroup.user_group_id == user_group_id).first()
     if db_user_group is None:
         raise HTTPException(status_code=404, detail="User Group not found")
     return db_user_group
@@ -468,7 +564,7 @@ def read_user_group(user_group_id: int, db: Session = Depends(get_db)):
 
 @app.put("/user_groups/{user_group_id}", response_model=UserGroupPydantic)
 def update_user_group(user_group_id: int, user_group: UserGroupPydantic, db: Session = Depends(get_db)):
-    db_user_group = db.query(UserGroupPydantic).filter(UserGroupPydantic.user_group_id == user_group_id).first()
+    db_user_group = db.query(UserGroup).filter(UserGroup.user_group_id == user_group_id).first()
     if db_user_group is None:
         raise HTTPException(status_code=404, detail="User Group not found")
     for field, value in user_group.dict().items():
@@ -480,7 +576,7 @@ def update_user_group(user_group_id: int, user_group: UserGroupPydantic, db: Ses
 
 @app.delete("/user_groups/{user_group_id}", response_model=UserGroupPydantic)
 def delete_user_group(user_group_id: int, db: Session = Depends(get_db)):
-    db_user_group = db.query(UserGroupPydantic).filter(UserGroupPydantic.user_group_id == user_group_id).first()
+    db_user_group = db.query(UserGroup).filter(UserGroup.user_group_id == user_group_id).first()
     if db_user_group is None:
         raise HTTPException(status_code=404, detail="User Group not found")
     db.delete(db_user_group)
@@ -498,13 +594,13 @@ def create_user_role(user_role: UserRolePydantic, db: Session = Depends(get_db))
 
 
 @app.get("/user_roles/", response_model=list[UserRolePydantic])
-def read_user_roles(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(UserRolePydantic).offset(skip).limit(limit).all()
+def read_user_roles(db: Session = Depends(get_db)):
+    return db.query(UserRole).all()
 
 
 @app.get("/user_roles/{role_id}", response_model=UserRolePydantic)
 def read_user_role(role_id: int, db: Session = Depends(get_db)):
-    db_user_role = db.query(UserRolePydantic).filter(UserRolePydantic.role_id == role_id).first()
+    db_user_role = db.query(UserRole).filter(UserRole.role_id == role_id).first()
     if db_user_role is None:
         raise HTTPException(status_code=404, detail="User Role not found")
     return db_user_role
@@ -512,7 +608,7 @@ def read_user_role(role_id: int, db: Session = Depends(get_db)):
 
 @app.put("/user_roles/{role_id}", response_model=UserRolePydantic)
 def update_user_role(role_id: int, user_role: UserRolePydantic, db: Session = Depends(get_db)):
-    db_user_role = db.query(UserRolePydantic).filter(UserRolePydantic.role_id == role_id).first()
+    db_user_role = db.query(UserRole).filter(UserRole.role_id == role_id).first()
     if db_user_role is None:
         raise HTTPException(status_code=404, detail="User Role not found")
     for field, value in user_role.dict().items():
@@ -524,7 +620,7 @@ def update_user_role(role_id: int, user_role: UserRolePydantic, db: Session = De
 
 @app.delete("/user_roles/{role_id}", response_model=UserRolePydantic)
 def delete_user_role(role_id: int, db: Session = Depends(get_db)):
-    db_user_role = db.query(UserRolePydantic).filter(UserRolePydantic.role_id == role_id).first()
+    db_user_role = db.query(UserRole).filter(UserRole.role_id == role_id).first()
     if db_user_role is None:
         raise HTTPException(status_code=404, detail="User Role not found")
     db.delete(db_user_role)
@@ -536,8 +632,8 @@ def delete_user_role(role_id: int, db: Session = Depends(get_db)):
 def create_user_group_membership(
     user_id: int, user_group_id: int, db: Session = Depends(get_db)
 ):
-    db_user = db.query(UserPydantic).filter(UserPydantic.user_id == user_id).first()
-    db_user_group = db.query(UserGroupPydantic).filter(UserGroupPydantic.user_group_id == user_group_id).first()
+    db_user = db.query(User).filter(User.user_id == user_id).first()
+    db_user_group = db.query(UserGroup).filter(UserGroup.user_group_id == user_group_id).first()
 
     if not db_user or not db_user_group:
         raise HTTPException(status_code=404, detail="User or User Group not found")
@@ -576,8 +672,8 @@ def delete_user_group_membership(
 def create_user_role_assignment(
     user_id: int, role_id: int, db: Session = Depends(get_db)
 ):
-    db_user = db.query(UserPydantic).filter(UserPydantic.user_id == user_id).first()
-    db_role = db.query(UserRolePydantic).filter(UserRolePydantic.role_id == role_id).first()
+    db_user = db.query(User).filter(User.user_id == user_id).first()
+    db_role = db.query(UserRole).filter(UserRole.role_id == role_id).first()
 
     if not db_user or not db_role:
         raise HTTPException(status_code=404, detail="User or UserRole not found")
@@ -621,13 +717,13 @@ def create_asset_type(asset_type: AssetTypePydantic, db: Session = Depends(get_d
 
 
 @app.get("/asset_types/", response_model=list[AssetTypePydantic])
-def read_asset_types(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(AssetTypePydantic).offset(skip).limit(limit).all()
+def read_asset_types(db: Session = Depends(get_db)):
+    return db.query(AssetType).all()
 
 
 @app.get("/asset_types/{asset_type_id}", response_model=AssetTypePydantic)
 def read_asset_type(asset_type_id: int, db: Session = Depends(get_db)):
-    db_asset_type = db.query(AssetTypePydantic).filter(AssetTypePydantic.asset_type_id == asset_type_id).first()
+    db_asset_type = db.query(AssetType).filter(AssetType.asset_type_id == asset_type_id).first()
     if db_asset_type is None:
         raise HTTPException(status_code=404, detail="Asset Type not found")
     return db_asset_type
@@ -635,7 +731,7 @@ def read_asset_type(asset_type_id: int, db: Session = Depends(get_db)):
 
 @app.put("/asset_types/{asset_type_id}", response_model=AssetTypePydantic)
 def update_asset_type(asset_type_id: int, asset_type: AssetTypePydantic, db: Session = Depends(get_db)):
-    db_asset_type = db.query(AssetTypePydantic).filter(AssetTypePydantic.asset_type_id == asset_type_id).first()
+    db_asset_type = db.query(AssetType).filter(AssetType.asset_type_id == asset_type_id).first()
     if db_asset_type is None:
         raise HTTPException(status_code=404, detail="Asset Type not found")
     for field, value in asset_type.dict().items():
@@ -647,7 +743,7 @@ def update_asset_type(asset_type_id: int, asset_type: AssetTypePydantic, db: Ses
 
 @app.delete("/asset_types/{asset_type_id}", response_model=AssetTypePydantic)
 def delete_asset_type(asset_type_id: int, db: Session = Depends(get_db)):
-    db_asset_type = db.query(AssetTypePydantic).filter(AssetTypePydantic.asset_type_id == asset_type_id).first()
+    db_asset_type = db.query(AssetType).filter(AssetType.asset_type_id == asset_type_id).first()
     if db_asset_type is None:
         raise HTTPException(status_code=404, detail="Asset Type not found")
     db.delete(db_asset_type)
@@ -667,13 +763,13 @@ def create_asset(asset: AssetPydantic, db: Session = Depends(get_db)):
 
 
 @app.get("/assets/", response_model=list[AssetPydantic])
-def read_assets(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(AssetPydantic).offset(skip).limit(limit).all()
+def read_assets(db: Session = Depends(get_db)):
+    return db.query(Asset).all()
 
 
 @app.get("/assets/{asset_id}", response_model=AssetPydantic)
 def read_asset(asset_id: int, db: Session = Depends(get_db)):
-    db_asset = db.query(AssetPydantic).filter(AssetPydantic.asset_id == asset_id).first()
+    db_asset = db.query(Asset).filter(Asset.asset_id == asset_id).first()
     if db_asset is None:
         raise HTTPException(status_code=404, detail="Asset not found")
     return db_asset
@@ -681,7 +777,7 @@ def read_asset(asset_id: int, db: Session = Depends(get_db)):
 
 @app.put("/assets/{asset_id}", response_model=AssetPydantic)
 def update_asset(asset_id: int, asset: AssetPydantic, db: Session = Depends(get_db)):
-    db_asset = db.query(AssetPydantic).filter(AssetPydantic.asset_id == asset_id).first()
+    db_asset = db.query(Asset).filter(Asset.asset_id == asset_id).first()
     if db_asset is None:
         raise HTTPException(status_code=404, detail="Asset not found")
     for field, value in asset.dict().items():
@@ -693,7 +789,7 @@ def update_asset(asset_id: int, asset: AssetPydantic, db: Session = Depends(get_
 
 @app.delete("/assets/{asset_id}", response_model=AssetPydantic)
 def delete_asset(asset_id: int, db: Session = Depends(get_db)):
-    db_asset = db.query(AssetPydantic).filter(AssetPydantic.asset_id == asset_id).first()
+    db_asset = db.query(Asset).filter(Asset.asset_id == asset_id).first()
     if db_asset is None:
         raise HTTPException(status_code=404, detail="Asset not found")
     db.delete(db_asset)
@@ -710,13 +806,13 @@ def create_right(right: RightPydantic, db: Session = Depends(get_db)):
 
 
 @app.get("/rights/", response_model=list[RightPydantic])
-def read_rights(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(RightPydantic).offset(skip).limit(limit).all()
+def read_rights(db: Session = Depends(get_db)):
+    return db.query(Right).all()
 
 
 @app.get("/rights/{right_id}", response_model=RightPydantic)
 def read_right(right_id: int, db: Session = Depends(get_db)):
-    db_right = db.query(RightPydantic).filter(RightPydantic.right_id == right_id).first()
+    db_right = db.query(Right).filter(Right.right_id == right_id).first()
     if db_right is None:
         raise HTTPException(status_code=404, detail="Right not found")
     return db_right
@@ -724,7 +820,7 @@ def read_right(right_id: int, db: Session = Depends(get_db)):
 
 @app.put("/rights/{right_id}", response_model=RightPydantic)
 def update_right(right_id: int, right: RightPydantic, db: Session = Depends(get_db)):
-    db_right = db.query(RightPydantic).filter(RightPydantic.right_id == right_id).first()
+    db_right = db.query(Right).filter(Right.right_id == right_id).first()
     if db_right is None:
         raise HTTPException(status_code=404, detail="Right not found")
     for field, value in right.dict().items():
@@ -736,7 +832,7 @@ def update_right(right_id: int, right: RightPydantic, db: Session = Depends(get_
 
 @app.delete("/rights/{right_id}", response_model=RightPydantic)
 def delete_right(right_id: int, db: Session = Depends(get_db)):
-    db_right = db.query(RightPydantic).filter(RightPydantic.right_id == right_id).first()
+    db_right = db.query(Right).filter(Right.right_id == right_id).first()
     if db_right is None:
         raise HTTPException(status_code=404, detail="Right not found")
     db.delete(db_right)
@@ -791,8 +887,8 @@ def delete_user_right(
 def create_role_right(
     role_id: int, right_id: int, db: Session = Depends(get_db)
 ):
-    db_role = db.query(UserRolePydantic).filter(UserRolePydantic.role_id == role_id).first()
-    db_right = db.query(RightPydantic).filter(RightPydantic.right_id == right_id).first()
+    db_role = db.query(UserRole).filter(UserRole.role_id == role_id).first()
+    db_right = db.query(Right).filter(Right.right_id == right_id).first()
 
     if not db_role or not db_right:
         raise HTTPException(status_code=404, detail="Role or Right not found")
@@ -837,13 +933,13 @@ def create_tag(tag: TagPydantic, db: Session = Depends(get_db)):
 
 
 @app.get("/tags/", response_model=list[TagPydantic])
-def read_tags(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(TagPydantic).offset(skip).limit(limit).all()
+def read_tags(db: Session = Depends(get_db)):
+    return db.query(Tag).all()
 
 
 @app.get("/tags/{tag_id}", response_model=TagPydantic)
 def read_tag(tag_id: int, db: Session = Depends(get_db)):
-    db_tag = db.query(TagPydantic).filter(TagPydantic.tag_id == tag_id).first()
+    db_tag = db.query(Tag).filter(Tag.tag_id == tag_id).first()
     if db_tag is None:
         raise HTTPException(status_code=404, detail="Tag not found")
     return db_tag
@@ -851,7 +947,7 @@ def read_tag(tag_id: int, db: Session = Depends(get_db)):
 
 @app.put("/tags/{tag_id}", response_model=TagPydantic)
 def update_tag(tag_id: int, tag: TagPydantic, db: Session = Depends(get_db)):
-    db_tag = db.query(TagPydantic).filter(TagPydantic.tag_id == tag_id).first()
+    db_tag = db.query(Tag).filter(Tag.tag_id == tag_id).first()
     if db_tag is None:
         raise HTTPException(status_code=404, detail="Tag not found")
     for field, value in tag.dict().items():
@@ -863,7 +959,7 @@ def update_tag(tag_id: int, tag: TagPydantic, db: Session = Depends(get_db)):
 
 @app.delete("/tags/{tag_id}", response_model=TagPydantic)
 def delete_tag(tag_id: int, db: Session = Depends(get_db)):
-    db_tag = db.query(TagPydantic).filter(TagPydantic.tag_id == tag_id).first()
+    db_tag = db.query(Tag).filter(Tag.tag_id == tag_id).first()
     if db_tag is None:
         raise HTTPException(status_code=404, detail="Tag not found")
     db.delete(db_tag)
@@ -880,13 +976,13 @@ def create_device_type(device_type: DeviceTypePydantic, db: Session = Depends(ge
 
 
 @app.get("/device_types/", response_model=list[DeviceTypePydantic])
-def read_device_types(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(DeviceTypePydantic).offset(skip).limit(limit).all()
+def read_device_types(db: Session = Depends(get_db)):
+    return db.query(DeviceType).all()
 
 
 @app.get("/device_types/{device_type_id}", response_model=DeviceTypePydantic)
 def read_device_type(device_type_id: int, db: Session = Depends(get_db)):
-    db_device_type = db.query(DeviceTypePydantic).filter(DeviceTypePydantic.device_type_id == device_type_id).first()
+    db_device_type = db.query(DeviceType).filter(DeviceType.device_type_id == device_type_id).first()
     if db_device_type is None:
         raise HTTPException(status_code=404, detail="Device Type not found")
     return db_device_type
@@ -894,7 +990,7 @@ def read_device_type(device_type_id: int, db: Session = Depends(get_db)):
 
 @app.put("/device_types/{device_type_id}", response_model=DeviceTypePydantic)
 def update_device_type(device_type_id: int, device_type: DeviceTypePydantic, db: Session = Depends(get_db)):
-    db_device_type = db.query(DeviceTypePydantic).filter(DeviceTypePydantic.device_type_id == device_type_id).first()
+    db_device_type = db.query(DeviceType).filter(DeviceType.device_type_id == device_type_id).first()
     if db_device_type is None:
         raise HTTPException(status_code=404, detail="Device Type not found")
     for field, value in device_type.dict().items():
@@ -906,7 +1002,7 @@ def update_device_type(device_type_id: int, device_type: DeviceTypePydantic, db:
 
 @app.delete("/device_types/{device_type_id}", response_model=DeviceTypePydantic)
 def delete_device_type(device_type_id: int, db: Session = Depends(get_db)):
-    db_device_type = db.query(DeviceTypePydantic).filter(DeviceTypePydantic.device_type_id == device_type_id).first()
+    db_device_type = db.query(DeviceType).filter(DeviceType.device_type_id == device_type_id).first()
     if db_device_type is None:
         raise HTTPException(status_code=404, detail="Device Type not found")
     db.delete(db_device_type)
@@ -923,13 +1019,13 @@ def create_device(device: DevicePydantic, db: Session = Depends(get_db)):
 
 
 @app.get("/devices/", response_model=list[DevicePydantic])
-def read_devices(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(DevicePydantic).offset(skip).limit(limit).all()
+def read_devices(db: Session = Depends(get_db)):
+    return db.query(Device).all()
 
 
 @app.get("/devices/{device_id}", response_model=DevicePydantic)
 def read_device(device_id: int, db: Session = Depends(get_db)):
-    db_device = db.query(DevicePydantic).filter(DevicePydantic.device_id == device_id).first()
+    db_device = db.query(Device).filter(Device.device_id == device_id).first()
     if db_device is None:
         raise HTTPException(status_code=404, detail="Device not found")
     return db_device
@@ -937,7 +1033,7 @@ def read_device(device_id: int, db: Session = Depends(get_db)):
 
 @app.put("/devices/{device_id}", response_model=DevicePydantic)
 def update_device(device_id: int, device: DevicePydantic, db: Session = Depends(get_db)):
-    db_device = db.query(DevicePydantic).filter(DevicePydantic.device_id == device_id).first()
+    db_device = db.query(Device).filter(Device.device_id == device_id).first()
     if db_device is None:
         raise HTTPException(status_code=404, detail="Device not found")
     for field, value in device.dict().items():
@@ -949,7 +1045,7 @@ def update_device(device_id: int, device: DevicePydantic, db: Session = Depends(
 
 @app.delete("/devices/{device_id}", response_model=DevicePydantic)
 def delete_device(device_id: int, db: Session = Depends(get_db)):
-    db_device = db.query(DevicePydantic).filter(DevicePydantic.device_id == device_id).first()
+    db_device = db.query(Device).filter(Device.device_id == device_id).first()
     if db_device is None:
         raise HTTPException(status_code=404, detail="Device not found")
     db.delete(db_device)
@@ -962,8 +1058,8 @@ def delete_device(device_id: int, db: Session = Depends(get_db)):
 def create_device_tag(
     device_id: int, tag_id: int, db: Session = Depends(get_db)
 ):
-    db_device = db.query(DevicePydantic).filter(DevicePydantic.device_id == device_id).first()
-    db_tag = db.query(TagPydantic).filter(TagPydantic.tag_id == tag_id).first()
+    db_device = db.query(Device).filter(Device.device_id == device_id).first()
+    db_tag = db.query(Tag).filter(Tag.tag_id == tag_id).first()
 
     if not db_device or not db_tag:
         raise HTTPException(status_code=404, detail="Device or Tag not found")
@@ -1008,13 +1104,13 @@ def create_connection_type(connection_type: ConnectionTypePydantic, db: Session 
 
 
 @app.get("/connection_types/", response_model=list[ConnectionTypePydantic])
-def read_connection_types(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(ConnectionTypePydantic).offset(skip).limit(limit).all()
+def read_connection_types(db: Session = Depends(get_db)):
+    return db.query(ConnectionType).all()
 
 
 @app.get("/connection_types/{connection_type_id}", response_model=ConnectionTypePydantic)
 def read_connection_type(connection_type_id: int, db: Session = Depends(get_db)):
-    db_connection_type = db.query(ConnectionTypePydantic).filter(ConnectionTypePydantic.connection_type_id == connection_type_id).first()
+    db_connection_type = db.query(ConnectionType).filter(ConnectionType.connection_type_id == connection_type_id).first()
     if db_connection_type is None:
         raise HTTPException(status_code=404, detail="Connection Type not found")
     return db_connection_type
@@ -1022,7 +1118,7 @@ def read_connection_type(connection_type_id: int, db: Session = Depends(get_db))
 
 @app.put("/connection_types/{connection_type_id}", response_model=ConnectionTypePydantic)
 def update_connection_type(connection_type_id: int, connection_type: ConnectionTypePydantic, db: Session = Depends(get_db)):
-    db_connection_type = db.query(ConnectionTypePydantic).filter(ConnectionTypePydantic.connection_type_id == connection_type_id).first()
+    db_connection_type = db.query(ConnectionType).filter(ConnectionType.connection_type_id == connection_type_id).first()
     if db_connection_type is None:
         raise HTTPException(status_code=404, detail="Connection Type not found")
     for field, value in connection_type.dict().items():
@@ -1034,7 +1130,7 @@ def update_connection_type(connection_type_id: int, connection_type: ConnectionT
 
 @app.delete("/connection_types/{connection_type_id}", response_model=ConnectionTypePydantic)
 def delete_connection_type(connection_type_id: int, db: Session = Depends(get_db)):
-    db_connection_type = db.query(ConnectionTypePydantic).filter(ConnectionTypePydantic.connection_type_id == connection_type_id).first()
+    db_connection_type = db.query(ConnectionType).filter(ConnectionType.connection_type_id == connection_type_id).first()
     if db_connection_type is None:
         raise HTTPException(status_code=404, detail="Connection Type not found")
     db.delete(db_connection_type)
@@ -1052,13 +1148,13 @@ def create_connection(connection: ConnectionPydantic, db: Session = Depends(get_
 
 
 @app.get("/connections/", response_model=list[ConnectionPydantic])
-def read_connections(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(ConnectionPydantic).offset(skip).limit(limit).all()
+def read_connections(db: Session = Depends(get_db)):
+    return db.query(Connection).all()
 
 
 @app.get("/connections/{connection_id}", response_model=ConnectionPydantic)
 def read_connection(connection_id: int, db: Session = Depends(get_db)):
-    db_connection = db.query(ConnectionPydantic).filter(ConnectionPydantic.connection_id == connection_id).first()
+    db_connection = db.query(Connection).filter(Connection.connection_id == connection_id).first()
     if db_connection is None:
         raise HTTPException(status_code=404, detail="Connection not found")
     return db_connection
@@ -1066,7 +1162,7 @@ def read_connection(connection_id: int, db: Session = Depends(get_db)):
 
 @app.put("/connections/{connection_id}", response_model=ConnectionPydantic)
 def update_connection(connection_id: int, connection: ConnectionPydantic, db: Session = Depends(get_db)):
-    db_connection = db.query(ConnectionPydantic).filter(ConnectionPydantic.connection_id == connection_id).first()
+    db_connection = db.query(Connection).filter(Connection.connection_id == connection_id).first()
     if db_connection is None:
         raise HTTPException(status_code=404, detail="Connection not found")
     for field, value in connection.dict().items():
@@ -1078,7 +1174,7 @@ def update_connection(connection_id: int, connection: ConnectionPydantic, db: Se
 
 @app.delete("/connections/{connection_id}", response_model=ConnectionPydantic)
 def delete_connection(connection_id: int, db: Session = Depends(get_db)):
-    db_connection = db.query(ConnectionPydantic).filter(ConnectionPydantic.connection_id == connection_id).first()
+    db_connection = db.query(Connection).filter(Connection.connection_id == connection_id).first()
     if db_connection is None:
         raise HTTPException(status_code=404, detail="Connection not found")
     db.delete(db_connection)
@@ -1098,13 +1194,13 @@ def create_connection_detail(connection_detail: ConnectionDetailPydantic, db: Se
 
 
 @app.get("/connection_details/", response_model=list[ConnectionDetailPydantic])
-def read_connection_details(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(ConnectionDetailPydantic).offset(skip).limit(limit).all()
+def read_connection_details(db: Session = Depends(get_db)):
+    return db.query(ConnectionDetail).all()
 
 
 @app.get("/connection_details/{connection_detail_id}", response_model=ConnectionDetailPydantic)
 def read_connection_detail(connection_detail_id: int, db: Session = Depends(get_db)):
-    db_connection_detail = db.query(ConnectionDetailPydantic).filter(ConnectionDetailPydantic.connection_detail_id == connection_detail_id).first()
+    db_connection_detail = db.query(ConnectionDetail).filter(ConnectionDetail.connection_detail_id == connection_detail_id).first()
     if db_connection_detail is None:
         raise HTTPException(status_code=404, detail="Connection Detail not found")
     return db_connection_detail
@@ -1112,7 +1208,7 @@ def read_connection_detail(connection_detail_id: int, db: Session = Depends(get_
 
 @app.put("/connection_details/{connection_detail_id}", response_model=ConnectionDetailPydantic)
 def update_connection_detail(connection_detail_id: int, connection_detail: ConnectionDetailPydantic, db: Session = Depends(get_db)):
-    db_connection_detail = db.query(ConnectionDetailPydantic).filter(ConnectionDetailPydantic.connection_detail_id == connection_detail_id).first()
+    db_connection_detail = db.query(ConnectionDetail).filter(ConnectionDetail.connection_detail_id == connection_detail_id).first()
     if db_connection_detail is None:
         raise HTTPException(status_code=404, detail="Connection Detail not found")
     for field, value in connection_detail.dict().items():
@@ -1124,7 +1220,7 @@ def update_connection_detail(connection_detail_id: int, connection_detail: Conne
 
 @app.delete("/connection_details/{connection_detail_id}", response_model=ConnectionDetailPydantic)
 def delete_connection_detail(connection_detail_id: int, db: Session = Depends(get_db)):
-    db_connection_detail = db.query(ConnectionDetailPydantic).filter(ConnectionDetailPydantic.connection_detail_id == connection_detail_id).first()
+    db_connection_detail = db.query(ConnectionDetail).filter(ConnectionDetail.connection_detail_id == connection_detail_id).first()
     if db_connection_detail is None:
         raise HTTPException(status_code=404, detail="Connection Detail not found")
     db.delete(db_connection_detail)
@@ -1141,13 +1237,13 @@ def create_user_log_history(user_log_history: UserLogHistoryPydantic, db: Sessio
 
 
 @app.get("/user_log_history/", response_model=list[UserLogHistoryPydantic])
-def read_user_log_history(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(UserLogHistoryPydantic).offset(skip).limit(limit).all()
+def read_user_log_history(db: Session = Depends(get_db)):
+    return db.query(UserLogHistory).all()
 
 
 @app.get("/user_log_history/{log_id}", response_model=UserLogHistoryPydantic)
 def read_user_log_by_id(log_id: int, db: Session = Depends(get_db)):
-    db_user_log = db.query(UserLogHistoryPydantic).filter(UserLogHistoryPydantic.log_id == log_id).first()
+    db_user_log = db.query(UserLogHistory).filter(UserLogHistory.log_id == log_id).first()
     if db_user_log is None:
         raise HTTPException(status_code=404, detail="User Log not found")
     return db_user_log
@@ -1155,7 +1251,7 @@ def read_user_log_by_id(log_id: int, db: Session = Depends(get_db)):
 
 @app.put("/user_log_history/{log_id}", response_model=UserLogHistoryPydantic)
 def update_user_log_history(log_id: int, user_log_history: UserLogHistoryPydantic, db: Session = Depends(get_db)):
-    db_user_log = db.query(UserLogHistoryPydantic).filter(UserLogHistoryPydantic.log_id == log_id).first()
+    db_user_log = db.query(UserLogHistory).filter(UserLogHistory.log_id == log_id).first()
     if db_user_log is None:
         raise HTTPException(status_code=404, detail="User Log not found")
     for field, value in user_log_history.dict().items():
@@ -1167,7 +1263,7 @@ def update_user_log_history(log_id: int, user_log_history: UserLogHistoryPydanti
 
 @app.delete("/user_log_history/{log_id}", response_model=UserLogHistoryPydantic)
 def delete_user_log_history(log_id: int, db: Session = Depends(get_db)):
-    db_user_log = db.query(UserLogHistoryPydantic).filter(UserLogHistoryPydantic.log_id == log_id).first()
+    db_user_log = db.query(UserLogHistory).filter(UserLogHistory.log_id == log_id).first()
     if db_user_log is None:
         raise HTTPException(status_code=404, detail="User Log not found")
     db.delete(db_user_log)
@@ -1186,13 +1282,13 @@ def create_alert(alert: AlertPydantic, db: Session = Depends(get_db)):
 
 
 @app.get("/alerts/", response_model=list[AlertPydantic])
-def read_alerts(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(AlertPydantic).offset(skip).limit(limit).all()
+def read_alerts(db: Session = Depends(get_db)):
+    return db.query(Alert).all()
 
 
 @app.get("/alerts/{alert_id}", response_model=AlertPydantic)
 def read_alert(alert_id: int, db: Session = Depends(get_db)):
-    db_alert = db.query(AlertPydantic).filter(AlertPydantic.alert_id == alert_id).first()
+    db_alert = db.query(Alert).filter(Alert.alert_id == alert_id).first()
     if db_alert is None:
         raise HTTPException(status_code=404, detail="Alert not found")
     return db_alert
@@ -1200,7 +1296,7 @@ def read_alert(alert_id: int, db: Session = Depends(get_db)):
 
 @app.put("/alerts/{alert_id}", response_model=AlertPydantic)
 def update_alert(alert_id: int, alert: AlertPydantic, db: Session = Depends(get_db)):
-    db_alert = db.query(AlertPydantic).filter(AlertPydantic.alert_id == alert_id).first()
+    db_alert = db.query(Alert).filter(Alert.alert_id == alert_id).first()
     if db_alert is None:
         raise HTTPException(status_code=404, detail="Alert not found")
     for field, value in alert.dict().items():
@@ -1212,7 +1308,7 @@ def update_alert(alert_id: int, alert: AlertPydantic, db: Session = Depends(get_
 
 @app.delete("/alerts/{alert_id}", response_model=AlertPydantic)
 def delete_alert(alert_id: int, db: Session = Depends(get_db)):
-    db_alert = db.query(AlertPydantic).filter(AlertPydantic.alert_id == alert_id).first()
+    db_alert = db.query(Alert).filter(Alert.alert_id == alert_id).first()
     if db_alert is None:
         raise HTTPException(status_code=404, detail="Alert not found")
     db.delete(db_alert)
@@ -1230,13 +1326,13 @@ def create_alert_expression(alert_expression: AlertExpressionPydantic, db: Sessi
 
 
 @app.get("/alert_expressions/", response_model=list[AlertExpressionPydantic])
-def read_alert_expressions(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(AlertExpressionPydantic).offset(skip).limit(limit).all()
+def read_alert_expressions(db: Session = Depends(get_db)):
+    return db.query(AlertExpressionPydantic).all()
 
 
 @app.get("/alert_expressions/{expression_id}", response_model=AlertExpressionPydantic)
 def read_alert_expression(expression_id: int, db: Session = Depends(get_db)):
-    db_alert_expression = db.query(AlertExpressionPydantic).filter(AlertExpressionPydantic.expression_id == expression_id).first()
+    db_alert_expression = db.query(AlertExpression).filter(AlertExpression.expression_id == expression_id).first()
     if db_alert_expression is None:
         raise HTTPException(status_code=404, detail="Alert Expression not found")
     return db_alert_expression
@@ -1244,7 +1340,7 @@ def read_alert_expression(expression_id: int, db: Session = Depends(get_db)):
 
 @app.put("/alert_expressions/{expression_id}", response_model=AlertExpressionPydantic)
 def update_alert_expression(expression_id: int, alert_expression: AlertExpressionPydantic, db: Session = Depends(get_db)):
-    db_alert_expression = db.query(AlertExpressionPydantic).filter(AlertExpressionPydantic.expression_id == expression_id).first()
+    db_alert_expression = db.query(AlertExpression).filter(AlertExpression.expression_id == expression_id).first()
     if db_alert_expression is None:
         raise HTTPException(status_code=404, detail="Alert Expression not found")
     for field, value in alert_expression.dict().items():
@@ -1256,7 +1352,7 @@ def update_alert_expression(expression_id: int, alert_expression: AlertExpressio
 
 @app.delete("/alert_expressions/{expression_id}", response_model=AlertExpressionPydantic)
 def delete_alert_expression(expression_id: int, db: Session = Depends(get_db)):
-    db_alert_expression = db.query(AlertExpressionPydantic).filter(AlertExpressionPydantic.expression_id == expression_id).first()
+    db_alert_expression = db.query(AlertExpression).filter(AlertExpression.expression_id == expression_id).first()
     if db_alert_expression is None:
         raise HTTPException(status_code=404, detail="Alert Expression not found")
     db.delete(db_alert_expression)
@@ -1275,13 +1371,13 @@ def create_history(history: HistoryPydantic, db: Session = Depends(get_db)):
 
 
 @app.get("/history/", response_model=list[HistoryPydantic])
-def read_history(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(History).offset(skip).limit(limit).all()
+def read_history(db: Session = Depends(get_db)):
+    return db.query(History).all()
 
 
 @app.get("/history/{history_id}", response_model=HistoryPydantic)
 def read_history_by_id(history_id: int, db: Session = Depends(get_db)):
-    db_history = db.query(HistoryPydantic).filter(HistoryPydantic.history_id == history_id).first()
+    db_history = db.query(History).filter(History.history_id == history_id).first()
     if db_history is None:
         raise HTTPException(status_code=404, detail="History not found")
     return db_history
@@ -1289,7 +1385,7 @@ def read_history_by_id(history_id: int, db: Session = Depends(get_db)):
 
 @app.put("/history/{history_id}", response_model=HistoryPydantic)
 def update_history(history_id: int, history: HistoryPydantic, db: Session = Depends(get_db)):
-    db_history = db.query(HistoryPydantic).filter(HistoryPydantic.history_id == history_id).first()
+    db_history = db.query(History).filter(History.history_id == history_id).first()
     if db_history is None:
         raise HTTPException(status_code=404, detail="History not found")
     for field, value in history.dict().items():
@@ -1301,7 +1397,7 @@ def update_history(history_id: int, history: HistoryPydantic, db: Session = Depe
 
 @app.delete("/history/{history_id}", response_model=HistoryPydantic)
 def delete_history(history_id: int, db: Session = Depends(get_db)):
-    db_history = db.query(HistoryPydantic).filter(HistoryPydantic.history_id == history_id).first()
+    db_history = db.query(History).filter(History.history_id == history_id).first()
     if db_history is None:
         raise HTTPException(status_code=404, detail="History not found")
     db.delete(db_history)
@@ -1318,13 +1414,13 @@ def create_action_type(action_type: ActionTypePydantic, db: Session = Depends(ge
 
 
 @app.get("/action_types/", response_model=list[ActionTypePydantic])
-def read_action_types(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(ActionTypePydantic).offset(skip).limit(limit).all()
+def read_action_types(db: Session = Depends(get_db)):
+    return db.query(ActionType).all()
 
 
 @app.get("/action_types/{action_type_id}", response_model=ActionTypePydantic)
 def read_action_type(action_type_id: int, db: Session = Depends(get_db)):
-    db_action_type = db.query(ActionTypePydantic).filter(ActionTypePydantic.action_type_id == action_type_id).first()
+    db_action_type = db.query(ActionType).filter(ActionType.action_type_id == action_type_id).first()
     if db_action_type is None:
         raise HTTPException(status_code=404, detail="Action Type not found")
     return db_action_type
@@ -1332,7 +1428,7 @@ def read_action_type(action_type_id: int, db: Session = Depends(get_db)):
 
 @app.put("/action_types/{action_type_id}", response_model=ActionTypePydantic)
 def update_action_type(action_type_id: int, action_type: ActionTypePydantic, db: Session = Depends(get_db)):
-    db_action_type = db.query(ActionTypePydantic).filter(ActionTypePydantic.action_type_id == action_type_id).first()
+    db_action_type = db.query(ActionType).filter(ActionType.action_type_id == action_type_id).first()
     if db_action_type is None:
         raise HTTPException(status_code=404, detail="Action Type not found")
     for field, value in action_type.dict().items():
@@ -1344,7 +1440,7 @@ def update_action_type(action_type_id: int, action_type: ActionTypePydantic, db:
 
 @app.delete("/action_types/{action_type_id}", response_model=ActionTypePydantic)
 def delete_action_type(action_type_id: int, db: Session = Depends(get_db)):
-    db_action_type = db.query(ActionTypePydantic).filter(ActionTypePydantic.action_type_id == action_type_id).first()
+    db_action_type = db.query(ActionType).filter(ActionType.action_type_id == action_type_id).first()
     if db_action_type is None:
         raise HTTPException(status_code=404, detail="Action Type not found")
     db.delete(db_action_type)
@@ -1363,13 +1459,13 @@ def create_action(action: ActionPydantic, db: Session = Depends(get_db)):
 
 
 @app.get("/actions/", response_model=list[ActionPydantic])
-def read_actions(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return db.query(ActionPydantic).offset(skip).limit(limit).all()
+def read_actions(db: Session = Depends(get_db)):
+    return db.query(Action).all()
 
 
 @app.get("/actions/{action_id}", response_model=ActionPydantic)
 def read_action(action_id: int, db: Session = Depends(get_db)):
-    db_action = db.query(ActionPydantic).filter(ActionPydantic.action_id == action_id).first()
+    db_action = db.query(Action).filter(Action.action_id == action_id).first()
     if db_action is None:
         raise HTTPException(status_code=404, detail="Action not found")
     return db_action
@@ -1377,7 +1473,7 @@ def read_action(action_id: int, db: Session = Depends(get_db)):
 
 @app.put("/actions/{action_id}", response_model=ActionPydantic)
 def update_action(action_id: int, action: ActionPydantic, db: Session = Depends(get_db)):
-    db_action = db.query(ActionPydantic).filter(ActionPydantic.action_id == action_id).first()
+    db_action = db.query(Action).filter(Action.action_id == action_id).first()
     if db_action is None:
         raise HTTPException(status_code=404, detail="Action not found")
     for field, value in action.dict().items():
@@ -1389,7 +1485,7 @@ def update_action(action_id: int, action: ActionPydantic, db: Session = Depends(
 
 @app.delete("/actions/{action_id}", response_model=ActionPydantic)
 def delete_action(action_id: int, db: Session = Depends(get_db)):
-    db_action = db.query(ActionPydantic).filter(ActionPydantic.action_id == action_id).first()
+    db_action = db.query(Action).filter(Action.action_id == action_id).first()
     if db_action is None:
         raise HTTPException(status_code=404, detail="Action not found")
     db.delete(db_action)
@@ -1399,8 +1495,8 @@ def delete_action(action_id: int, db: Session = Depends(get_db)):
 
 @app.post("/action_history/")
 def create_action_history(action_id: int, history_id: int, db: Session = Depends(get_db)):
-    action = db.query(ActionPydantic).filter(ActionPydantic.action_id == action_id).first()
-    history = db.query(HistoryPydantic).filter(HistoryPydantic.history_id == history_id).first()
+    action = db.query(Action).filter(Action.action_id == action_id).first()
+    history = db.query(History).filter(History.history_id == history_id).first()
     if action is None or history is None:
         raise HTTPException(status_code=404, detail="Action or History not found")
 

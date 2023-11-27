@@ -254,8 +254,19 @@ class User(Base):
     
     # users = relationship('Address', secondary='user_addresses')
 
+class DeviceTagHistory(Base):
+    __tablename__ = 'device_tag_history'
 
+    unique_row_id = Column(Integer, primary_key=True)
+    did = Column(Integer)
+    sr_no = Column(String)
+    tag_desc = Column(String)
+    tag_value = Column(String)
+    tag_status = Column(String)
+    recorded_date_time = Column(DateTime)
+    uom = Column(String)
 
+    
 class Device(Base):
     __tablename__ = 'devices'
 
@@ -470,7 +481,7 @@ from datetime import datetime
 from decimal import Decimal
 
 class AddressPydantic(BaseModel):
-    address_id: int
+    address_id: Optional[int] = None
     address_line1: str
     address_line2: str
     city: str
@@ -483,68 +494,89 @@ class AddressPydantic(BaseModel):
     created_at: datetime
     updated_by: str
     updated_at: datetime
-
+    class Config:
+        from_orm = True     
 
 class ActionTypePydantic(BaseModel):
-    action_type_id: int
+    action_type_id: Optional[int] = None
     description: str
     created_by: str
     created_at: datetime
     updated_by: str
     updated_at: datetime
+    class Config:
+        from_orm = True
+
 
 class ConnectionTypePydantic(BaseModel):
-    connection_type_id: int
+    connection_type_id: Optional[int] = None
     description: str
     created_by: str
     created_at: datetime
     updated_by: str
     updated_at: datetime
-
+    class Config:
+        from_orm = True
 
 class ContactTypePydantic(BaseModel):
-    contact_type_id: int
+    contact_type_id: Optional[int] = None
     description: str
     created_by: str
     created_at: datetime
     updated_by: str
     updated_at: datetime
+    
+    class Config:
+        orm_mode = True
 
 class DeviceTypePydantic(BaseModel):
-    device_type_id: int
+    device_type_id: Optional[int] = None
     description: str
     created_by: str
     created_at: datetime
     updated_by: str
     updated_at: datetime
+    class Config:
+        from_orm = True
+
 
 class TagPydantic(BaseModel):
-    tag_id: int
+    tag_id: Optional[int] = None
     description: str
     unit_of_measure: str
     created_by: str
     created_at: datetime
     updated_by: str
     updated_at: datetime
+    class Config:
+        from_orm = True
+
 
 class UserGroupPydantic(BaseModel):
-    user_group_id: int
+    user_group_id: Optional[int] = None
     group_name: str
     created_by: str
     created_at: datetime
     updated_by: str
     updated_at: datetime
+    class Config:
+        from_orm = True
+
+
 
 class UserRolePydantic(BaseModel):
-    role_id: int
+    role_id: Optional[int] = None
     role_name: str
     created_by: str
     created_at: datetime
     updated_by: str
     updated_at: datetime
+    class Config:
+        from_orm = True
+
 
 class ActionPydantic(BaseModel):
-    action_id: int
+    action_id: Optional[int] = None
     description: str
     action_type_id: int  # ForeignKey relationship, represented as int
     action_taken_datetime: datetime
@@ -552,17 +584,23 @@ class ActionPydantic(BaseModel):
     created_at: datetime
     updated_by: str
     updated_at: datetime
+    class Config:
+        from_orm = True
+
 
 class AssetPydantic(BaseModel):
-    asset_id: int
+    asset_id: Optional[int] = None
     asset_type_id: int  # ForeignKey relationship, represented as int
     created_by: str
     created_at: datetime
     updated_by: str
     updated_at: datetime
+    class Config:
+        from_orm = True
+
 
 class ContactPydantic(BaseModel):
-    contact_id: int
+    contact_id: Optional[int] = None
     contact_description: str
     contact_type_id: int  # ForeignKey relationship, represented as int
     created_by: str
@@ -570,10 +608,12 @@ class ContactPydantic(BaseModel):
     updated_by: str
     updated_at: datetime
 
+    class Config:
+        orm_mode = True
 
 
 class LocationPydantic(BaseModel):
-    location_id: int
+    location_id: Optional[int] = None
     location_name: str
     location_desc: str
     location_type_id: int
@@ -588,11 +628,12 @@ class LocationPydantic(BaseModel):
     updated_at: datetime
 
     class Config:
+        orm_mode = True
         from_orm = True
         from_attributes = True
 
 class RightPydantic(BaseModel):
-    right_id: int
+    right_id: Optional[int] = None
     asset_id: int  # ForeignKey relationship, represented as int
     create_right: bool
     edit_right: bool
@@ -603,10 +644,12 @@ class RightPydantic(BaseModel):
     created_at: datetime
     updated_by: str
     updated_at: datetime
+    class Config:
+        orm_mode = True
 
 
 class UserPydantic(BaseModel):
-    user_id: int
+    user_id: Optional[int] = None
     email: str
     hex_password: str
     contact_id: Optional[int] = None  # ForeignKey relationship, represented as int
@@ -615,23 +658,28 @@ class UserPydantic(BaseModel):
     is_verified: Optional[bool] = None
     created_by: str
     updated_by: str
-    
+    class Config:
+        orm_mode = True
 
 class UserReponsePydantic(BaseModel):
-    user_id: int
+    user_id: Optional[int] = None
     email: EmailStr
 
     class Config:
         from_attributes = True
+        orm_mode = True
 
 class UserCreatePydantic(BaseModel):
     email: Optional[EmailStr]=None
     user_name: Optional[str]=None
     password: str  # Accept plaintext password
     # other fields as necessary
+    class Config:
+        orm_mode = True
+
 
 class DevicePydantic(BaseModel):
-    device_id: int
+    device_id: Optional[int] = None
     device_root_id: int  # ForeignKey relationship, represented as int
     device_type_id: int  # ForeignKey relationship, represented as int
     location_id: int  # ForeignKey relationship, represented as int
@@ -644,9 +692,12 @@ class DevicePydantic(BaseModel):
     created_at: datetime
     updated_by: str
     updated_at: datetime
+    class Config:
+        orm_mode = True
+
 
 class UserLogHistoryPydantic(BaseModel):
-    log_id: int
+    log_id: Optional[int] = None
     remote_host: str
     identity: str
     user_name: str
@@ -661,32 +712,44 @@ class UserLogHistoryPydantic(BaseModel):
     created_at: datetime
     updated_by: str
     updated_at: datetime
+    class Config:
+        orm_mode = True
+
 
 class AlertPydantic(BaseModel):
-    alert_id: int
+    alert_id: Optional[int] = None
     device_id: int  # ForeignKey relationship, represented as int
     alert_description: str
     created_by: str
     created_at: datetime
     updated_by: str
     updated_at: datetime
+    class Config:
+        orm_mode = True
+
 
 class ConnectionPydantic(BaseModel):
-    connection_id: int
+    connection_id: Optional[int] = None
     connection_type_id: int  # ForeignKey relationship, represented as int
     device_id: int  # ForeignKey relationship, represented as int
     created_by: str
     created_at: datetime
     updated_by: str
     updated_at: datetime
+    class Config:
+        orm_mode = True
+
 
 class DeviceTagPydantic(BaseModel):
     device_id: int  # ForeignKey relationship, represented as int
     tag_id: int  # ForeignKey relationship, represented as int
-    ID: int
+    ID: Optional[int] = None
+    class Config:
+        orm_mode = True
+
 
 class AlertExpressionPydantic(BaseModel):
-    expression_id: int
+    expression_id: Optional[int] = None
     alert_id: int  # ForeignKey relationship, represented as int
     expression: str
     input_field_name: str
@@ -699,10 +762,11 @@ class AlertExpressionPydantic(BaseModel):
     created_at: datetime
     updated_by: str
     updated_at: datetime
-
+    class Config:
+        orm_mode = True
 
 class ConnectionDetailPydantic(BaseModel):
-    connection_detail_id: int
+    connection_detail_id: Optional[int] = None
     connection_id: int  # ForeignKey relationship, represented as int
     field_type: str
     field_value: str
@@ -710,64 +774,112 @@ class ConnectionDetailPydantic(BaseModel):
     created_at: datetime
     updated_by: str
     updated_at: datetime
+    class Config:
+        orm_mode = True
+
 
 class HistoryPydantic(BaseModel):
-    history_id: int
+    history_id: Optional[int] = None
     device_tag_id: int  # ForeignKey relationship, represented as int
     value: float
     status:  Optional[str] = None
     recorded_date_time: datetime
     alert_id: Optional[int] = None  # ForeignKey relationship, represented as int
-    
+    class Config:
+        orm_mode = True
 
 class UserLoginPydantic(BaseModel):
     username: str
     password: str
+    class Config:
+        orm_mode = True
 
 class LocationContactPydantic(BaseModel):
     location_id: int
     contact_id: int
+    class Config:
+        orm_mode = True
+
+
 
 class UserContactPydantic(BaseModel):
     user_id: int
     contact_id: int
+    class Config:
+        orm_mode = True
+
+
 
 class UserAddressPydantic(BaseModel):
     user_id: int
     adress_id: int
     user: Optional[str]
     address: Optional[str]
+    class Config:
+        orm_mode = True
+
+
 
 class UserGroupMembershipPydantic(BaseModel):
     user_id: int
     user_group_id: int
+    class Config:
+        orm_mode = True
+
+
 
 class UserRoleAssignmentPydantic(BaseModel):
     user_id: int
     role_id: int
+    class Config:
+        orm_mode = True
+
+
 
 class AssetTypePydantic(BaseModel):
-    asset_type_id: int
+    asset_type_id: Optional[int] = None
     description: Optional[str]
     created_by: Optional[str]
     created_at: Optional[str]
     updated_by: Optional[str]
     updated_at: Optional[str]
+    class Config:
+        orm_mode = True
+
 
 class UserRightPydantic(BaseModel):
     user_id: int
     right_id: int
+    class Config:
+        orm_mode = True
+
 
 class RoleRightPydantic(BaseModel):
     role_id: int
     right_id: int
+    class Config:
+        orm_mode = True
+
 
 class ActionHistoryPydantic(BaseModel):
     action_id: int
     history_id: int
+    class Config:
+        orm_mode = True
+
 
 class ActionAlertPydantic(BaseModel):
     action_id: int
     alert_id: int
+    class Config:
+        orm_mode = True
 
+class DeviceTagHistoryPydantic(BaseModel):
+    did: Optional[int] = None
+    sr_no: Optional[str] = None
+    tag_desc: Optional[str] = None
+    tag_value: Optional[int] = None
+    tag_status: Optional[str] = None
+    recorded_date_time: Optional[datetime] = None
+    uom: Optional[str] = None
 Base.metadata.create_all(engine)
