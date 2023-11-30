@@ -14,6 +14,8 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.sql import text
 from sqlalchemy import desc, and_  # Add this import
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy import delete
 
 db_host = '51.20.144.184'
 db_username = 'iot_dev'
@@ -421,10 +423,21 @@ def Registration(user_data: UserCreatePydantic, db: Session = Depends(get_db)):
 
 @app.post("/users/", response_model=UserPydantic)
 def create_user(user: UserPydantic, db: Session = Depends(get_db)):
-    db.add(user)
+    db_user = User(
+        user_name=user.user_name,
+        email=user.email,
+        hex_password=user.hex_password,
+        is_active=user.is_active,
+        is_verified=user.is_verified,
+        created_by=user.created_by,
+        updated_by=user.updated_by,
+    )
+
+    db.add(db_user)
     db.commit()
-    db.refresh(user)
-    return user
+    db.refresh(db_user)
+
+    return db_user
 
 
 @app.get("/users/", response_model=list[UserPydantic])
@@ -470,36 +483,30 @@ def create_user_contact(
 
     if not db_user or not db_contact:
         raise HTTPException(status_code=404, detail="User or Contact not found")
-
-    user_contact = UserContactPydantic(user_id=user_id, contact_id=contact_id)
-    db.add(user_contact)
+    db.execute(
+    t_user_contacts.insert().values(user_id=user_id, contact_id=contact_id)
+    )
     db.commit()
-    db.refresh(user_contact)
-    return user_contact
+    return UserContactPydantic(user_id=user_id, contact_id=contact_id)
 
 
 @app.delete("/user_contacts/")
 def delete_user_contact(
     user_id: int, contact_id: int, db: Session = Depends(get_db)
 ):
-    user_contact = (
-        db.query(UserContactPydantic)
-        .filter(
-            UserContactPydantic.user_id == user_id,
-            UserContactPydantic.contact_id == contact_id,
-        )
-        .first()
-    )
+    db_user = db.query(User).filter(User.user_id == user_id).first()
+    db_contact = db.query(Contact).filter(Contact.contact_id == contact_id).first()
 
-    if user_contact is None:
-        raise HTTPException(
-            status_code=404, detail="User-Contact relationship not found"
-        )
+    if not db_user or not db_contact:
+        raise HTTPException(status_code=404, detail="User or Contact not found")
 
-    db.delete(user_contact)
+    db.execute(
+            t_user_contacts.delete().where(
+                (t_user_contacts.c.user_id == user_id) & (t_user_contacts.c.contact_id == contact_id)
+            )
+        )
     db.commit()
-    return {"detail": "User-Contact relationship deleted"}
-
+    return UserContactPydantic(user_id=user_id, contact_id=contact_id)
 
 @app.post("/user_addresses/", response_model=UserAddressPydantic)
 def create_user_address(
@@ -511,42 +518,37 @@ def create_user_address(
     if not db_user or not db_address:
         raise HTTPException(status_code=404, detail="User or Address not found")
 
-    user_address = UserAddressPydantic(user_id=user_id, address_id=address_id)
-    db.add(user_address)
+    # Insert a new row into the user_addresses table
+    db.execute(user_addresses.insert().values(user_id=user_id, address_id=address_id))
     db.commit()
-    db.refresh(user_address)
-    return user_address
 
+    return {"detail": "User-Address relationship created"}
 
 @app.delete("/user_addresses/")
 def delete_user_address(
     user_id: int, address_id: int, db: Session = Depends(get_db)
 ):
-    user_address = (
-        db.query(UserAddressPydantic)
-        .filter(
-            UserAddressPydantic.user_id == user_id,
-            UserAddressPydantic.address_id == address_id,
-        )
-        .first()
-    )
+    db_user = db.query(User).filter(User.user_id == user_id).first()
+    db_address = db.query(Address).filter(Address.address_id == address_id).first()
 
-    if user_address is None:
-        raise HTTPException(
-            status_code=404, detail="User-Address relationship not found"
-        )
+    if not db_user or not db_address:
+        raise HTTPException(status_code=404, detail="User or Address not found")
 
-    db.delete(user_address)
+    # Insert a new row into the user_addresses table
+    db.execute(user_addresses.delete().where(
+                (user_addresses.c.user_id == user_id) & (user_addresses.c.address_id == address_id)))
     db.commit()
+
     return {"detail": "User-Address relationship deleted"}
 
 
 @app.post("/user_groups/", response_model=UserGroupPydantic)
 def create_user_group(user_group: UserGroupPydantic, db: Session = Depends(get_db)):
-    db.add(user_group)
+    db_user_group = UserGroup(**user_group.dict())
+    db.add(db_user_group)
     db.commit()
-    db.refresh(user_group)
-    return user_group
+    db.refresh(db_user_group)
+    return UserGroupPydantic.from_orm(db_user_group)
 
 
 @app.get("/user_groups/", response_model=list[UserGroupPydantic])
@@ -587,6 +589,7 @@ def delete_user_group(user_group_id: int, db: Session = Depends(get_db)):
 
 @app.post("/user_roles/", response_model=UserRolePydantic)
 def create_user_role(user_role: UserRolePydantic, db: Session = Depends(get_db)):
+    user_role = UserRole(**user_role.dict())
     db.add(user_role)
     db.commit()
     db.refresh(user_role)
@@ -638,34 +641,28 @@ def create_user_group_membership(
     if not db_user or not db_user_group:
         raise HTTPException(status_code=404, detail="User or User Group not found")
 
-    user_group_membership = UserGroupMembershipPydantic(user_id=user_id, user_group_id=user_group_id)
-    db.add(user_group_membership)
+    db.execute(
+        t_user_group_membership.insert().values(user_id=user_id, user_group_id=user_group_id)
+    )
     db.commit()
-    db.refresh(user_group_membership)
-    return user_group_membership
+    return UserGroupMembershipPydantic(user_id=user_id, user_group_id=user_group_id)
 
 
 @app.delete("/user_group_memberships/")
-def delete_user_group_membership(
+def create_user_group_membership(
     user_id: int, user_group_id: int, db: Session = Depends(get_db)
 ):
-    user_group_membership = (
-        db.query(UserGroupMembershipPydantic)
-        .filter(
-            UserGroupMembershipPydantic.user_id == user_id,
-            UserGroupMembershipPydantic.user_group_id == user_group_id,
-        )
-        .first()
+    db_user = db.query(User).filter(User.user_id == user_id).first()
+    db_user_group = db.query(UserGroup).filter(UserGroup.user_group_id == user_group_id).first()
+
+    if not db_user or not db_user_group:
+        raise HTTPException(status_code=404, detail="User or User Group not found")
+
+    db.execute(
+        t_user_group_membership.delete().where(t_user_group_membership.c.user_id==user_id, t_user_group_membership.c.user_group_id==user_group_id)
     )
-
-    if user_group_membership is None:
-        raise HTTPException(
-            status_code=404, detail="User-UserGroup Membership not found"
-        )
-
-    db.delete(user_group_membership)
     db.commit()
-    return {"detail": "User-UserGroup Membership deleted"}
+    return {"message": "User added to User Group successfully"}
 
 
 @app.post("/user_role_assignments/", response_model=UserRoleAssignmentPydantic)
@@ -678,43 +675,40 @@ def create_user_role_assignment(
     if not db_user or not db_role:
         raise HTTPException(status_code=404, detail="User or UserRole not found")
 
-    user_role_assignment = UserRoleAssignmentPydantic(user_id=user_id, role_id=role_id)
-    db.add(user_role_assignment)
+    # Assuming t_user_role_assignment is your SQLAlchemy Core Table object
+    db.execute(
+        t_user_role_assignment.insert().values(user_id=user_id, role_id=role_id)
+    )
     db.commit()
-    db.refresh(user_role_assignment)
-    return user_role_assignment
+
+    # Return the created user_id and role_id
+    return UserRoleAssignmentPydantic(user_id=user_id, role_id=role_id)
 
 
 @app.delete("/user_role_assignments/")
 def delete_user_role_assignment(
     user_id: int, role_id: int, db: Session = Depends(get_db)
 ):
-    user_role_assignment = (
-        db.query(UserRoleAssignmentPydantic)
-        .filter(
-            UserRoleAssignmentPydantic.user_id == user_id,
-            UserRoleAssignmentPydantic.role_id == role_id,
-        )
-        .first()
+    db_user = db.query(User).filter(User.user_id == user_id).first()
+    db_user_group = db.query(UserRole).filter(UserRole.role_id == role_id).first()
+
+    if not db_user or not db_user_group:
+        raise HTTPException(status_code=404, detail="User or User Group not found")
+
+    db.execute(
+        t_user_role_assignment.delete().where(t_user_role_assignment.c.user_id==user_id, t_user_role_assignment.c.role_id==role_id)
     )
-
-    if user_role_assignment is None:
-        raise HTTPException(
-            status_code=404, detail="User-UserRole Assignment not found"
-        )
-
-    db.delete(user_role_assignment)
     db.commit()
-    return {"detail": "User-UserRole Assignment deleted"}
+    return {"message": "User removed from User role assignment successfully"}
 
 
 @app.post("/asset_types/", response_model=AssetTypePydantic)
 def create_asset_type(asset_type: AssetTypePydantic, db: Session = Depends(get_db)):
-    db.add(asset_type)
+    asset_type_db = AssetType(**asset_type.dict())
+    db.add(asset_type_db)
     db.commit()
-    db.refresh(asset_type)
-    return asset_type
-
+    db.refresh(asset_type_db)
+    return {"response": "data inserted successfully"}
 
 @app.get("/asset_types/", response_model=list[AssetTypePydantic])
 def read_asset_types(db: Session = Depends(get_db)):
@@ -756,6 +750,7 @@ def delete_asset_type(asset_type_id: int, db: Session = Depends(get_db)):
 
 @app.post("/assets/", response_model=AssetPydantic)
 def create_asset(asset: AssetPydantic, db: Session = Depends(get_db)):
+    asset = Asset(**asset.dict())
     db.add(asset)
     db.commit()
     db.refresh(asset)
@@ -799,6 +794,7 @@ def delete_asset(asset_id: int, db: Session = Depends(get_db)):
 
 @app.post("/rights/", response_model=RightPydantic)
 def create_right(right: RightPydantic, db: Session = Depends(get_db)):
+    right = Right(**right.dict())
     db.add(right)
     db.commit()
     db.refresh(right)
@@ -851,34 +847,26 @@ def create_user_right(
     if not db_user or not db_right:
         raise HTTPException(status_code=404, detail="User or Right not found")
 
-    user_right = UserRightPydantic(user_id=user_id, right_id=right_id)
-    db.add(user_right)
+    db.execute(t_user_rights.insert().values(user_id=user_id, right_id=right_id))
     db.commit()
-    db.refresh(user_right)
-    return user_right
+    return UserRightPydantic(user_id=user_id, right_id=right_id )
 
 
 @app.delete("/user_rights/")
 def delete_user_right(
     user_id: int, right_id: int, db: Session = Depends(get_db)
 ):
-    user_right = (
-        db.query(UserRightPydantic)
-        .filter(
-            UserRightPydantic.user_id == user_id,
-            UserRightPydantic.right_id == right_id,
-        )
-        .first()
+    db_user = db.query(User).filter(User.user_id == user_id).first()
+    db_user_group = db.query(Right).filter(Right.right_id == right_id).first()
+
+    if not db_user or not db_user_group:
+        raise HTTPException(status_code=404, detail="User or User Group not found")
+
+    db.execute(
+        t_user_rights.delete().where(t_user_rights.c.user_id==user_id, t_user_rights.c.right_id==right_id)
     )
-
-    if user_right is None:
-        raise HTTPException(
-            status_code=404, detail="User-Right Relationship not found"
-        )
-
-    db.delete(user_right)
     db.commit()
-    return {"detail": "User-Right Relationship deleted"}
+    return {"message": "removed successfully"}
 
 
 
@@ -893,39 +881,32 @@ def create_role_right(
     if not db_role or not db_right:
         raise HTTPException(status_code=404, detail="Role or Right not found")
 
-    role_right = RoleRightPydantic(role_id=role_id, right_id=right_id)
-    db.add(role_right)
+    db.execute(t_role_rights.insert().values(role_id=role_id, right_id=right_id))
     db.commit()
-    db.refresh(role_right)
-    return role_right
+    return RoleRightPydantic(role_id=role_id, right_id=right_id )
 
 
 @app.delete("/role_rights/")
 def delete_role_right(
     role_id: int, right_id: int, db: Session = Depends(get_db)
 ):
-    role_right = (
-        db.query(RoleRightPydantic)
-        .filter(
-            RoleRightPydantic.role_id == role_id,
-            RoleRightPydantic.right_id == right_id,
-        )
-        .first()
+    db_user = db.query(UserRole).filter(UserRole.role_id == role_id).first()
+    db_user_group = db.query(Right).filter(Right.right_id == right_id).first()
+
+    if not db_user or not db_user_group:
+        raise HTTPException(status_code=404, detail="User or User Group not found")
+
+    db.execute(
+        t_role_rights.delete().where(t_role_rights.c.role_id==role_id, t_role_rights.c.right_id==right_id)
     )
-
-    if role_right is None:
-        raise HTTPException(
-            status_code=404, detail="Role-Right Relationship not found"
-        )
-
-    db.delete(role_right)
     db.commit()
-    return {"detail": "Role-Right Relationship deleted"}
+    return {"message": "removed successfully"}
 
 
 
 @app.post("/tags/", response_model=TagPydantic)
 def create_tag(tag: TagPydantic, db: Session = Depends(get_db)):
+    tag = Tag(**tag.dict())
     db.add(tag)
     db.commit()
     db.refresh(tag)
@@ -969,6 +950,7 @@ def delete_tag(tag_id: int, db: Session = Depends(get_db)):
 
 @app.post("/device_types/", response_model=DeviceTypePydantic)
 def create_device_type(device_type: DeviceTypePydantic, db: Session = Depends(get_db)):
+    device_type = DeviceType(**device_type.dict())
     db.add(device_type)
     db.commit()
     db.refresh(device_type)
@@ -1012,6 +994,7 @@ def delete_device_type(device_type_id: int, db: Session = Depends(get_db)):
 
 @app.post("/devices/", response_model=DevicePydantic)
 def create_device(device: DevicePydantic, db: Session = Depends(get_db)):
+    device = Device(**device.dict())
     db.add(device)
     db.commit()
     db.refresh(device)
@@ -1055,48 +1038,31 @@ def delete_device(device_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/device_tags/", response_model=DeviceTagPydantic)
-def create_device_tag(
-    device_id: int, tag_id: int, db: Session = Depends(get_db)
-):
-    db_device = db.query(Device).filter(Device.device_id == device_id).first()
-    db_tag = db.query(Tag).filter(Tag.tag_id == tag_id).first()
-
-    if not db_device or not db_tag:
-        raise HTTPException(status_code=404, detail="Device or Tag not found")
-
-    device_tag = DeviceTagPydantic(device_id=device_id, tag_id=tag_id)
-    db.add(device_tag)
+def create_device_tag(device: DeviceTagPydantic, db: Session = Depends(get_db)):
+    device = DeviceTag(**device.dict())
+    db.add(device)
     db.commit()
-    db.refresh(device_tag)
-    return device_tag
+    db.refresh(device)
+    return device
+
 
 
 @app.delete("/device_tags/")
 def delete_device_tag(
-    device_id: int, tag_id: int, db: Session = Depends(get_db)
+    ID: int, db: Session = Depends(get_db)
 ):
-    device_tag = (
-        db.query(DeviceTagPydantic)
-        .filter(
-            DeviceTagPydantic.device_id == device_id,
-            DeviceTagPydantic.tag_id == tag_id,
-        )
-        .first()
-    )
-
-    if device_tag is None:
-        raise HTTPException(
-            status_code=404, detail="Device-Tag Relationship not found"
-        )
-
-    db.delete(device_tag)
+    db_device_type = db.query(DeviceTag).filter(DeviceTag.ID == ID).first()
+    if db_device_type is None:
+        raise HTTPException(status_code=404, detail="Device Type not found")
+    db.delete(db_device_type)
     db.commit()
-    return {"detail": "Device-Tag Relationship deleted"}
+    return db_device_type
 
 
 
 @app.post("/connection_types/", response_model=ConnectionTypePydantic)
 def create_connection_type(connection_type: ConnectionTypePydantic, db: Session = Depends(get_db)):
+    connection_type = ConnectionType(**connection_type.dict())
     db.add(connection_type)
     db.commit()
     db.refresh(connection_type)
@@ -1141,6 +1107,7 @@ def delete_connection_type(connection_type_id: int, db: Session = Depends(get_db
 
 @app.post("/connections/", response_model=ConnectionPydantic)
 def create_connection(connection: ConnectionPydantic, db: Session = Depends(get_db)):
+    connection = Connection(**connection.dict())
     db.add(connection)
     db.commit()
     db.refresh(connection)
@@ -1187,6 +1154,7 @@ def delete_connection(connection_id: int, db: Session = Depends(get_db)):
 
 @app.post("/connection_details/", response_model=ConnectionDetailPydantic)
 def create_connection_detail(connection_detail: ConnectionDetailPydantic, db: Session = Depends(get_db)):
+    connection_detail = ConnectionDetail(**connection_detail.dict())
     db.add(connection_detail)
     db.commit()
     db.refresh(connection_detail)
@@ -1230,11 +1198,11 @@ def delete_connection_detail(connection_detail_id: int, db: Session = Depends(ge
 
 @app.post("/user_log_history/", response_model=UserLogHistoryPydantic)
 def create_user_log_history(user_log_history: UserLogHistoryPydantic, db: Session = Depends(get_db)):
+    user_log_history = UserLogHistory(**user_log_history.dict())
     db.add(user_log_history)
     db.commit()
     db.refresh(user_log_history)
     return user_log_history
-
 
 @app.get("/user_log_history/", response_model=list[UserLogHistoryPydantic])
 def read_user_log_history(db: Session = Depends(get_db)):
@@ -1275,6 +1243,7 @@ def delete_user_log_history(log_id: int, db: Session = Depends(get_db)):
 
 @app.post("/alerts/", response_model=AlertPydantic)
 def create_alert(alert: AlertPydantic, db: Session = Depends(get_db)):
+    alert = Alert(**alert.dict())
     db.add(alert)
     db.commit()
     db.refresh(alert)
@@ -1319,6 +1288,7 @@ def delete_alert(alert_id: int, db: Session = Depends(get_db)):
 
 @app.post("/alert_expressions/", response_model=AlertExpressionPydantic)
 def create_alert_expression(alert_expression: AlertExpressionPydantic, db: Session = Depends(get_db)):
+    alert_expression = AlertExpression(**alert_expression.dict())
     db.add(alert_expression)
     db.commit()
     db.refresh(alert_expression)
@@ -1364,6 +1334,7 @@ def delete_alert_expression(expression_id: int, db: Session = Depends(get_db)):
 
 @app.post("/history/", response_model=HistoryPydantic)
 def create_history(history: HistoryPydantic, db: Session = Depends(get_db)):
+    history = History(**history.dict())
     db.add(history)
     db.commit()
     db.refresh(history)
@@ -1407,6 +1378,7 @@ def delete_history(history_id: int, db: Session = Depends(get_db)):
 
 @app.post("/action_types/", response_model=ActionTypePydantic)
 def create_action_type(action_type: ActionTypePydantic, db: Session = Depends(get_db)):
+    action_type = ActionType(**action_type.dict())
     db.add(action_type)
     db.commit()
     db.refresh(action_type)
@@ -1452,6 +1424,7 @@ def delete_action_type(action_type_id: int, db: Session = Depends(get_db)):
 
 @app.post("/actions/", response_model=ActionPydantic)
 def create_action(action: ActionPydantic, db: Session = Depends(get_db)):
+    action = Action(**action.dict())
     db.add(action)
     db.commit()
     db.refresh(action)
@@ -1499,33 +1472,18 @@ def create_action_history(action_id: int, history_id: int, db: Session = Depends
     history = db.query(History).filter(History.history_id == history_id).first()
     if action is None or history is None:
         raise HTTPException(status_code=404, detail="Action or History not found")
-
-    # Check if the association already exists
-    existing_association = (
-        db.query(ActionHistoryPydantic)
-        .filter(ActionHistoryPydantic.action_id == action_id, ActionHistoryPydantic.history_id == history_id)
-        .first()
-    )
-    if existing_association:
-        raise HTTPException(status_code=400, detail="Association already exists")
-
-    new_association = ActionHistoryPydantic(action_id=action_id, history_id=history_id)
-    db.add(new_association)
+    db.execute(t_actions_history.insert().values(action_id=action_id, history_id=history_id))
     db.commit()
-    return {"message": "Association created successfully"}
+    return ActionHistoryPydantic(action_id=action_id, history_id=history_id)
 
 
 @app.delete("/action_history/")
 def delete_action_history(action_id: int, history_id: int, db: Session = Depends(get_db)):
-    association = (
-        db.query(ActionHistoryPydantic)
-        .filter(ActionHistoryPydantic.action_id == action_id, ActionHistoryPydantic.history_id == history_id)
-        .first()
-    )
-    if association is None:
-        raise HTTPException(status_code=404, detail="Association not found")
-
-    db.delete(association)
+    action = db.query(Action).filter(Action.action_id == action_id).first()
+    history = db.query(History).filter(History.history_id == history_id).first()
+    if action is None or history is None:
+        raise HTTPException(status_code=404, detail="Action or History not found")
+    db.execute(t_actions_history.delete().where(t_actions_history.c.action_id==action_id, t_actions_history.c.history_id==history_id))
     db.commit()
     return {"message": "Association deleted successfully"}
 
@@ -1533,39 +1491,24 @@ def delete_action_history(action_id: int, history_id: int, db: Session = Depends
 
 @app.post("/action_alert/")
 def create_action_alert(action_id: int, alert_id: int, db: Session = Depends(get_db)):
-    action = db.query(ActionPydantic).filter(ActionPydantic.action_id == action_id).first()
-    alert = db.query(AlertPydantic).filter(AlertPydantic.alert_id == alert_id).first()
+    action = db.query(Action).filter(Action.action_id == action_id).first()
+    alert = db.query(Alert).filter(Alert.alert_id == alert_id).first()
     if action is None or alert is None:
         raise HTTPException(status_code=404, detail="Action or Alert not found")
-
-    # Check if the association already exists
-    existing_association = (
-        db.query(ActionAlertPydantic)
-        .filter(ActionAlertPydantic.action_id == action_id, ActionAlertPydantic.alert_id == alert_id)
-        .first()
-    )
-    if existing_association:
-        raise HTTPException(status_code=400, detail="Association already exists")
-
-    new_association = ActionAlertPydantic(action_id=action_id, alert_id=alert_id)
-    db.add(new_association)
+    db.execute(t_actions_alert.insert().values(action_id=action_id, alert_id=alert_id))
     db.commit()
-    return {"message": "Association created successfully"}
+    return ActionAlertPydantic(action_id=action_id, alert_id=alert_id)
 
 
 @app.delete("/action_alert/")
 def delete_action_alert(action_id: int, alert_id: int, db: Session = Depends(get_db)):
-    association = (
-        db.query(ActionAlertPydantic)
-        .filter(ActionAlertPydantic.action_id == action_id, ActionAlertPydantic.alert_id == alert_id)
-        .first()
-    )
-    if association is None:
-        raise HTTPException(status_code=404, detail="Association not found")
-
-    db.delete(association)
+    action = db.query(Action).filter(Action.action_id == action_id).first()
+    alert = db.query(Alert).filter(Alert.alert_id == alert_id).first()
+    if action is None or alert is None:
+        raise HTTPException(status_code=404, detail="Action or Alert not found")
+    db.execute(t_actions_alert.delete().where(t_actions_alert.c.action_id==action_id, t_actions_alert.c.alert_id==alert_id))
     db.commit()
-    return {"message": "Association deleted successfully"}
+    return ActionAlertPydantic(action_id=action_id, alert_id=alert_id)
     
 # Define the GET method to retrieve all active device data
 @app.get("/active_devices/")

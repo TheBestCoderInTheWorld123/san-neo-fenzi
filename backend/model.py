@@ -266,7 +266,7 @@ class DeviceTagHistory(Base):
     recorded_date_time = Column(DateTime)
     uom = Column(String)
 
-    
+
 class Device(Base):
     __tablename__ = 'devices'
 
@@ -495,7 +495,7 @@ class AddressPydantic(BaseModel):
     updated_by: str
     updated_at: datetime
     class Config:
-        from_orm = True     
+        orm_mode = True     
 
 class ActionTypePydantic(BaseModel):
     action_type_id: Optional[int] = None
@@ -505,7 +505,7 @@ class ActionTypePydantic(BaseModel):
     updated_by: str
     updated_at: datetime
     class Config:
-        from_orm = True
+        orm_mode = True
 
 
 class ConnectionTypePydantic(BaseModel):
@@ -516,7 +516,7 @@ class ConnectionTypePydantic(BaseModel):
     updated_by: str
     updated_at: datetime
     class Config:
-        from_orm = True
+        orm_mode = True
 
 class ContactTypePydantic(BaseModel):
     contact_type_id: Optional[int] = None
@@ -537,7 +537,7 @@ class DeviceTypePydantic(BaseModel):
     updated_by: str
     updated_at: datetime
     class Config:
-        from_orm = True
+        orm_mode = True
 
 
 class TagPydantic(BaseModel):
@@ -549,7 +549,7 @@ class TagPydantic(BaseModel):
     updated_by: str
     updated_at: datetime
     class Config:
-        from_orm = True
+        orm_mode = True
 
 
 class UserGroupPydantic(BaseModel):
@@ -560,7 +560,7 @@ class UserGroupPydantic(BaseModel):
     updated_by: str
     updated_at: datetime
     class Config:
-        from_orm = True
+        orm_mode = True
 
 
 
@@ -572,7 +572,7 @@ class UserRolePydantic(BaseModel):
     updated_by: str
     updated_at: datetime
     class Config:
-        from_orm = True
+        orm_mode = True
 
 
 class ActionPydantic(BaseModel):
@@ -585,7 +585,7 @@ class ActionPydantic(BaseModel):
     updated_by: str
     updated_at: datetime
     class Config:
-        from_orm = True
+        orm_mode = True
 
 
 class AssetPydantic(BaseModel):
@@ -596,7 +596,7 @@ class AssetPydantic(BaseModel):
     updated_by: str
     updated_at: datetime
     class Config:
-        from_orm = True
+        orm_mode = True
 
 
 class ContactPydantic(BaseModel):
@@ -647,13 +647,22 @@ class RightPydantic(BaseModel):
     class Config:
         orm_mode = True
 
+# user_id = Column(Integer, primary_key=True, server_default=text("nextval('users_user_id_seq'::regclass)"))
+#     user_name = Column(String(255))
+#     email = Column(String(255))
+#     hex_password = Column(String(255))
+#     is_active = Column(Boolean)
+#     is_verified = Column(Boolean)
+#     created_by = Column(String(255))
+#     created_at = Column(DateTime)
+#     updated_by = Column(String(255))
+#     updated_at = Column(DateTime)
 
 class UserPydantic(BaseModel):
     user_id: Optional[int] = None
+    user_name: str
     email: str
     hex_password: str
-    contact_id: Optional[int] = None  # ForeignKey relationship, represented as int
-    address_id: Optional[int] = None  # ForeignKey relationship, represented as int
     is_active: Optional[bool] = None
     is_verified: Optional[bool] = None
     created_by: str
@@ -813,8 +822,6 @@ class UserContactPydantic(BaseModel):
 class UserAddressPydantic(BaseModel):
     user_id: int
     adress_id: int
-    user: Optional[str]
-    address: Optional[str]
     class Config:
         orm_mode = True
 
@@ -840,11 +847,12 @@ class AssetTypePydantic(BaseModel):
     asset_type_id: Optional[int] = None
     description: Optional[str]
     created_by: Optional[str]
-    created_at: Optional[str]
+    created_at: Optional[datetime]
     updated_by: Optional[str]
-    updated_at: Optional[str]
+    updated_at: Optional[datetime]
     class Config:
         orm_mode = True
+
 
 
 class UserRightPydantic(BaseModel):
