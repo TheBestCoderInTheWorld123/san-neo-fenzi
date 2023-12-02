@@ -1762,3 +1762,19 @@ async def get_device_pichart_data(db: Session = Depends(get_db)):
         "offline_perc": round(offline_percentage, 2)
     }
     # return {"records": list(result.values())}
+
+#DeviceTagHistory
+@app.get("/device_by_time")
+def history_descriptions(fd: datetime, td: datetime, db: Session = Depends(get_db)):
+    data = db.query(DeviceTagHistory.did, DeviceTagHistory.recorded_date_time, DeviceTagHistory.sr_no).filter(
+        and_(DeviceTagHistory.recorded_date_time >= fd, DeviceTagHistory.recorded_date_time <= td)
+    ).all()
+    formatted_data = [
+        {'did': row[0], 'recorded_date_time': row[1], 'sr_no': row[2]} for row in data
+    ]
+    return formatted_data
+
+@app.get("/device_by_serial_number")
+def device_by_serial_number(no: str, db: Session = Depends(get_db)):
+    device = db.query(Device).filter(Device.device_serial_number == no).first()
+    return device
