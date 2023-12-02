@@ -1764,7 +1764,7 @@ async def get_device_pichart_data(db: Session = Depends(get_db)):
     # return {"records": list(result.values())}
 
 #DeviceTagHistory
-@app.get("/history_by_time")
+@app.get("/device_by_time")
 def history_descriptions(fd: datetime, td: datetime, db: Session = Depends(get_db)):
     data = db.query(DeviceTagHistory.did, DeviceTagHistory.recorded_date_time, DeviceTagHistory.sr_no).filter(
         and_(DeviceTagHistory.recorded_date_time >= fd, DeviceTagHistory.recorded_date_time <= td)
