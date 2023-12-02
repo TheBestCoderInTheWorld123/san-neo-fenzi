@@ -1770,8 +1770,7 @@ def history_descriptions(fd: datetime, td: datetime, db: Session = Depends(get_d
         and_(DeviceTagHistory.recorded_date_time >= fd, DeviceTagHistory.recorded_date_time <= td)
     ).all()
     formatted_data = [
-        {'did': row[0], 'recorded_date_time': row[1], 'sr_no': row[2]}
-        for row in data
+        {'did': row[0], 'recorded_date_time': row[1], 'sr_no': row[2]} for row in data
     ]
     return formatted_data
 
