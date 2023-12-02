@@ -66,12 +66,12 @@ export default function RadioButton() {
       <div id="sheet" className="px-4 py-4 flex justify-between items-center border-b">
         <Navbar />
       </div>
-      <div className="flex justify-between">
-        <div className="w-3/5">
+      <div className="flex flex-wrap">
+        <div className="w-full md:w-3/5 p-4">
           <Box>
             <RadioCard setRadioValue={handleRadioChange} />
-            {radioValue === "Table" ? (
-              <TablePage />
+            {radioValue === "Table" ?(
+              <TablePage data={data} />
             ) : (
               <Box className="cursor-pointer border-spacing-4 m-4 display:inline-block">
                 <Map />
@@ -79,12 +79,14 @@ export default function RadioButton() {
             )}
           </Box>
         </div>
-        <div className="w-2/5 p-5">
-          <h1 id="text" className=" font-black text-3xl">Communication Status</h1>
-          <Pie data={setData} />
+        <div className="w-full md:w-2/5 p-4 flex justify-center items-center">
+          <div className="text-center">
+            <h1 id="text" className="font-black text-3xl">Communication Status</h1>
+            <Pie data={data} />
+          </div>
         </div>
       </div>
-      <div className="w-full">
+      <div>
         <AlertTable />
       </div>
     </div>

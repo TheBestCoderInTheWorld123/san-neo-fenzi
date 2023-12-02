@@ -12,9 +12,12 @@ export default function Devices() {
             .then(data => {
                 console.log()
                 const mytable = document.getElementById('data-container');
-                while (mytable.firstChild) {
-                    mytable.firstChild.remove();
+                if (mytable) {
+                    while (mytable.firstChild) {
+                        mytable.firstChild.remove();
+                    }
                 }
+
 
 
                 for (const row of data.records) {
@@ -35,7 +38,9 @@ export default function Devices() {
                     newRow.appendChild(AQTD);
                     newRow.appendChild(HUMTD);
                     newRow.appendChild(TMPTD);
-                    mytable.appendChild(newRow);
+                    if (mytable) {
+                        mytable.appendChild(newRow);
+                    }
                 }
 
             });

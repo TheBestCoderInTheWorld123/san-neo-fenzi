@@ -1,0 +1,27 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./san-neo-fenzi.db"
+}
+
+model USERS (
+    user_id INT PRIMARY KEY,
+    email VARCHAR(255),
+    hex_password VARCHAR(255),
+    contact_id INT,
+    address_id INT,
+    is_active BOOLEAN,
+    is_verified BOOLEAN,
+    created_by VARCHAR(255),
+    created_at DATETIME,
+    updated_by VARCHAR(255),
+    updated_at DATETIME,
+    FOREIGN KEY (contact_id) REFERENCES CONTACTS(contact_id),
+    FOREIGN KEY (address_id) REFERENCES ADDRESSES(address_id)
+);

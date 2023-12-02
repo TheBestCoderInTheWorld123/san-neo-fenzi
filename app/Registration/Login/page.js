@@ -1,14 +1,13 @@
 "use client";
-import { BiSolidLockAlt } from "react-icons/bi"
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { BiSolidLockAlt } from "react-icons/bi";
 import { IoMdPerson } from "react-icons/io";
-import React, { useState, ChangeEvent } from 'react';
-
-
-import SignUp from "../SignUp/page";
 
 const LogIn = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const router = useRouter();
 
     const handleUsernameChange = (event) => {
         setUsername(event.target.value);
@@ -18,32 +17,31 @@ const LogIn = () => {
         setPassword(event.target.value);
     };
 
-
     const login = async () => {
-        var request = require('request');
-        var options = {
-            'method': 'POST',
-            'url': 'http://51.20.249.252:8000/login',
-            'headers': {
-                'Content-Type': 'application/json'
-            },
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 "username": username,
                 "password": password
             })
-
         };
-        request(options, function (error, response) {
-            if (error) throw new Error(error);
-            console.log(response.body);
-            if (JSON.parse(response.body)['status_code'] == 101) { window.location.href = "/Report"; };
-        });
 
+        try {
+            const response = await fetch('http://51.20.249.252:8000/login', requestOptions);
+            const data = await response.json();
+            console.log(data);
+
+            if (data['status_code'] === 101) {
+                router.push("/Home");
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
     };
 
     const goToSignUp = () => {
-        // router.push('/Registration/SignUp');
-        window.location.href = '/Registration/SignUp';
+        router.push('/Registration/SignUp');
     };
 
     return (
@@ -78,13 +76,12 @@ const LogIn = () => {
                 </div>
                 <div id="sidediv"
                     className="w-2/5 text-white rounded-tr-2xl rounded-br-2xl py-36 px-12">
-                    <h2 className="text-3xl font-black">Don't have an account?</h2>
-                    <button onClick={goToSignUp} id="side-signup-button"
-                        className="hover:bg-white border-white border-2 text-white w-40 m-4 py-1 rounded-3xl text-lg font-semibold">Sign Up</button>
+                    <h2 className="text-3xl font-black">Don&apos;t have an account?</h2>
+                    <button onClick={goToSignUp} id="side-signup-button" className="hover:bg-white border-white border-2 text-white w-40 m-4 py-1 rounded-3xl text-lg font-semibold">Sign Up</button>
                 </div>
             </div>
-        </main >
-    )
-}
+        </main>
+    );
+};
 
 export default LogIn;

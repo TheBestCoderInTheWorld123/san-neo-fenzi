@@ -5,9 +5,7 @@ import { Card, CardBody, CardHeader, Col, Row, Table } from 'reactstrap';
 const tableTypes = ['hover'];
 const TablePage = () => {
   return (
-    <div
-      className="TablePage"
-    >
+    <div>
 
       {tableTypes.map((tableType, index) => (
         <Row key={index}>
@@ -15,7 +13,7 @@ const TablePage = () => {
             <Card className="mb-3 px-6 ">
               <CardHeader className="font-extrabold text-lg py-6">Devices Data</CardHeader>
               <div className="card card-body">
-                <table className="table table-hover w-full">
+                <table>
                   <thead>
                     <th>Sr. No.</th>
                     <th>Timestamp</th>

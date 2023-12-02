@@ -1,10 +1,13 @@
+"use client";
 import { BiSolidEnvelope, BiSolidLockAlt } from "react-icons/bi"
 import { BsFillPersonFill } from "react-icons/bs"
 import LogIn from "../Login/page";
+import { useRouter } from "next/navigation";
+
 const SignUp = () => {
+    const router = useRouter();
     const goToLogIn = () => {
-        // router.push('/Registration/SignUp');
-        window.location.href = '/Registration/Login';
+        router.push('/Registration/Login');
     };
 
     return (
