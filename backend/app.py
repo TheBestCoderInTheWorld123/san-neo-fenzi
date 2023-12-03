@@ -1716,7 +1716,7 @@ async def get_device_latest_records(db: Session = Depends(get_db)):
 
     return {"records": list(result.values())}
 
-@app.get("/get_device_piehart_data")
+@app.get("/get_device_pichart_data")
 async def get_device_pichart_data(db: Session = Depends(get_db)):
     # deviceslatestrecords = db.query(DeviceLatestRecord).all()
 
