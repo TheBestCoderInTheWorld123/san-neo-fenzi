@@ -6,6 +6,7 @@ import Select from "react-select";
 
 export default function Report() {
   const [data, setData] = useState([]);
+  // const [rowData, setTableRows] = useState([]);
   const [selectedColumn, setSelectedColumn] = useState("device_serial_number"); // Initialize selectedColumn state variable
   const [showInput, setShowInput] = useState(false);
   const [filterText, setFilterText] = useState("");
@@ -77,14 +78,39 @@ export default function Report() {
     </tr>
   )) : null;
 
+  // const showTableClick = async () => {
+  //   // Construct the query parameters
+  //   console.log(fromDateTime, toDateTime);
+  //   const queryParams = new URLSearchParams({
+  //     sno: selectedSerialNumber, // The serial number selected from the dropdown
+  //     tdate: toDateTime, // Assuming this state holds the 'to' date
+  //     fdate: fromDateTime // Assuming this state holds the 'from' date
+  //   });
+
+  //   try {
+  //     const response = await fetch(`http://51.20.249.252:8000/history_by_device_serial_no?${queryParams}`);
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! status: ${response.status}`);
+  //     }
+  //     const historyData = await response.json();
+  //     console.log(historyData);
+  //     setData(historyData.records); // Be sure this is the correct place to set data
+  //     setShowTable(true); // Update state to show table
+  //   } catch (error) {
+  //     console.error('Error fetching history data:', error);
+  //   }
+  // };
 
   const showTableClick = async () => {
-    // Construct the query parameters
-    console.log(fromDateTime, toDateTime);
+    const formattedToDateTime = new Date(toDateTime).toISOString().replace(/\.\d{3}Z$/, '').replace('T', ' '); 
+    const formattedFromDateTime = new Date(fromDateTime).toISOString().replace(/\.\d{3}Z$/, '').replace('T', ' '); 
+
+    console.log(formattedFromDateTime, formattedToDateTime, selectedColumn);
+
     const queryParams = new URLSearchParams({
-      sno: selectedSerialNumber, // The serial number selected from the dropdown
-      tdate: fromDateTime, // Assuming this state holds the 'to' date
-      fdate: toDateTime // Assuming this state holds the 'from' date
+      sno: selectedColumn,
+      tdate: formattedToDateTime,
+      fdate: formattedFromDateTime
     });
 
     try {
@@ -94,12 +120,13 @@ export default function Report() {
       }
       const historyData = await response.json();
       console.log(historyData);
-      setData(historyData.records); // Be sure this is the correct place to set data
-      setShowTable(true); // Update state to show table
+      setData(historyData.records);
+      setShowTable(true);
     } catch (error) {
       console.error('Error fetching history data:', error);
     }
   };
+
 
 
   return (
