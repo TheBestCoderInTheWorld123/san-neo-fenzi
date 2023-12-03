@@ -360,9 +360,22 @@ def get_all_device(db: Session = Depends(get_db)):
 
 @app.get("/history_by_device_serial_no")
 def history_by_device_serial_no(sno: str, tdate: datetime, fdate: datetime, db: Session = Depends(get_db)):
-    dth = db.query(DeviceTagHistory).filter(DeviceTagHistory.sr_no == sno and DeviceTagHistory.recorded_date_time >= fdate and DeviceTagHistory.recorded_date_time <= tdate).all()
+    print(tdate)
+    print(fdate)
+
+    # tdate = datetime.strptime(tdate, "%Y-%m-%d %H:%M:%S")
+    # fdate = datetime.strptime(fdate, "%Y-%m-%d %H:%M:%S")
+    # # dth = db.query(DeviceTagHistory).filter(DeviceTagHistory.sr_no == sno and DeviceTagHistory.recorded_date_time >= fdate
+    #                                         and DeviceTagHistory.recorded_date_time <= tdate).all()
+    dth = db.query(DeviceTagHistory).filter(
+        DeviceTagHistory.sr_no == sno,
+        and_(
+            DeviceTagHistory.recorded_date_time >= fdate,
+            DeviceTagHistory.recorded_date_time <= tdate
+        )
+    ).all()
+
     result = {}
-    current_time = datetime.now()
     for record in dth:
         #device_id = record.devices_device_id
         device_serial_number = record.sr_no
