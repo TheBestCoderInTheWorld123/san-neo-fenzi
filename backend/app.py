@@ -360,20 +360,48 @@ def get_all_device(db: Session = Depends(get_db)):
 
 @app.get("/history_by_device_serial_no")
 def history_by_device_serial_no(sno: str, tdate: datetime, fdate: datetime, db: Session = Depends(get_db)):
-    dth = db.query(DeviceTagHistory).filter(DeviceTagHistory.sr_no == sno and DeviceTagHistory.recorded_date_time >= fdate and DeviceTagHistory.recorded_date_time <= tdate).all()
-    result = []
-    current_time = datetime.now()
+    print(tdate)
+    print(fdate)
+
+    # tdate = datetime.strptime(tdate, "%Y-%m-%d %H:%M:%S")
+    # fdate = datetime.strptime(fdate, "%Y-%m-%d %H:%M:%S")
+    # # dth = db.query(DeviceTagHistory).filter(DeviceTagHistory.sr_no == sno and DeviceTagHistory.recorded_date_time >= fdate
+    #                                         and DeviceTagHistory.recorded_date_time <= tdate).all()
+    dth = db.query(DeviceTagHistory).filter(
+        DeviceTagHistory.sr_no == sno,
+        and_(
+            DeviceTagHistory.recorded_date_time >= fdate,
+            DeviceTagHistory.recorded_date_time <= tdate
+        )
+    ).all()
+
+    result = {}
     for record in dth:
-        device_id = record.did
-        sr_no = record.sr_no
+        #device_id = record.devices_device_id
+        device_serial_number = record.sr_no
         tag_description = record.tag_desc
         tag_value = record.tag_value
-        tag_status = record.tag_status
-        
         latest_recorded_date = record.recorded_date_time.strftime("%Y-%m-%d %H:%M:%S")
-        result.append({'device_serial_number': sr_no, 'tags': tag_description, "tag_value": tag_value, 'latest_recorded_date': latest_recorded_date, 'satus': tag_status})
+        # Assuming latest_recorded_date is in the format "YYYY-MM-DD HH:MM:SS"
+        latest_recorded_date_ = record.recorded_date_time  # Assuming this is a string
+        if latest_recorded_date not in result:
+            result[latest_recorded_date] = {'device_serial_number': device_serial_number, 'tags': {}, 'latest_recorded_date': latest_recorded_date}
+        if tag_description not in result[latest_recorded_date]['tags']:
+            result[latest_recorded_date]['tags'][tag_description] = tag_value
 
-    return {"records": result}
+    return {"records": list(result.values())}
+    # result = []
+    # current_time = datetime.now()
+    # for record in dth:
+    #     device_id = record.did
+    #     sr_no = record.sr_no
+    #     tag_description = record.tag_desc
+    #     tag_value = record.tag_value
+    #     tag_status = record.tag_status
+    #     latest_recorded_date = record.recorded_date_time.strftime("%Y-%m-%d %H:%M:%S")
+    #     result.append({'device_serial_number': sr_no, 'tags': tag_description, "tag_value": tag_value, 'latest_recorded_date': latest_recorded_date, 'satus': tag_status})
+
+    # return {"records": result}
 # Login API 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -1688,7 +1716,7 @@ async def get_device_latest_records(db: Session = Depends(get_db)):
 
     return {"records": list(result.values())}
 
-@app.get("/get_device_piehart_data")
+@app.get("/get_device_pichart_data")
 async def get_device_pichart_data(db: Session = Depends(get_db)):
     # deviceslatestrecords = db.query(DeviceLatestRecord).all()
 
