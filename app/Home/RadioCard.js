@@ -2,10 +2,15 @@ import {
   Box,
   useRadioGroup,
   useRadio,
+  Switch,
+  FormLabel,
   HStack,
+  VStack,
   ChakraProvider,
+  Spacer,
+  Flex
 } from "@chakra-ui/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 function RadioOption({ radio }) {
   const { getInputProps, getCheckboxProps } = useRadio(radio);
@@ -36,6 +41,8 @@ function RadioOption({ radio }) {
 
 export default function RadioCard({ setRadioValue }) {
   const options = ["Table", "Map"];
+  const [isMapSelected, setIsMapSelected] = useState(false);
+  
   const { getRootProps, getRadioProps } = useRadioGroup({
     name: "framework",
     defaultValue: "Table",
@@ -51,14 +58,31 @@ export default function RadioCard({ setRadioValue }) {
     setRadioValue("Table");
   }, []);
 
+  const handleToggle = () => {
+    setIsMapSelected(!isMapSelected);
+    setRadioValue(isMapSelected ? "Table" : "Map");
+  };
+
+
   return (
     <ChakraProvider>
-      <HStack {...group}>
-        {options.map((value) => {
-          const radio = getRadioProps({ value });
-          return <RadioOption key={value} radio={radio} />;
-        })}
-      </HStack>
-    </ChakraProvider>
+    <Flex justifyContent="flex-start" alignItems="center">
+      <Box>
+        <Flex alignItems="center">
+          <FormLabel htmlFor="toggle" mb="0" mr={2}> {/* Add a margin to the right of the label */}
+            {isMapSelected ? "Map" : "Table"}
+          </FormLabel>
+          <Switch
+            id="toggle"
+            isChecked={isMapSelected}
+            onChange={handleToggle}
+            colorScheme="teal"
+            size="md"
+          />
+        </Flex>
+      </Box>
+    </Flex>
+  </ChakraProvider>
+  
   );
 }

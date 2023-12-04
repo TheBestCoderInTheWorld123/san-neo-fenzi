@@ -16,7 +16,7 @@ import Link from "next/link";
 export default function Navbar() {
     const goToLogIn = () => {
         // router.push('/Login-SignUp/SignUp');
-        window.location.href = '/Login-SignUp/Login';
+        window.location.href = '/';
     };
     const goToHome = () => {
         window.location.href = '/Home/page';
@@ -53,7 +53,7 @@ export default function Navbar() {
                                       Settings
                                   </Link>  
                                   <Link
-                                  href={"/Login-SignUp/Login"}>
+                                  href={"/"}>
                                       Log Out
                                   </Link>                           
                               </div>

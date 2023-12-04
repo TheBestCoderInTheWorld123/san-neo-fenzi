@@ -33,7 +33,7 @@ export default function RadioButton() {
       <div className="mb-4">
       </div>
       {/* <!-- Pie chart section --> */}
-      <div className="h-0.5/3 mb-4"> 
+      <div className="h-0.5/3 mb-4 border-2 border-gray-300"> 
       {/* <!-- Adjust height as needed --> */}
         <Pie className="w-full h-full" />
          {/* <!-- Pie chart fills the container --> */}
