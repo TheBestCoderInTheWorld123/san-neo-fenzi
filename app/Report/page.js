@@ -179,7 +179,7 @@ export default function Report() {
 
                         <div id="TablePage" className="card card-body">
                           <table id="TablePage" className="table table-hover w-full">
-                            <thead>
+                            <thead className="bg-blue-200">
                               <tr>
                                 <th>Sr. No.</th>
                                 <th>Timestamp</th>

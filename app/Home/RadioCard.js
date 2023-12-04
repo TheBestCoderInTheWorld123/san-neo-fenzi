@@ -39,14 +39,17 @@ export default function RadioCard({ setRadioValue }) {
   const { getRootProps, getRadioProps } = useRadioGroup({
     name: "framework",
     defaultValue: "Table",
-    onChange: setRadioValue,
+    onChange: (value) => {
+      console.log("RadioCard onChange called with:", value); // Add this for debugging
+      setRadioValue(value);
+    },
   });
 
   const group = getRootProps();
 
   useEffect(() => {
     setRadioValue("Table");
-  }, [setRadioValue]);
+  }, []);
 
   return (
     <ChakraProvider>

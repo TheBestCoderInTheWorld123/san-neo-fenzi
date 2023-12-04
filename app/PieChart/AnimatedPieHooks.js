@@ -51,12 +51,15 @@ const AnimatedPieHooks = (props) => {
   }, [props.data]);
 
   return (
-    <div style={{ width: '200px', margin: 'auto' }}>
-      <svg ref={ref} width={outerRadius * 2} height={outerRadius * 2}></svg>
-      <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="16">
-          {props.data.live} / {(props.data.offline + props.data.live)}
-        </text>
+    <div style={{ width: '200px', margin: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <svg ref={ref} width={outerRadius * 2} height={outerRadius * 2}>
+    </svg>
+    <div style={{ textAlign: 'center', marginTop: '10px' }}>
+    {isNaN(props.data.live) || isNaN(props.data.offline)
+      ? '-'
+      : `${props.data.live} / ${props.data.offline + props.data.live}`}
     </div>
+  </div>
   );
 };
 
