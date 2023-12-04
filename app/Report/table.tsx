@@ -5,6 +5,7 @@ import { Card, CardBody, CardHeader, Col, Row, Table } from 'reactstrap';
 interface DeviceRecord {
   device_serial_number: string;
   latest_recorded_date: string;
+  comm_satus: string;
   tags: {
     AQ: string;
     HUM: string;
@@ -36,6 +37,12 @@ const TablePage = () => {
     return () => clearInterval(intervalId);
   }, []);
 
+  // Function to return an icon based on the comm_status
+  const getStatusIcon = (status: string) => {
+    let color = status === 'green' ? 'green' : status === 'red' ? 'red' : 'orange';
+    return <span className={`status-icon status-${color}`} />;
+  };
+
   return (
     <div>
       <Row>
@@ -46,6 +53,7 @@ const TablePage = () => {
                 <thead className="bg-blue-200">
                   <tr>
                     <th>Sr. No.</th>
+                    <th>Status</th>
                     <th>Timestamp</th>
                     <th>AQ</th>
                     <th>HUM</th>
@@ -56,6 +64,7 @@ const TablePage = () => {
                   {data.map((row, index) => (
                     <tr key={index}>
                       <td>{row.device_serial_number}</td>
+                      <td>{getStatusIcon(row.comm_satus)}</td>
                       <td>{row.latest_recorded_date}</td>
                       <td>{row.tags.AQ}</td>
                       <td>{row.tags.HUM}</td>

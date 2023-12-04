@@ -192,3 +192,22 @@ thead {
   padding-top:5px;
   padding-bottom: 5px;
 }
+
+.status-icon {
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-green {
+  background-color: green;
+}
+
+.status-red {
+  background-color: red;
+}
+
+.status-orange {
+  background-color: orange;
+}
