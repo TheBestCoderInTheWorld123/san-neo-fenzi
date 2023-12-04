@@ -1067,11 +1067,12 @@ def delete_device(device_id: int, db: Session = Depends(get_db)):
 
 @app.post("/device_tags/", response_model=DeviceTagPydantic)
 def create_device_tag(device: DeviceTagPydantic, db: Session = Depends(get_db)):
-    device = DeviceTag(**device.dict())
-    db.add(device)
+    db_device_tag = DeviceTag(**device.dict())
+    db.add(db_device_tag)
     db.commit()
-    db.refresh(device)
-    return device
+    db.refresh(db_device_tag)
+    return db_device_tag
+
 
 
 

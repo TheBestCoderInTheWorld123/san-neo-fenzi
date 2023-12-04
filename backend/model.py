@@ -1,5 +1,5 @@
 # coding: utf-8
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, DECIMAL, BIGINT, Numeric,Table
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, DECIMAL, BIGINT, Numeric, Table, Sequence
 from sqlalchemy.sql import text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -394,7 +394,7 @@ class DeviceTag(Base):
 
     device_id = Column(ForeignKey('devices.device_id'), nullable=False)
     tag_id = Column(ForeignKey('tags.tag_id'), nullable=False)
-    ID = Column(BIGINT, primary_key=True)
+    ID = Column(BIGINT, Sequence('device_tag_id_seq'), primary_key=True)
 
     # device = relationship('Device')
     # tag = relationship('Tag')
