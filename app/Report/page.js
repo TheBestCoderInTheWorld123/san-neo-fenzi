@@ -1,8 +1,12 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Navbar from "./navbar";
 import { Card, CardBody, CardHeader, Col, Row, Table, Button } from "reactstrap";
 import Select from "react-select";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 export default function Report() {
   const [data, setData] = useState([]);
@@ -16,6 +20,69 @@ export default function Report() {
   // const [options, setOptions, setDeviceData] = useState([]);
   const [options, setOptions] = useState([]);
   const [selectedSerialNumber, setSelectedSerialNumber] = useState('');
+
+  const [currentPage, setCurrentPage] = useState(0);
+  const recordsPerPage = 10; // Adjust the number of records per page as needed
+  const totalPages = Math.ceil(data.length / recordsPerPage);
+
+  // Export functions
+  const exportToPDF = () => {
+    const unit = "pt";
+    const size = "A4"; // Use A4 paper size
+    const orientation = "landscape"; // Portrait or landscape
+  
+    const marginLeft = 40;
+    const doc = new jsPDF(orientation, unit, size);
+  
+    doc.setFontSize(15);
+  
+    const title = `Report for Sr. No: ${selectedColumn}`;
+    const headers = [["Sr. No.", "Timestamp", "AQ", "HUM", "TMP"]];
+  
+    const data_table = data.map((elt, index) => [
+      index + 1, // Assuming you want to add a row index as "Sr. No."
+      elt.latest_recorded_date,
+      elt.tags.AQ,
+      elt.tags.HUM,
+      elt.tags.TMP,
+    ]);
+  
+    let content = {
+      startY: 50,
+      head: headers,
+      body: data_table,
+    };
+  
+    doc.text(title, marginLeft, 40);
+    doc.autoTable(content);
+    doc.save("report.pdf")
+  };
+
+  const exportToExcel = () => {
+  // Transform data for Excel if needed (in case of complex or nested structures)
+  const worksheet = XLSX.utils.json_to_sheet(data.map(item => ({
+    'Sr. No.': item.device_serial_number,
+    'Timestamp': item.latest_recorded_date,
+    'AQ': item.tags.AQ,
+    'HUM': item.tags.HUM,
+    'TMP': item.tags.TMP,
+  })));
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+  XLSX.writeFile(workbook, 'table-data.xlsx');
+};
+  // Function to handle the pagination
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
+  // Calculate the current page data
+  const currentTableData = useMemo(() => {
+    const firstPageIndex = currentPage * recordsPerPage;
+    const lastPageIndex = firstPageIndex + recordsPerPage;
+    return data.slice(firstPageIndex, lastPageIndex);
+  }, [currentPage, data]);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -68,7 +135,7 @@ export default function Report() {
 
 
 
-  const tableRows = data ? data.map((row) => (
+  const tableRows = currentTableData ? currentTableData.map((row) => (
     <tr key={row.device_serial_number}>
       <td>{row.device_serial_number}</td>
       <td>{row.latest_recorded_date}</td>
@@ -78,30 +145,7 @@ export default function Report() {
     </tr>
   )) : null;
 
-  // const showTableClick = async () => {
-  //   // Construct the query parameters
-  //   console.log(fromDateTime, toDateTime);
-  //   const queryParams = new URLSearchParams({
-  //     sno: selectedSerialNumber, // The serial number selected from the dropdown
-  //     tdate: toDateTime, // Assuming this state holds the 'to' date
-  //     fdate: fromDateTime // Assuming this state holds the 'from' date
-  //   });
-
-  //   try {
-  //     const response = await fetch(`http://51.20.249.252:8000/history_by_device_serial_no?${queryParams}`);
-  //     if (!response.ok) {
-  //       throw new Error(`HTTP error! status: ${response.status}`);
-  //     }
-  //     const historyData = await response.json();
-  //     console.log(historyData);
-  //     setData(historyData.records); // Be sure this is the correct place to set data
-  //     setShowTable(true); // Update state to show table
-  //   } catch (error) {
-  //     console.error('Error fetching history data:', error);
-  //   }
-  // };
-
-  const showTableClick = async () => {
+    const showTableClick = async () => {
     const formattedToDateTime = new Date(toDateTime).toISOString().replace(/\.\d{3}Z$/, '').replace('T', ' '); 
     const formattedFromDateTime = new Date(fromDateTime).toISOString().replace(/\.\d{3}Z$/, '').replace('T', ' '); 
 
@@ -121,6 +165,7 @@ export default function Report() {
       const historyData = await response.json();
       console.log(historyData);
       setData(historyData.records);
+
       setShowTable(true);
     } catch (error) {
       console.error('Error fetching history data:', error);
@@ -172,12 +217,17 @@ export default function Report() {
 
               <div>
                 {showTable && (
+                  <>
+                   <div className="flex justify-end mb-2">
+                   <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2" onClick={exportToPDF}>Export to PDF</button>
+                   <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={exportToExcel}>Export to Excel</button>
+                 </div>
                   <Row>
                     <Col>
-                      <Card className="mb-3 px-6">
-                        <CardHeader className="font-extrabold text-lg py-6">Table</CardHeader>
+                      <Card className="mb-3">
+                        {/* <CardHeader className="font-extrabold text-lg py-6"></CardHeader> */}
 
-                        <div id="TablePage" className="card card-body">
+                        <div className="overflow-auto" style={{ maxHeight: '600px' }}>
                           <table id="TablePage" className="table table-hover w-full">
                             <thead className="bg-blue-200">
                               <tr>
@@ -194,12 +244,24 @@ export default function Report() {
                       </Card>
                     </Col>
                   </Row>
+                  <div className="flex justify-between items-center mt-4">
+              <div>
+                <button className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 0}>Previous</button>
+                <span className="mx-2">Page {currentPage + 1} of {totalPages}</span>
+                <button className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage >= totalPages - 1}>Next</button>
+              </div>
+              <div className="text-sm">
+                Total Records: {data.length}
+              </div>
+            </div>
+          </>
                 )}
               </div>
             </div>
           </div>
         </div>
       </div>
-    </main>
+      
+    </main> 
   )
 };
