@@ -25,6 +25,17 @@ export default function Report() {
   const recordsPerPage = 10; // Adjust the number of records per page as needed
   const totalPages = Math.ceil(data.length / recordsPerPage);
 
+  const validateInputs = () => {
+    // Basic validation: check if inputs are not empty
+    if (!fromDateTime || !toDateTime || !selectedColumn) {
+      // console.log("returning false");
+      return false;
+    }
+      // Further validation can be added here (e.g., date range validation)
+      // console.log("returning true");
+    return true;
+  };
+
   // Export functions
   const exportToPDF = () => {
     const unit = "pt";
@@ -136,7 +147,7 @@ export default function Report() {
 
 
   const tableRows = currentTableData ? currentTableData.map((row) => (
-    <tr key={row.device_serial_number}>
+    <tr key={row.latest_recorded_date}>
       <td>{row.device_serial_number}</td>
       <td>{row.latest_recorded_date}</td>
       <td>{row.tags.AQ}</td>
@@ -146,6 +157,15 @@ export default function Report() {
   )) : null;
 
     const showTableClick = async () => {
+
+      // Clear existing data
+    setData([]);
+
+      // Check if inputs are valid
+    if (!validateInputs()) {
+       alert('Please fill in all required fields correctly.');
+       return;
+    }  
     const formattedToDateTime = new Date(toDateTime).toISOString().replace(/\.\d{3}Z$/, '').replace('T', ' '); 
     const formattedFromDateTime = new Date(fromDateTime).toISOString().replace(/\.\d{3}Z$/, '').replace('T', ' '); 
 
@@ -210,7 +230,7 @@ export default function Report() {
                   onChange={handleEndDateTimeChange}
                 />
 
-                <button className="tablebutton" onClick={() => showTableClick()} >
+                <button className="tablebutton" onClick={() => showTableClick()} disabled={!validateInputs()}>
                   Show Data
                 </button>
               </div>
