@@ -14,22 +14,23 @@ export default function AlertTable() {
                         <table className="table table-hover w-full">
                             <thead className="bg-blue-200">
                                 <th>Alert ID</th>
+                                <th>Reported At</th>
                                 <th>Alert Type</th>
                                 <th>Device Sr No</th>
-                                <th>Reported At</th>
                             </thead>
                             <tbody>
                                 <tr>
                                     <td>A00001</td>
-                                    <td>Max temperature recorded</td>
-                                    <td>862174069140333</td>
                                     <td>2023-12-05 01:35:00</td>
+                                    <td>Critical</td>
+                                    <td>862174069140333</td>
+                                    
                                 </tr>
                                 <tr>
                                     <td>A00002</td>
-                                    <td>Max Pressure recorded</td>
-                                    <td>862174069141333</td>
                                     <td>2023-12-03 01:35:00</td>
+                                    <td>Normal</td>
+                                    <td>862174069141333</td>
                                 </tr>
                             </tbody>
                         </table>
