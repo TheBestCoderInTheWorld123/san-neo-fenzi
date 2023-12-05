@@ -1,7 +1,7 @@
 import './globals.css'
 export const metadata = {
-  title: 'Penguin-NEO',
-  description: 'Penguin powered by NeoMoment',
+  title: 'Penguin',
+  description: 'Penguin CRM',
 }
 
 export default function RootLayout({

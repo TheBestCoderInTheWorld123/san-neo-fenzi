@@ -53,7 +53,7 @@ const LogIn = () => {
             <div className="bg-white rounded-2xl shadow-md flex w-2/3 max-w-4xl text-center">
                 <div className="w-3/5 p-5">
                     <div className="text-left px-4 font-black">
-                        <p>Penguin (powered by Neo) </p>
+                        <p>Penguin CRM Private Limited</p>
                     </div>
                     <div className="py-10">
                         <h2 id="text"

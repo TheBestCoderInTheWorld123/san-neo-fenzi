@@ -16,12 +16,20 @@ export default function AlertTable() {
                                 <th>Alert ID</th>
                                 <th>Alert Type</th>
                                 <th>Device Sr No</th>
+                                <th>Reported At</th>
                             </thead>
                             <tbody>
                                 <tr>
-                                    {/* <td>Content 1</td>
-                                    <td>Content 2</td>
-                                    <td>Content 3</td> */}
+                                    <td>A00001</td>
+                                    <td>Max temperature recorded</td>
+                                    <td>862174069140333</td>
+                                    <td>2023-12-05 01:35:00</td>
+                                </tr>
+                                <tr>
+                                    <td>A00002</td>
+                                    <td>Max Pressure recorded</td>
+                                    <td>862174069141333</td>
+                                    <td>2023-12-03 01:35:00</td>
                                 </tr>
                             </tbody>
                         </table>

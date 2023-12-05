@@ -63,7 +63,7 @@ export default function Navbar() {
               </Sheet>
           </div>
           <div className="hidden md:flex md:space-x-4 text-white">
-              <Button 
+              {/* <Button 
               className="text-md"
               id = "button"> 
                   Profile
@@ -72,7 +72,7 @@ export default function Navbar() {
               className="text-md"
               id = "button"> 
                   Settings
-              </Button>
+              </Button> */}
               <Button 
               className="text-md"
               id = "button"

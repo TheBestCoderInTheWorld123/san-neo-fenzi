@@ -1762,10 +1762,10 @@ async def get_device_pichart_data(db: Session = Depends(get_db)):
         minutes_difference = time_difference.total_seconds() / 60  # Convert to minutes
 
         # Assign comm_status based on time difference
-        if minutes_difference <= 31:
+        if minutes_difference <= 60:
             comm_status = 'green'
             live_count += 1
-        elif 31 < minutes_difference <= 61:
+        elif 61 < minutes_difference <= 121:
             comm_status = 'orange'
             offline_count += 1
         else:
