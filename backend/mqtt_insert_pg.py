@@ -27,8 +27,10 @@ def get_device_tag_id(session, device_id, tag_id):
 def insert_history_data(session, data):
     for _, entries in data.items():
         imei = entries[0]['IMEI']
+        imei = imei.replace('"', '')
+        # print('imei', imei)
         device_id = get_device_id(session, imei)
-
+        # print('device_id',device_id)
         for entry in entries[1:]:
             for tag_description, value in entry.items():
                 if tag_description in ['status', 'date_time']:

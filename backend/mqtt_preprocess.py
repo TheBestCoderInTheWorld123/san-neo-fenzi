@@ -11,6 +11,14 @@ from datetime import datetime
 # IMEI:"862174069140333",AQ:">10.0",HUM:"51",TMP:"32",TIM:"2023/11/21,13:03"
 # --"""
 # data = "IMEI:'862174069140333',AQ:'>10.0',HUM:'51',TMP:'32',TIM:'2023/11/21,13:02'"
+def safe_strptime(date_str, format):
+    try:
+        return datetime.strptime(date_str, format)
+    except ValueError:
+        print(f"Error: time data '{date_str}' does not match format '{format}'")
+        # Handle the error as appropriate for your case
+        # For example, you might want to return None or a default date
+        return None
 def preprocess(data):
     data_split = data.split(',')
     print(data_split)
@@ -40,7 +48,11 @@ def preprocess(data):
             #date_str = (data_split[len(data_split)-2].split(':')[1] +" "+ data_split[len(data_split)-1]).strip("'")
             date_str = (data_split[len(data_split)-2].split(':')[1] + " " + data_split[len(data_split)-1]).strip("'\"")
             print('data string', date_str)
-            date_time  = datetime.strptime(date_str,'%Y/%m/%d %H:%M')
+            date_time = safe_strptime(date_str, '%Y/%m/%d %H:%M')
+            # date_time  = datetime.strptime(date_str,'%Y/%m/%d %H:%M')
+
+            if date_time is None:
+                break
             record.append([{'IMEI': imei}, {data_split[i].split(':')[0]: record_value}, {'status': status}, {'date_time': date_time}])
             record_dict[j]=record[-1]
             j+=1
