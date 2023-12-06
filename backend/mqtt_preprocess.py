@@ -38,6 +38,7 @@ def preprocess(data):
             status = status.replace("'","")
             # print(record_value)
             date_str = (data_split[len(data_split)-2].split(':')[1] +" "+ data_split[len(data_split)-1]).strip("'")
+            print('data string', date_str)
             date_time  = datetime.strptime(date_str,'%Y/%m/%d %H:%M')
             record.append([{'IMEI': imei}, {data_split[i].split(':')[0]: record_value}, {'status': status}, {'date_time': date_time}])
             record_dict[j]=record[-1]
