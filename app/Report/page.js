@@ -7,23 +7,30 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import domtoimage from 'dom-to-image';
 
 export default function Report() {
   const [data, setData] = useState([]);
-  // const [rowData, setTableRows] = useState([]);
   const [selectedColumn, setSelectedColumn] = useState("device_serial_number"); // Initialize selectedColumn state variable
   const [showInput, setShowInput] = useState(false);
   const [filterText, setFilterText] = useState("");
   const [fromDateTime, setStartDateTime] = useState("");
   const [toDateTime, setEndDateTime] = useState("");
   const [showTable, setShowTable] = useState(false);
-  // const [options, setOptions, setDeviceData] = useState([]);
   const [options, setOptions] = useState([]);
   const [selectedSerialNumber, setSelectedSerialNumber] = useState('');
 
   const [currentPage, setCurrentPage] = useState(0);
   const recordsPerPage = 10; // Adjust the number of records per page as needed
   const totalPages = Math.ceil(data.length / recordsPerPage);
+  const [displayType, setDisplayType] = useState('table'); // 'table' or 'chart'
+  const displayOptions = [
+    { value: 'table', label: 'Table' },
+    { value: 'chart', label: 'Chart' }
+  ];
+  const [selectedDisplayOption, setSelectedDisplayOption] = useState(displayOptions[0]);
+
 
   const validateInputs = () => {
     // Basic validation: check if inputs are not empty
@@ -36,6 +43,47 @@ export default function Report() {
     return true;
   };
 
+    const exportChartAsImage = () => {
+    const chartNode = document.getElementById('chartId'); // Replace with your chart's ID
+    if (chartNode) {
+      domtoimage.toPng(chartNode)
+        .then((dataUrl) => {
+          const link = document.createElement('a');
+          const formattedEndDate = toDateTime.split('T')[0]; // Assuming ISO format: YYYY-MM-DDTHH:MM
+          link.download = `${selectedColumn}_${formattedEndDate}.png`;
+          link.href = dataUrl;
+          link.click();
+        })
+        .catch((error) => {
+          console.error('could not export the chart as image', error);
+        });
+    }
+  };
+  
+  const exportChartToPDF = () => {
+    const chartNode = document.getElementById('chartId'); // Replace with your chart's ID
+    if (chartNode) {
+      domtoimage.toPng(chartNode)
+        .then((dataUrl) => {
+          const formattedStartDate = fromDateTime.split('T')[0]; // Assuming ISO format: YYYY-MM-DDTHH:MM
+          const formattedEndDate = toDateTime.split('T')[0]; // Assuming ISO format: YYYY-MM-DDTHH:MM
+          const title = `Report for Serial Number: ${selectedColumn} from ${fromDateTime} to ${toDateTime}`;
+  
+          const pdf = new jsPDF({
+            orientation: "landscape",
+            unit: "px",
+            format: [chartNode.offsetWidth, chartNode.offsetHeight]
+          });
+          pdf.setFontSize(12);
+          pdf.text(title, 15, 20); // Adjust the position as needed
+          pdf.addImage(dataUrl, 'PNG', 0, 30); // Adjust Y offset to accommodate title
+          pdf.save(`${selectedColumn}_${formattedEndDate}.pdf`);
+        })
+        .catch((error) => {
+          console.error('could not export the chart as PDF', error);
+        });
+    }
+  };
   // Export functions
   const exportToPDF = () => {
     const unit = "pt";
@@ -192,6 +240,31 @@ export default function Report() {
     }
   };
 
+  const renderChart = () => {
+    const chartData = data.map(item => ({
+      Timestamp: item.latest_recorded_date,
+      AQ: Number(item.tags.AQ),
+      HUM: Number(item.tags.HUM),
+      TMP: Number(item.tags.TMP),
+    }));
+  
+    return (
+      <ResponsiveContainer width="100%" height={400} id="chartId">
+        <LineChart data={chartData} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="Timestamp" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Line type="monotone" dataKey="AQ" stroke="#8884d8" activeDot={{ r: 8 }} />
+          <Line type="monotone" dataKey="HUM" stroke="#82ca9d" />
+          <Line type="monotone" dataKey="TMP" stroke="#ffc658" />
+        </LineChart>
+      </ResponsiveContainer>
+    );
+  };
+  
+
 
 
   return (
@@ -207,6 +280,13 @@ export default function Report() {
           <div id="TablePage">
             <div className="flex-col m-4">
               <div className="flex items-center mr-4">
+              <label className="mr-2">Report Type</label>
+              <Select
+                value={selectedDisplayOption}
+                onChange={setSelectedDisplayOption}
+                options={displayOptions}
+                className="w-40"
+              />
                 <label className="mr-2">Sr. No.</label>
                 <Select
                   className="filter-select"
@@ -237,6 +317,7 @@ export default function Report() {
 
               <div>
                 {showTable && (
+    selectedDisplayOption.value === 'table' ?  (
                   <>
                    <div className="flex justify-end mb-2">
                    <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2" onClick={exportToPDF}>Export to PDF</button>
@@ -275,7 +356,16 @@ export default function Report() {
               </div>
             </div>
           </>
-                )}
+                ) : (
+                  <>
+                    {renderChart()}
+                    <div className="flex justify-between">
+                      <button className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l" onClick={exportChartAsImage}>Export Chart as Image</button>
+                      <button className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r" onClick={exportChartToPDF}>Export Chart to PDF</button>
+                    </div>
+                  </>
+                )
+              )}
               </div>
             </div>
           </div>
