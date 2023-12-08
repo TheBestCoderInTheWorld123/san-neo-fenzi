@@ -4,9 +4,10 @@ export default function AlertTable() {
     return (
                 
         <Row>
-            <div className="font-extrabold text-lg mt-2 py-6 text-center w-full"> {/* Center text */}
-                    <p id="text">Alert Data</p>
-        </div>
+            {/* <div className="font-extrabold text-lg mt-2 py-6 text-center w-full"> 
+            {/* Center text */}
+                    {/* <p id="text">Alert Data</p> */}
+        {/* </div> */} 
         
             <Col>
                 <Card className="mb-3 px-6 ">

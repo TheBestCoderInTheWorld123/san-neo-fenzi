@@ -32,9 +32,10 @@ const Pie = () => {
   return (
     <div className="App">
   <div className="flex flex-col items-center"> {/* Flex container to align children vertically */}
-    <div className="font-extrabold text-lg py-6 text-center w-full"> {/* Center text */}
-      <p id="text">Communication Status</p>
-    </div>
+    {/* <div className="font-extrabold text-lg py-6 text-center w-full">  */}
+    {/* Center text */}
+       {/* <p id="text">Communication Status</p> 
+     </div>  */}
     <AnimatedPieHooks
       data={data}
       width={500}

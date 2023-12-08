@@ -19,31 +19,43 @@ export default function RadioButton() {
 
   return (
     <div>
-      <div id="sheet" className="px-4 py-4 flex justify-between items-center border-b">
-        <Navbar />
-      </div>
-      <div className="mb-4 h-screen">
-        <div className="flex">
-          <div className="w-3/5 mt-4">
-           <p id="text" className="text-center mb-4 font-black">Devices Data</p>
-            <TablePage />
-          </div>
-          <div className="w-2/5">
-            <Pie />
-          </div>
-        </div>
-        <div className="flex flex-row">
-          <div className="w-1/2 mt-6 flex-grow">
-          <p id="text" className="text-center mb-4 font-black">Map</p>
-
-            <Map />
-          </div>
-           <div className="w-1/2 flex-grow">
-            <AlertTable />
-          </div>
-        </div> 
-      </div>
+    <div id="sheet" className="px-4 py-4 flex justify-between items-center border-b">
+      <Navbar />
     </div>
+    <div className="mb-4 h-screen">
+      {/* First Row with Map and Devices Data Table */}
+      <div className="flex flex-col md:flex-row h-[50vh]">
+        {/* Map (50% Width) with Border and Title */}
+        <div className="md:w-1/2 w-full overflow-auto border border-gray-300">
+          <h3 className="text-center text-xl mb-2">Devices on Map</h3>
+          <Map />
+        </div>
+
+        {/* Devices Data Table (50% Width) with Border and Title */}
+        <div className="md:w-1/2 w-full overflow-auto border border-gray-300">
+          <h3 className="text-center text-xl mb-2">Devices Data</h3>
+          <TablePage />
+        </div>
+      </div>
+
+      {/* Second Row with Alert Table and Pie Chart */}
+      <div className="flex flex-col md:flex-row h-[50vh]">
+        {/* Alert Table (50% Width) with Border and Title */}
+        <div className="md:w-1/2 w-full overflow-auto border border-gray-300">
+          <h3 className="text-center text-xl mb-2">Alert Details</h3>
+          <AlertTable />
+        </div>
+
+        {/* Pie Chart (50% Width) with Border and Title */}
+        <div className="md:w-1/2 w-full overflow-auto border border-gray-300">
+          <h3 className="text-center text-xl mb-2">Comm Status</h3>
+          <Pie />
+        </div>
+      </div> 
+    </div>
+</div>
+
+
   );
 }
 

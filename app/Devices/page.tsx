@@ -11,28 +11,28 @@ export default function Devices() {
 
     }, []);
     return (
-        <main>
-            <div>
-                <div id="sheet" className="px-4 py-4 flex justify-between items-center border-b"><Navbar /></div>
-                <div className="flex">
-                    <div className="w-1/5"> <Treeview /> </div>
-                    <div className="w-4/5">
-                        <Row>
-                            <Col>
-                                <Card className="mb-3 px-6">
-                                    <div className="font-extrabold text-lg py-6 text-center w-full"> {/* Center text */}
-                                        <h4>Devices Latest Data</h4>
-                                    </div>
+        <main className="h-screen">
+        <div className="flex flex-col h-full">
+            <div id="sheet" className="px-4 py-4 flex justify-between items-center border-b"><Navbar /></div>
+            <div className="flex flex-row flex-grow">
+    {/* Treeview with Border and Title (30% Width) */}
+    <div className="w-[20%] h-full border border-gray-300 overflow-auto">
+        <h4 className="text-center text-xl mb-2">Treeview</h4>
+        <Treeview />
+    </div>
 
-                                    <div id="TablePage" className="card card-body">
-                                        <TablePage />
-                                    </div>
-                                </Card>
-                            </Col>
-                        </Row>
-                    </div>
-                </div>
-            </div>
-        </main>
+    {/* TablePage with Border and Title (70% Width) */}
+    <div className="w-[80%] h-full border border-gray-300 overflow-auto">
+        <h4 className="text-center text-xl mb-2">Devices Latest Data</h4>
+        <div id="TablePage" className="h-full">
+            <TablePage />
+        </div>
+    </div>
+</div>
+
+        </div>
+    </main>
+    
+    
     )
 };
