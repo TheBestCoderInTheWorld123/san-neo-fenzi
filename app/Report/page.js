@@ -271,49 +271,55 @@ export default function Report() {
     <main>
       {/* Main div */}
       <div>
-        <div id="sheet" className="px-4 py-4 flex justify-between items-center border-b">
-          <Navbar />
-        </div>
-
+      <div id="sheet" className="px-4 py-4 flex justify-between items-center border-b">
+      <Navbar />
+    </div>
+    
         {/* Main page div */}
         <div>
-          <div id="TablePage">
+          <div id="TablePage" >
             <div className="flex-col m-4">
-              <div className="flex items-center mr-4">
-              <label className="mr-2">Report Type</label>
-              <Select
-                value={selectedDisplayOption}
-                onChange={setSelectedDisplayOption}
-                options={displayOptions}
-                className="w-40"
-              />
-                <label className="mr-2">Sr. No.</label>
-                <Select
-                  className="filter-select"
-                  value={options.find(option => option.value === selectedColumn)}
-                  onChange={(option) => setSelectedColumn(option.value)}
-                  options={options}
-                />
-                <label>Start Date and Time:</label>
-                <input
-                  className="filter-date"
-                  type="datetime-local"
-                  value={fromDateTime}
-                  onChange={handleStartDateTimeChange}
-                />
-
-                <label>End Date and Time:</label>
-                <input
-                  className="filter-date"
-                  type="datetime-local"
-                  value={toDateTime}
-                  onChange={handleEndDateTimeChange}
-                />
-
-                <button className="tablebutton" onClick={() => showTableClick()} disabled={!validateInputs()}>
-                  Show Data
-                </button>
-              </div>
+            <div className="flex flex-wrap justify-center md:justify-start -mx-2">
+            <div className="flex items-center mb-2 md:mb-0 mx-2">
+    <label className="mr-2 text-sm md:text-base">Report Type</label>
+    <Select
+      value={selectedDisplayOption}
+      onChange={setSelectedDisplayOption}
+      options={displayOptions}
+      className="w-full md:w-40"
+    />
+  </div>
+  <div className="flex items-center mb-2 md:mb-0 mx-2">
+    <label className="mr-2 text-sm md:text-base">Sr. No.</label>
+    <Select
+      className="flex w-full md:w-40 filter-select" // Added flex class
+      value={options.find(option => option.value === selectedColumn)}
+      onChange={(option) => setSelectedColumn(option.value)}
+      options={options}
+    />
+  </div>
+  <div className="flex items-center mb-2 md:mb-0 mx-2">
+    <label className="mr-2 text-sm md:text-base">Start Date:</label>
+    <input
+      className="w-full md:w-40 filter-date"
+      type="datetime-local"
+      value={fromDateTime}
+      onChange={handleStartDateTimeChange}
+    />
+  </div>
+  <div className="flex items-center mb-2 md:mb-0 mx-2">
+    <label className="mr-2 text-sm md:text-base">End Date:</label>
+    <input
+      className="w-full md:w-40 filter-date"
+      type="datetime-local"
+      value={toDateTime}
+      onChange={handleEndDateTimeChange}
+    />
+  </div>
+  <button className="w-full md:w-auto mt-2 md:mt-0 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => showTableClick()} disabled={!validateInputs()}>
+    Show Data
+  </button>
+</div>
 
               <div>
                 {showTable && (
