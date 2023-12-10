@@ -16,6 +16,9 @@ interface DeviceRecord {
 const TablePage = () => {
   // Use the DeviceRecord type for the state
   const [data, setData] = useState<DeviceRecord[]>([]);
+  const [filteredData, setFilteredData] = useState<DeviceRecord[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+
 
   const fetchData = () => {
     fetch('http://51.20.249.252:8000/get_device_latest_records')
@@ -37,14 +40,47 @@ const TablePage = () => {
     return () => clearInterval(intervalId);
   }, []);
 
+  useEffect(() => {
+    // Filter data when searchTerm changes
+    const lowercasedFilter = searchTerm.toLowerCase();
+    const filtered = data.filter(item =>
+      Object.keys(item).some(key =>
+        typeof item[key as keyof DeviceRecord] === 'string'
+          ? (item[key as keyof DeviceRecord] as string).toLowerCase().includes(lowercasedFilter)
+          : key === 'tags' && Object.entries(item.tags).some(([tagKey, tagValue]) =>
+              // Convert the number to string before calling toLowerCase
+              tagValue.toString().toLowerCase().includes(lowercasedFilter)
+            )
+      )
+    );
+  setFilteredData(filtered);
+  }, [searchTerm, data]);
+
   // Function to return an icon based on the comm_status
   const getStatusIcon = (status: string) => {
     let color = status === 'green' ? 'green' : status === 'red' ? 'red' : 'orange';
     return <span className={`status-icon status-${color}`} />;
   };
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+
   return (
     <div>
+      {/* Search input for all columns */}
+      <div className="flex items-center mb-2 md:mb-0 mx-2">
+      <label className="mr-2 text-sm md:text-base">Filter:</label>
+        <input
+          type="text"
+          className="form-control border-1"
+          placeholder="Search all columns..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+        />
+      </div>
+
       <Row>
         <Col>
           <Card className="mb-3 px-6">
@@ -61,7 +97,7 @@ const TablePage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.map((row, index) => (
+                  {filteredData.map((row, index) => (
                     <tr key={index}>
                       <td>{row.device_serial_number}</td>
                       <td>{getStatusIcon(row.comm_satus)}</td>

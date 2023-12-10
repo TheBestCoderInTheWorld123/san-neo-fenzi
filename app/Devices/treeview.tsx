@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {SyntheticEvent, useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import { TreeView, TreeItem } from '@mui/x-tree-view';
 // import TreeItem from '@mui/lab/TreeItem';
@@ -14,6 +14,8 @@ interface Location {
 
 export default function FileSystemNavigator() {
   const [data, setLocations] = useState([]);
+  const [expanded, setExpanded] = useState<string[]>([]);
+  const [selected, setSelected] = useState(""); // State to keep track of selected node
 
   useEffect(() => {
     async function fetchData() {
@@ -32,6 +34,16 @@ export default function FileSystemNavigator() {
     fetchData();
   }, []);
 
+   // Function to handle node toggle
+   const handleToggle = (event: SyntheticEvent, nodeIds: string[]) => {
+    setExpanded(nodeIds);
+  };
+
+// Function to handle node select
+  const handleSelect = (event: SyntheticEvent, nodeId: string) => {
+    setSelected(nodeId);
+    console.log("Selected node ID:", nodeId); // Here you can get the location_id
+  };
   // const buildTree = (data: []) => {
   //   let tree = data.reduce((acc, node) => {
   //     acc[node.location_id] = { ...node, children: [] };
@@ -67,7 +79,19 @@ export default function FileSystemNavigator() {
       {Array.isArray(nodes.children) && nodes.children.map((node) => renderTree(node))}
     </TreeItem>
   );
+//   const getAllNodeIds = (nodes) => {
+//     let ids = [];
+//     const getNodeIds = (node) => {
+//         ids.push(node.location_id.toString());
+//         if (node.children) {
+//             node.children.forEach(getNodeIds);
+//         }
+//     };
+//     nodes.forEach(getNodeIds);
+//     return ids;
+// };
   const treeData = buildTree(data);
+  // const allNodeIds = getAllNodeIds(treeData);
 
   return (
     <Box sx={{ minHeight: 180, flexGrow: 1, maxWidth: 300 }}>
@@ -75,6 +99,10 @@ export default function FileSystemNavigator() {
         aria-label="file system navigator"
         defaultCollapseIcon={<ExpandMoreIcon />}
         defaultExpandIcon={<ChevronRightIcon />}
+        expanded={expanded} 
+                selected={selected}
+                onNodeToggle={handleToggle}
+                onNodeSelect={handleSelect}
       >
         {treeData.map((node) => renderTree(node))}
       </TreeView>

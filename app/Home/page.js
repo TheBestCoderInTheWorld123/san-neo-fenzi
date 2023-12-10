@@ -19,42 +19,39 @@ export default function RadioButton() {
 
   return (
     <div>
-    <div id="sheet" className="px-4 py-4 flex justify-between items-center border-b">
-      <Navbar />
-    </div>
-    <div className="mb-4 h-screen">
-      {/* First Row with Map and Devices Data Table */}
-      <div className="flex flex-col md:flex-row h-[50vh]">
-        {/* Map (50% Width) with Border and Title */}
-        <div className="md:w-1/2 w-full overflow-auto border border-gray-300">
-          <h3 className="text-center text-xl mb-2">Devices on Map</h3>
+  <div id="sheet" className="px-4 py-4 flex justify-between items-center border-b">
+    <Navbar />
+  </div>
+  <div className="flex-grow overflow-auto">
+    {/* First Row with Map and Devices Data Table */}
+    <div className="flex flex-col md:flex-row md:h-1/2">
+      <div className="w-full md:w-1/2 overflow-hidden">
+        <h3 className="text-center text-xl mb-2">Devices on Map</h3>
+        <div className="relative min-h-[200px] h-full">
           <Map />
         </div>
-
-        {/* Devices Data Table (50% Width) with Border and Title */}
-        <div className="md:w-1/2 w-full overflow-auto border border-gray-300">
-          <h3 className="text-center text-xl mb-2">Devices Data</h3>
-          <TablePage />
-        </div>
       </div>
+      <div className="w-full md:w-1/2 overflow-x-auto">
+        <h3 className="text-center text-xl mb-2">Devices Data</h3>
+        <TablePage />
+      </div>
+    </div>
 
-      {/* Second Row with Alert Table and Pie Chart */}
-      <div className="flex flex-col md:flex-row h-[50vh]">
-        {/* Alert Table (50% Width) with Border and Title */}
-        <div className="md:w-1/2 w-full overflow-auto border border-gray-300">
-          <h3 className="text-center text-xl mb-2">Alert Details</h3>
-          <AlertTable />
-        </div>
-
-        {/* Pie Chart (50% Width) with Border and Title */}
-        <div className="md:w-1/2 w-full overflow-auto border border-gray-300">
-          <h3 className="text-center text-xl mb-2">Comm Status</h3>
+    {/* Second Row with Alert Table and Pie Chart */}
+    <div className="flex flex-col md:flex-row md:h-1/2">
+      <div className="w-full md:w-1/2 overflow-x-auto">
+        <h3 className="text-center text-xl mb-2">Alert Details</h3>
+        <AlertTable />
+      </div>
+      <div className="w-full md:w-1/2 overflow-hidden">
+        <h3 className="text-center text-xl mb-2">Comm Status</h3>
+        <div className="relative min-h-[200px] h-full">
           <Pie />
         </div>
-      </div> 
+      </div>
     </div>
+  </div>
 </div>
-
 
   );
 }

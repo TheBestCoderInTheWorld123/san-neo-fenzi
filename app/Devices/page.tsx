@@ -10,10 +10,12 @@ import FileSystemNavigator from "./treeview";
 export default function Devices() {
     return (
         <main className="h-screen">
+           {/* <div> */}
+  <div id="sheet" className="px-4 py-4 flex justify-between items-center border-b">
+    <Navbar />
+  </div>
             <div className="flex flex-col h-full">
-                <div className="px-4 py-4 flex justify-between items-center border-b">
-                    <Navbar />
-                </div>
+                
                 <div className="flex flex-col md:flex-row flex-grow">
                     <div className="w-full md:w-[20%] h-auto md:h-full border border-gray-300 overflow-auto">
                         <h4 className="text-center text-xl mb-2">Devices by Locations</h4>

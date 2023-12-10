@@ -316,9 +316,11 @@ export default function Report() {
       onChange={handleEndDateTimeChange}
     />
   </div>
-  <button className="w-full md:w-auto mt-2 md:mt-0 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => showTableClick()} disabled={!validateInputs()}>
-    Show Data
-  </button>
+  <div className="flex justify-center md:justify-start w-full md:w-auto px-2 mb-2 md:mb-0">
+        <button className="w-full md:w-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={() => showTableClick()} disabled={!validateInputs()}>
+          Show Data
+        </button>
+      </div>
 </div>
 
               <div>
