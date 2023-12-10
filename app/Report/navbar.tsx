@@ -41,17 +41,17 @@ export default function Navbar() {
                       <AlignJustify />
                   </SheetTrigger>
                   <SheetContent>
-                      <SheetHeader>
+                      <SheetHeader >
                           <SheetDescription>
-                              <div className="flex flex-col space-y-4 items-start w-full h-full text-lg mt-10">
-                                  <Link
+                              <div className="flex flex-col space-y-4 items-start w-full h-full text-lg mt-10 bg-slate-500/100">
+                                  {/* <Link
                                   href={"/"}>
                                       Profile
                                   </Link>
                                   <Link
                                   href={"/"}>
                                       Settings
-                                  </Link>  
+                                  </Link>   */}
                                   <Link
                                   href={"/"}>
                                       Log Out
