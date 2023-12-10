@@ -1702,9 +1702,9 @@ async def get_device_latest_records(db: Session = Depends(get_db)):
         minutes_difference = time_difference.total_seconds() / 60  # Convert to minutes
 
         # Assign comm_status based on time difference
-        if minutes_difference <= 31:
+        if minutes_difference <= 5:
             comm_status = 'green'
-        elif 31 < minutes_difference <= 61:
+        elif 6 < minutes_difference <= 10:
             comm_status = 'orange'
         else:
             comm_status = 'red'
@@ -1762,10 +1762,10 @@ async def get_device_pichart_data(db: Session = Depends(get_db)):
         minutes_difference = time_difference.total_seconds() / 60  # Convert to minutes
 
         # Assign comm_status based on time difference
-        if minutes_difference <= 60:
+        if minutes_difference <= 5:
             comm_status = 'green'
             live_count += 1
-        elif 61 < minutes_difference <= 90:
+        elif 6 < minutes_difference <= 10:
             comm_status = 'orange'
             offline_count += 1
         else:
