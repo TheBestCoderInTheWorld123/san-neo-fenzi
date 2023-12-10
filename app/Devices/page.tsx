@@ -4,6 +4,7 @@ import Navbar from "../Report/navbar";
 import TablePage from "../Report/table";
 import { Card, CardBody, CardHeader, Col, Row, Table, Button } from "reactstrap";
 import FileSystemNavigator from "./treeview";
+import TableDevices from "./TableDevices";
 // import { use } from 'next/navigation';
 
 
@@ -25,7 +26,7 @@ export default function Devices() {
                     <div className="w-full md:w-[100%] h-auto md:h-full border border-gray-300 overflow-auto mt-4 md:mt-0">
                         <h4 className="text-center text-xl mb-2">Devices Latest Data</h4>
                         <div className="h-full">
-                            <TablePage />
+                            <TableDevices />
                         </div>
                     </div>
                 </div>

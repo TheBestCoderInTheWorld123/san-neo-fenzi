@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { Card, CardBody, CardHeader, Col, Row, Table } from 'reactstrap';
-
 interface DeviceRecord {
   device_serial_number: string;
   latest_recorded_date: string;
@@ -79,8 +78,8 @@ const TablePage = () => {
           value={searchTerm}
           onChange={handleSearchChange}
         />
+       {/* <button className="items-left mb-2 md:mb-0 mx-2" onClick={exportPDF}>Export to PDF</button>  */}
       </div>
-
       <Row>
         <Col>
           <Card className="mb-3 px-6">
