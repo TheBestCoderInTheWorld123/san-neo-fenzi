@@ -1538,7 +1538,34 @@ def delete_action_alert(action_id: int, alert_id: int, db: Session = Depends(get
     db.execute(t_actions_alert.delete().where(t_actions_alert.c.action_id==action_id, t_actions_alert.c.alert_id==alert_id))
     db.commit()
     return ActionAlertPydantic(action_id=action_id, alert_id=alert_id)
-    
+
+
+
+@app.post("/alert_config/", response_model=AlertConfigPydantic)
+def create_alert_config(config: AlertConfigPydantic, db: Session = Depends(get_db)):
+    db_config = AlertConfig(
+        tag_id=config.tag_id,
+        tag_value_min=config.tag_value_min,
+        tag_value_max=config.tag_value_max,
+        alert_type=config.alert_type,
+        device_id=config.device_id
+    )
+    db.add(db_config)
+    db.commit()
+    db.refresh(db_config)
+    return db_config
+
+
+@app.delete("/alert_config/{config_id}")
+def alert_config_delete(config_id: int, db: Session = Depends(get_db)):
+    config = db.query(AlertConfig).filter(AlertConfig.config_id == config_id).first()
+    if config is None:
+        return HTTPException(status_code=404, detail="Alert Config not found")
+    db.delete(config)
+    db.commit()
+    config = sqlalchemy_to_dict(config)
+    return AlertConfigPydantic(**config)
+
 # Define the GET method to retrieve all active device data
 @app.get("/active_devices/")
 def get_active_devices(db: Session = Depends(get_db)):

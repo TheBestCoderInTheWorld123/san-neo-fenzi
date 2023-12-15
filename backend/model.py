@@ -406,6 +406,15 @@ t_actions_alert = Table(
     Column('alert_id', ForeignKey('alerts.alert_id'), primary_key=True, nullable=False)
 )
 
+class AlertConfig(Base):
+    __tablename__ = 'alert_config'
+
+    config_id = Column(Integer, Sequence('alert_config_config_id_seq'), primary_key=True)
+    tag_id = Column(Integer, nullable=False)
+    tag_value_min = Column(Integer, nullable=False)
+    tag_value_max = Column(Integer, nullable=False)
+    alert_type = Column(String(255), nullable=False)
+    device_id = Column(Integer, nullable=False)
 
 class AlertExpression(Base):
     __tablename__ = 'alert_expressions'
@@ -891,3 +900,13 @@ class DeviceTagHistoryPydantic(BaseModel):
     recorded_date_time: Optional[datetime] = None
     uom: Optional[str] = None
 Base.metadata.create_all(engine)
+
+class AlertConfigPydantic(BaseModel):
+    tag_id: int
+    tag_value_min: int
+    tag_value_max: int
+    alert_type: str
+    device_id: int
+
+    class Config:
+        orm_mode = True
