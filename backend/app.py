@@ -16,6 +16,7 @@ from sqlalchemy import desc, and_  # Add this import
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import delete
+from sqlalchemy import or_
 
 db_host = '51.20.144.184'
 db_username = 'iot_dev'
@@ -1555,6 +1556,61 @@ def create_alert_config(config: AlertConfigPydantic, db: Session = Depends(get_d
     db.refresh(db_config)
     return db_config
 
+@app.get("/check_history/")
+def read_alert_config(config_id: int, db: Session = Depends(get_db)):
+    # Fetch AlertConfig details
+    config = db.query(AlertConfig).filter(AlertConfig.config_id == config_id).first()
+    if not config:
+        raise HTTPException(status_code=404, detail="Config ID not found")
+
+    # Convert SQLAlchemy result to a dictionary
+    config_dict = sqlalchemy_to_dict(config)
+
+    # Fetch DeviceTag IDs based on config's tag_id and device_id
+    devicetags = db.query(DeviceTag).filter(
+        DeviceTag.tag_id == config_dict['tag_id'],
+        DeviceTag.device_id == config_dict['device_id']
+    ).all()
+    tag_ids = [devicetag.ID for devicetag in devicetags]
+
+    # Fetch Historical data based on DeviceTag IDs and value conditions
+    results = db.query(History, DeviceTag)\
+        .join(DeviceTag, History.device_tag_id == DeviceTag.ID)\
+        .filter(
+            History.device_tag_id.in_(tag_ids),
+            or_(
+                History.value > config_dict["tag_value_max"],
+                History.value < config_dict["tag_value_min"]
+            )
+        )\
+        .all()
+
+    alerts = []
+    for result, devicetag in results:
+        tag_name = db.query(Tag.description).filter(Tag.tag_id == devicetag.tag_id).first()[0]
+        alert = {
+            "tag_id": devicetag.tag_id,
+            "tag_value": result.value,
+            "tag_name": tag_name,
+            "alert_type": config_dict["alert_type"],
+            "device_id": config_dict["device_id"],
+            "time": result.recorded_date_time
+        }
+        alerts.append(alert)
+
+        # Create and addrecorded_date_timevalues_out_of_range row
+        new_alert = alert_values_out_of_range(
+            tag_id=devicetag.tag_id,
+            tag_value=result.value,
+            tag_name=tag_name,
+            alert_type=config_dict["alert_type"],
+            device_id=config_dict["device_id"],
+            time=result.recorded_date_time
+        )
+        db.add(new_alert)
+
+    db.commit()
+    return alerts
 
 @app.delete("/alert_config/{config_id}")
 def alert_config_delete(config_id: int, db: Session = Depends(get_db)):

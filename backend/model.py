@@ -416,6 +416,19 @@ class AlertConfig(Base):
     alert_type = Column(String(255), nullable=False)
     device_id = Column(Integer, nullable=False)
 
+
+class alert_values_out_of_range(Base):
+    __tablename__ = 'alert_values_out_of_range'
+
+    id = Column(Integer, Sequence('alert_values_out_of_range_id_seq'), primary_key=True)
+    tag_id = Column(Integer)
+    tag_value = Column(Integer)
+    tag_name = Column(String(255))
+    alert_type = Column(String(255))
+    device_id = Column(Integer)
+    time = Column(DateTime)
+
+
 class AlertExpression(Base):
     __tablename__ = 'alert_expressions'
 
@@ -902,11 +915,24 @@ class DeviceTagHistoryPydantic(BaseModel):
 Base.metadata.create_all(engine)
 
 class AlertConfigPydantic(BaseModel):
+    config_id: Optional[int] = None
     tag_id: int
     tag_value_min: int
     tag_value_max: int
     alert_type: str
     device_id: int
+
+    class Config:
+        orm_mode = True
+
+class alert_values_out_of_rangePydantic(BaseModel):
+    id: Optional[int] = None
+    tag_id: int
+    tag_value: int
+    tag_name: str
+    alert_type: str
+    device_id: int
+    time: datetime
 
     class Config:
         orm_mode = True
