@@ -21,6 +21,7 @@ def on_message(client, userdata, msg):
     msg_topic = msg.topic
     records = preprocess(data=data) 
     insert_history_data(session, records)
+    insert_alert(session, records)
     print(f"Topic: {msg_topic}\nMessage: {data}")
 
 # Create an MQTT client instance
@@ -35,6 +36,6 @@ client.on_message = on_message
 
 # Connect to the broker
 client.connect(broker_ip, port, 60)
-
 # Loop forever, to continuously check for messages
+
 client.loop_forever()

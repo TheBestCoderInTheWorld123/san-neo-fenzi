@@ -425,8 +425,8 @@ class alert_values_out_of_range(Base):
     tag_value = Column(Integer)
     tag_name = Column(String(255))
     alert_type = Column(String(255))
-    device_id = Column(Integer)
     time = Column(DateTime)
+    device_serial_num = Column(String(255))
 
 
 class AlertExpression(Base):
@@ -931,8 +931,8 @@ class alert_values_out_of_rangePydantic(BaseModel):
     tag_value: int
     tag_name: str
     alert_type: str
-    device_id: int
     time: datetime
+    device_serial_num: str
 
     class Config:
         orm_mode = True

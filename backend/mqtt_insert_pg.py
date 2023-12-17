@@ -1,8 +1,9 @@
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
-from model import Base, History, Device, DeviceTag, Tag, db_url # Import your model classes
+from model import * # Import your model classes
+from app import sqlalchemy_to_dict
 from datetime import datetime
-
+import requests
 # Assuming your database URI is stored in 'DATABASE_URI'
 # DATABASE_URI = 'your_database_uri'
 engine = create_engine(db_url)
@@ -23,6 +24,22 @@ def get_tag_id(session, description):
 
 def get_device_tag_id(session, device_id, tag_id):
     return session.query(DeviceTag.ID).filter(DeviceTag.device_id == device_id, DeviceTag.tag_id == tag_id).scalar()
+
+def insert_alert(session, data):
+    for i, entries in data.items():
+        imei = entries[0]['IMEI']
+        imei = imei.replace('"', '')
+        time_stamp = entries[3]['date_time']
+        tag_name = entries[1].key()
+        tag_value = entries[1][tag_name]
+        tag_id = get_tag_id(session, tag_name)
+        device_id = get_device_id(session, imei)
+        alert_type = session.query(AlertConfig.alert_type).filter(AlertConfig.tag_id == tag_id, AlertConfig.device_id == device_id).first()
+
+        alert = alert_values_out_of_range(tag_id = tag_id, tag_value = tag_value, tag_name = tag_name, alert_type = alert_type, time_stamp = time_stamp, device_serial_num = imei)
+        session.add(alert)
+        session.commit()
+        
 
 def insert_history_data(session, data):
     for _, entries in data.items():

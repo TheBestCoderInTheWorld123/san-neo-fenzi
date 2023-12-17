@@ -1556,7 +1556,7 @@ def create_alert_config(config: AlertConfigPydantic, db: Session = Depends(get_d
     db.refresh(db_config)
     return db_config
 
-@app.get("/check_history/")
+@app.get("/check_history/{config_id}")
 def read_alert_config(config_id: int, db: Session = Depends(get_db)):
     # Fetch AlertConfig details
     config = db.query(AlertConfig).filter(AlertConfig.config_id == config_id).first()
@@ -1572,7 +1572,8 @@ def read_alert_config(config_id: int, db: Session = Depends(get_db)):
         DeviceTag.device_id == config_dict['device_id']
     ).all()
     tag_ids = [devicetag.ID for devicetag in devicetags]
-
+    device = db.query(Device).filter(Device.device_id == config_dict['device_id']).first()
+    device = sqlalchemy_to_dict(device)
     # Fetch Historical data based on DeviceTag IDs and value conditions
     results = db.query(History, DeviceTag)\
         .join(DeviceTag, History.device_tag_id == DeviceTag.ID)\
@@ -1593,8 +1594,8 @@ def read_alert_config(config_id: int, db: Session = Depends(get_db)):
             "tag_value": result.value,
             "tag_name": tag_name,
             "alert_type": config_dict["alert_type"],
-            "device_id": config_dict["device_id"],
-            "time": result.recorded_date_time
+            "time": result.recorded_date_time,
+            "device_serial_num": device["device_serial_number"]
         }
         alerts.append(alert)
 
@@ -1604,13 +1605,29 @@ def read_alert_config(config_id: int, db: Session = Depends(get_db)):
             tag_value=result.value,
             tag_name=tag_name,
             alert_type=config_dict["alert_type"],
-            device_id=config_dict["device_id"],
-            time=result.recorded_date_time
+            time=result.recorded_date_time,
+            device_serial_num = device["device_serial_number"],
         )
         db.add(new_alert)
 
     db.commit()
     return alerts
+
+@app.get("/alert_config/")
+def read_alert_config_id(db: Session = Depends(get_db)):
+    config = db.query(AlertConfig).all()
+    if not config:
+        raise HTTPException(status_code=404, detail="Config IDs not found")
+    config = sqlalchemy_to_dict(config)
+    return config
+
+@app.get("/alert_config/{config_id}")
+def alert_config_get(config_id: int, db: Session = Depends(get_db)):
+    config = db.query(AlertConfig).filter(AlertConfig.config_id == config_id).first()
+    if config is None:
+        raise HTTPException(status_code=404, detail="Config ID not found")
+    config = sqlalchemy_to_dict(config)
+    return config
 
 @app.delete("/alert_config/{config_id}")
 def alert_config_delete(config_id: int, db: Session = Depends(get_db)):
