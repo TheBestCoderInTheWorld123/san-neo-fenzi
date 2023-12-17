@@ -1624,11 +1624,29 @@ def read_alert_config_id(db: Session = Depends(get_db)):
 
 @app.get("/latest_alerts/")
 def read_latest_alerts(db: Session = Depends(get_db)):
-    alerts = db.query(alert_values_out_of_range).order_by(alert_values_out_of_range.time).limit(10).all()
-    if not alerts:
+    latest_alerts = db.query(alert_values_out_of_range).order_by(alert_values_out_of_range.time).limit(10).all()
+    # print(latest_alerts)
+    if not latest_alerts:
         raise HTTPException(status_code=404, detail="Alert IDs not found")
-    alerts = sqlalchemy_to_dict(alerts)
-    return alerts
+    alert_dicts = []
+    for obj in latest_alerts:
+        alert_dict = {
+            "id": obj.id, 
+            "time": obj.time,
+            "tag_id": obj.tag_id,
+            "tag_value": obj.tag_value,
+            "tag_name": obj.tag_name,
+            "alert_type": obj.alert_type,
+            "device_serial_num": obj.device_serial_num
+            # Add more fields as needed
+        }
+        alert_dicts.append(alert_dict)
+
+        # Optional: Print each dictionary
+        # print(alert_dict)
+
+    return alert_dicts
+    # return latest_alerts
 
 
 @app.get("/get_alert/{time}")
