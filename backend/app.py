@@ -54,7 +54,13 @@ def sqlalchemy_to_dict(obj):
     """
     Convert SQLAlchemy model instance to dictionary.
     """
-    return {column.name: getattr(obj, column.name) for column in obj.__table__.columns}
+
+    if isinstance(obj, list):
+        return [sqlalchemy_to_dict(item) for item in obj]
+    else:
+        return {column.name: getattr(obj, column.name) for column in obj.__table__.columns}
+
+    # return {column.name: getattr(obj, column.name) for column in obj.__table__.columns}
 
 
 @app.post("/addresses/", response_model=AddressPydantic)
