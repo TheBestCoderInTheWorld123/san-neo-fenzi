@@ -1621,6 +1621,25 @@ def read_alert_config_id(db: Session = Depends(get_db)):
     config = sqlalchemy_to_dict(config)
     return config
 
+
+@app.get("/latest_alerts/")
+def read_latest_alerts(db: Session = Depends(get_db)):
+    alerts = db.query(alert_values_out_of_range).order_by(alert_values_out_of_range.time).limit(10).all()
+    if not alerts:
+        raise HTTPException(status_code=404, detail="Alert IDs not found")
+    alerts = sqlalchemy_to_dict(alerts)
+    return alerts
+
+
+@app.get("/get_alert/{time}")
+def get_alert(time: str, db: Session = Depends(get_db)):
+    alert = db.query(alert_values_out_of_range).filter(alert_values_out_of_range.time == time).first()
+    if not alert:
+        raise HTTPException(status_code=404, detail="Alert ID not found")
+    alert = sqlalchemy_to_dict(alert)
+    return alert
+
+
 @app.get("/alert_config/{config_id}")
 def alert_config_get(config_id: int, db: Session = Depends(get_db)):
     config = db.query(AlertConfig).filter(AlertConfig.config_id == config_id).first()
