@@ -41,7 +41,7 @@ def insert_alert(session, data):
                                                                   AlertConfig.device_id == device_id).first()
 
         alert = alert_values_out_of_range(tag_id=tag_id, tag_value=tag_value, tag_name=tag_name, alert_type=alert_type,
-                                          time_stamp=time_stamp, device_serial_num=imei)
+                                          time=time_stamp, device_serial_num=imei)
         session.add(alert)
         session.commit()
         
