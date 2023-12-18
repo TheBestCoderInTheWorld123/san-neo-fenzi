@@ -37,8 +37,7 @@ def insert_alert(session, data):
         tag_value = float(tag_value)
         tag_id = get_tag_id(session, tag_name)
         device_id = get_device_id(session, imei)
-        alert_type = session.query(AlertConfig.alert_type).filter(AlertConfig.tag_id == tag_id,
-                                                                  AlertConfig.device_id == device_id).first()
+        alert_type = session.query(AlertConfig.alert_type).filter(AlertConfig.tag_id == tag_id, AlertConfig.device_id == device_id).scalar()
 
         alert = alert_values_out_of_range(tag_id=tag_id, tag_value=tag_value, tag_name=tag_name, alert_type=alert_type,
                                           time=time_stamp, device_serial_num=imei)
