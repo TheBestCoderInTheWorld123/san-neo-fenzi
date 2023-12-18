@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 from model import * # Import your model classes
@@ -69,6 +70,16 @@ def insert_history_data(session, data):
                 session.add(history_entry)
     session.commit()
 
-# Main execution
-session = Session()
-# insert_history_data(session, data)
+
+@contextmanager
+def session_scope():
+    """Provide a transactional scope around a series of operations."""
+    session = Session()
+    try:
+        yield session
+        session.commit()
+    except:
+        session.rollback()
+        raise
+    finally:
+        session.close()
