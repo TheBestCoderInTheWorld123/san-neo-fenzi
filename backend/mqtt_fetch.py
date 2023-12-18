@@ -19,12 +19,13 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     data = msg.payload.decode()
     msg_topic = msg.topic
+    print(f"Topic: {msg_topic}\nMessage: {data}")
     records = preprocess(data=data)
     with session_scope() as session:
         insert_history_data(session, records)
     with session_scope() as session:
         insert_alert(session, records)
-    print(f"Topic: {msg_topic}\nMessage: {data}")
+
 
 # Create an MQTT client instance
 client = mqtt.Client()

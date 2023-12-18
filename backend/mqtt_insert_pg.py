@@ -31,13 +31,17 @@ def insert_alert(session, data):
         imei = entries[0]['IMEI']
         imei = imei.replace('"', '')
         time_stamp = entries[3]['date_time']
-        tag_name = entries[1].key()
-        tag_value = entries[1][tag_name]
+
+        # Assuming each dictionary in entries[1] has only one key-value pair
+        tag_name, tag_value = next(iter(entries[1].items()))
+
         tag_id = get_tag_id(session, tag_name)
         device_id = get_device_id(session, imei)
-        alert_type = session.query(AlertConfig.alert_type).filter(AlertConfig.tag_id == tag_id, AlertConfig.device_id == device_id).first()
+        alert_type = session.query(AlertConfig.alert_type).filter(AlertConfig.tag_id == tag_id,
+                                                                  AlertConfig.device_id == device_id).first()
 
-        alert = alert_values_out_of_range(tag_id = tag_id, tag_value = tag_value, tag_name = tag_name, alert_type = alert_type, time_stamp = time_stamp, device_serial_num = imei)
+        alert = alert_values_out_of_range(tag_id=tag_id, tag_value=tag_value, tag_name=tag_name, alert_type=alert_type,
+                                          time_stamp=time_stamp, device_serial_num=imei)
         session.add(alert)
         session.commit()
         
