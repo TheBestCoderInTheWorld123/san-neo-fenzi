@@ -31,18 +31,34 @@ def insert_alert(session, data):
         imei = entries[0]['IMEI']
         imei = imei.replace('"', '')
         time_stamp = entries[3]['date_time']
-
-        # Assuming each dictionary in entries[1] has only one key-value pair
         tag_name, tag_value = next(iter(entries[1].items()))
-        tag_value = float(tag_value)
+
         tag_id = get_tag_id(session, tag_name)
         device_id = get_device_id(session, imei)
-        alert_type = session.query(AlertConfig.alert_type).filter(AlertConfig.tag_id == tag_id, AlertConfig.device_id == device_id).scalar()
 
-        alert = alert_values_out_of_range(tag_id=tag_id, tag_value=tag_value, tag_name=tag_name, alert_type=alert_type,
-                                          time=time_stamp, device_serial_num=imei)
-        session.add(alert)
-        session.commit()
+        # Check if tag_id exists in AlertConfig and meets your condition
+        alert_config = session.query(AlertConfig).filter(
+            AlertConfig.tag_id == tag_id,
+            AlertConfig.device_id == device_id
+        ).first()
+
+        if alert_config:  # Proceed if the alert_config record exists
+            alert_type = alert_config.alert_type  # Assuming alert_type is a field in AlertConfig
+
+            # Insert logic here, if additional conditions are required, include them
+            alert = alert_values_out_of_range(
+                tag_id=tag_id,
+                tag_value=float(tag_value),
+                tag_name=tag_name,
+                alert_type=alert_type,
+                time=time_stamp,
+                device_serial_num=imei
+            )
+            session.add(alert)
+            session.commit()
+        else:
+            # Optionally, handle the case where the condition is not met
+            print(f"No AlertConfig found for tag_id {tag_id} and device_id {device_id}")
         
 
 def insert_history_data(session, data):
