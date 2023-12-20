@@ -212,3 +212,33 @@ thead {
 .status-orange {
   background-color: orange;
 }
+
+@keyframes blink-critical {
+  0% { background-color: lightcoral; }
+  50% { background-color: lightcyan; }
+  100% { background-color: lightcoral; }
+}
+
+.alert-critical {
+  animation: blink-critical 1s infinite;
+}
+
+@keyframes blink-normal {
+  0% { background-color: lightcyan; }
+  50% { background-color: lightcoral; }
+  100% { background-color: lightcyan; }
+}
+
+.alert-normal {
+  animation: blink-normal 1s infinite;
+}
+
+@keyframes blink-animation {
+  0%, 100% { background-color: lightcoral; }
+  50% { background-color: lightcyan; }
+}
+
+.blinking {
+  animation: blink-animation 1s infinite;
+  animation-duration: 5s; /* Animation will last for 5 seconds */
+}

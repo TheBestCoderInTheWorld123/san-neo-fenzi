@@ -1638,7 +1638,7 @@ def read_alert_config_id(db: Session = Depends(get_db)):
 
 @app.get("/latest_alerts/")
 def read_latest_alerts(db: Session = Depends(get_db)):
-    latest_alerts = db.query(alert_values_out_of_range).order_by(alert_values_out_of_range.time).limit(10).all()
+    latest_alerts = db.query(alert_values_out_of_range).order_by(alert_values_out_of_range.time.desc()).limit(10).all()
     # print(latest_alerts)
     if not latest_alerts:
         raise HTTPException(status_code=404, detail="Alert IDs not found")

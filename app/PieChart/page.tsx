@@ -11,7 +11,7 @@ const Pie = () => {
       .then(response => response.json())
       .then(fetchedJson => {
         setData(fetchedJson);
-        console.log("Fetched Data: ", fetchedJson); // Log data here, right after setting it
+        // console.log("Fetched Data: ", fetchedJson); // Log data here, right after setting it
       })
       .catch(error => {
         console.error('Error fetching data:', error);

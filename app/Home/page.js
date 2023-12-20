@@ -13,7 +13,7 @@ export default function RadioButton() {
   const [showMap, setShowMap] = useState(true);
 
   const MapTable = (value) => {
-    console.log("MapTable called with value:", value);
+    // console.log("MapTable called with value:", value);
     setShowMap(value == "Map");
   };
 

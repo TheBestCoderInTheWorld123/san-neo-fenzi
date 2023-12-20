@@ -429,7 +429,7 @@ class alert_values_out_of_range(Base):
 
     id = Column(Integer, Sequence('alert_values_out_of_range_id_seq'), primary_key=True)
     tag_id = Column(Integer)
-    tag_value = Column(Integer)
+    tag_value = Column(DECIMAL)
     tag_name = Column(String(255))
     alert_type = Column(String(255))
     time = Column(DateTime)
