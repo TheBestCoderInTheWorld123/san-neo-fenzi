@@ -49,7 +49,7 @@ app.add_middleware(
     allow_headers=["*"],  # You can specify specific headers here
 )
 
-
+#device_default_tags
 def sqlalchemy_to_dict(obj):
     """
     Convert SQLAlchemy model instance to dictionary.
@@ -60,7 +60,6 @@ def sqlalchemy_to_dict(obj):
     else:
         return {column.name: getattr(obj, column.name) for column in obj.__table__.columns}
 
-    # return {column.name: getattr(obj, column.name) for column in obj.__table__.columns}
 
 
 @app.post("/addresses/", response_model=AddressPydantic)
@@ -1081,7 +1080,16 @@ def create_device_tag(device: DeviceTagPydantic, db: Session = Depends(get_db)):
     return db_device_tag
 
 
-
+@app.put("/device_tags/{ID}", response_model=DeviceTagPydantic)
+def update_device_tag(ID: int, device: DeviceTagPydantic, db: Session = Depends(get_db)):
+    device_tag = db.query(DeviceTag).filter(DeviceTag.ID == ID).first()
+    if device_tag is None:
+        raise HTTPException(status_code=404, detail="Connection Type not found")
+    for field, value in device.dict().items():
+        setattr(device_tag, field, value)
+    db.commit()
+    db.refresh(device_tag)
+    return device_tag
 
 @app.delete("/device_tags/")
 def delete_device_tag(
@@ -1950,3 +1958,47 @@ def history_descriptions(fd: datetime, td: datetime, db: Session = Depends(get_d
 def device_by_serial_number(no: str, db: Session = Depends(get_db)):
     device = db.query(Device).filter(Device.device_serial_number == no).first()
     return device
+
+
+
+@app.get("/device_default_tags/", response_model=list[DeviceDefaultTagsPydantic])
+def get_device_default_tags(db: Session = Depends(get_db)):
+    device_types = db.query(DeviceDefaultTags).all()
+    device_types = sqlalchemy_to_dict(device_types)
+    return device_types
+
+@app.get("/device_default_tags/{tag_id}", response_model=DeviceDefaultTagsPydantic)
+def get_device_default_tag_by_tag_id(tag_id: int, db: Session = Depends(get_db)):
+    device_type = db.query(DeviceDefaultTags).filter(DeviceDefaultTags.tag_id == tag_id).first()
+    if device_type is None:
+        raise HTTPException(status_code=404, detail="Device default tag not found")
+    device_type = sqlalchemy_to_dict(device_type)
+    return device_type
+
+
+
+@app.get("/device_default_tags_by_device_type_id/{device_type_id}")
+def get_device_default_tag_by_device_type_id(device_type_id: int, db: Session = Depends(get_db)):
+    device_types = db.query(DeviceDefaultTags).filter(DeviceDefaultTags.device_type_id == device_type_id).all()
+    if not device_types:
+        raise HTTPException(status_code=404, detail="Device default tag not found")
+    return device_types
+
+@app.post("/device_default_tags/", response_model=DeviceDefaultTagsPydantic)
+def create_device_default_tag(device_default_tag: DeviceDefaultTagsPydantic, db: Session = Depends(get_db)):
+    new_device_default_tag = DeviceDefaultTags(**device_default_tag.dict())
+    db.add(new_device_default_tag)
+    db.commit()
+    db.refresh(new_device_default_tag)
+    new_device_default_tag = sqlalchemy_to_dict(new_device_default_tag)
+    return new_device_default_tag
+
+@app.delete("/device_default_tags/{device_default_tag_id}", response_model=DeviceDefaultTagsPydantic)
+def delete_device_default_tag(device_default_tag_id: int, db: Session = Depends(get_db)):
+    device_default_tag = db.query(DeviceDefaultTags).filter(DeviceDefaultTags.tag_id == device_default_tag_id).first()
+    if device_default_tag is None:
+        raise HTTPException(status_code=404, detail="Device default tag not found")
+    db.delete(device_default_tag)
+    db.commit()
+    device_default_tag = sqlalchemy_to_dict(device_default_tag)
+    return device_default_tag

@@ -296,6 +296,13 @@ t_location_contacts = Table(
 )
 
 
+class DeviceDefaultTags(Base):
+    __tablename__ = 'device_default_tags'
+
+    tag_id = Column(Integer, primary_key=True)
+    device_type_id = Column(Integer)
+
+
 t_role_rights = Table(
     'role_rights', metadata,
     Column('role_id', ForeignKey('user_role.role_id'), primary_key=True, nullable=False),
@@ -936,3 +943,8 @@ class alert_values_out_of_rangePydantic(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class DeviceDefaultTagsPydantic(BaseModel):
+    tag_id: int
+    device_type_id: int
