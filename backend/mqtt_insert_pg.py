@@ -17,6 +17,9 @@ data = {
     2: [{'IMEI': '862174069140333'}, {'TMP': '32'}, {'status': ''}, {'date_time': datetime(2023, 11, 21, 13, 2)}]
 }
 
+def get_device_type(session, imei):
+    return session.query(Device.device_type_id).filter(Device.device_serial_number == imei).scalar()
+
 def get_device_id(session, imei):
     return session.query(Device.device_id).filter(Device.device_serial_number == imei).scalar()
 
@@ -66,6 +69,7 @@ def insert_history_data(session, data):
         imei = imei.replace('"', '')
         # print('imei', imei)
         device_id = get_device_id(session, imei)
+        # device_type_id = get_device_type(session, imei)
         # print('device_id',device_id)
         for entry in entries[1:]:
             for tag_description, value in entry.items():
@@ -74,6 +78,9 @@ def insert_history_data(session, data):
 
                 tag_id = get_tag_id(session, tag_description)
                 device_tag_id = get_device_tag_id(session, device_id, tag_id)
+                if tag_description == 'AQ' or tag_id == 1:
+                    # logic for AQ tag as per discussion with client
+                    value = (-1) * ((float(value)*2) - 20)
                 history_entry = History(
                     device_tag_id=device_tag_id,
                     value=float(value),
