@@ -47,6 +47,10 @@ def insert_alert(session, data):
 
         if alert_config:  # Proceed if the alert_config record exists
             alert_type = alert_config.alert_type  # Assuming alert_type is a field in AlertConfig
+            if tag_id == 1:
+                # logic for AQ tag as per discussion with client
+                tag_value = (-1) * ((float(tag_value) * 2) - 20)
+
             if float(tag_value) < alert_config.tag_value_min or float(tag_value) > alert_config.tag_value_max:
                 alert = alert_values_out_of_range(
                     tag_id=tag_id,
