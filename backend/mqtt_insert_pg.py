@@ -44,18 +44,18 @@ def insert_alert(session, data):
 
         if alert_config:  # Proceed if the alert_config record exists
             alert_type = alert_config.alert_type  # Assuming alert_type is a field in AlertConfig
-
-            # Insert logic here, if additional conditions are required, include them
-            alert = alert_values_out_of_range(
-                tag_id=tag_id,
-                tag_value=float(tag_value),
-                tag_name=tag_name,
-                alert_type=alert_type,
-                time=time_stamp,
-                device_serial_num=imei
-            )
-            session.add(alert)
-            session.commit()
+            if tag_value < alert_config.tag_value_min or tag_value > alert_config.tag_value_max:
+                # Insert logic here, if additional conditions are required, include them
+                alert = alert_values_out_of_range(
+                    tag_id=tag_id,
+                    tag_value=float(tag_value),
+                    tag_name=tag_name,
+                    alert_type=alert_type,
+                    time=time_stamp,
+                    device_serial_num=imei
+                )
+                session.add(alert)
+                session.commit()
         else:
             # Optionally, handle the case where the condition is not met
             print(f"No AlertConfig found for tag_id {tag_id} and device_id {device_id}")

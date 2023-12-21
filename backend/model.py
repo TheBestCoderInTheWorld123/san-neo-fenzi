@@ -418,14 +418,14 @@ class AlertConfig(Base):
 
     config_id = Column(Integer, Sequence('alert_config_config_id_seq'), primary_key=True)
     tag_id = Column(Integer, nullable=False)
-    tag_value_min = Column(Integer, nullable=False)
-    tag_value_max = Column(Integer, nullable=False)
+    tag_value_min = Column(DECIMAL, nullable=False)
+    tag_value_max = Column(DECIMAL, nullable=False)
     alert_type = Column(String(255), nullable=False)
     device_id = Column(Integer, nullable=False)
 
 
 class alert_values_out_of_range(Base):
-    __tablename__ = 'alert_values_out_of_range'
+    __tablename__ = 'alert_history'
 
     id = Column(Integer, Sequence('alert_values_out_of_range_id_seq'), primary_key=True)
     tag_id = Column(Integer)
