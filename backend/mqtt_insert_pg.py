@@ -43,9 +43,8 @@ def insert_alert(session, data):
         ).first()
 
         if alert_config:  # Proceed if the alert_config record exists
-            alert_type = alert_config.alert_type  # Assuming alert_type is a field in AlertConfig
-            if tag_value < alert_config.tag_value_min or tag_value > alert_config.tag_value_max:
-                # Insert logic here, if additional conditions are required, include them
+            if float(tag_value) > alert_config.tag_value_max or float(tag_value) < alert_config.tag_value_min:
+                alert_type = alert_config.alert_type  # Assuming alert_type is a field in AlertConfig
                 alert = alert_values_out_of_range(
                     tag_id=tag_id,
                     tag_value=float(tag_value),
