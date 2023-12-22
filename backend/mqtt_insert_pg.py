@@ -47,7 +47,7 @@ def insert_alert(session, data):
 
         if alert_config:  # Proceed if the alert_config record exists
             alert_type = alert_config.alert_type  # Assuming alert_type is a field in AlertConfig
-            print("alert",tag_id,tag_name,tag_value)
+            # print("alert",tag_id,tag_name,tag_value)
             if tag_id == 1 or tag_name =='AQ':
                 # logic for AQ tag as per discussion with client
                 tag_value = (-1) * ((float(tag_value) * 2) - 20)
@@ -66,7 +66,8 @@ def insert_alert(session, data):
                 session.commit()
         else:
             # Optionally, handle the case where the condition is not met
-            print(f"No AlertConfig found for tag_id {tag_id} and device_id {device_id}")
+            # print(f"No AlertConfig found for tag_id {tag_id} and device_id {device_id}")
+            pass
         
 
 def insert_history_data(session, data):
