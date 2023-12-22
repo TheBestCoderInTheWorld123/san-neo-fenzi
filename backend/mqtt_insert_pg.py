@@ -47,7 +47,7 @@ def insert_alert(session, data):
 
         if alert_config:  # Proceed if the alert_config record exists
             alert_type = alert_config.alert_type  # Assuming alert_type is a field in AlertConfig
-            if tag_id == 1:
+            if tag_id == 1 or tag_name=='AQ':
                 # logic for AQ tag as per discussion with client
                 tag_value = (-1) * ((float(tag_value) * 2) - 20)
                 tag_value = round(tag_value,2)
