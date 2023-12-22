@@ -96,7 +96,7 @@ def insert_history_data(session, data):
         for entry in entries[1:]:
             for tag_description, value in entry.items():
 
-                if tag_description == 'AQ' or tag_id == 1:
+                if tag_description == 'AQ':
                     # logic for AQ tag as per discussion with client
                     value = (-1) * ((float(value) * 2) - 20)
                     value = round(value, 2)
