@@ -50,6 +50,7 @@ def insert_alert(session, data):
             if tag_id == 1:
                 # logic for AQ tag as per discussion with client
                 tag_value = (-1) * ((float(tag_value) * 2) - 20)
+                tag_value = round(tag_value,2)
 
             if float(tag_value) < alert_config.tag_value_min or float(tag_value) > alert_config.tag_value_max:
                 alert = alert_values_out_of_range(
@@ -85,6 +86,7 @@ def insert_history_data(session, data):
                 if tag_description == 'AQ' or tag_id == 1:
                     # logic for AQ tag as per discussion with client
                     value = (-1) * ((float(value)*2) - 20)
+                    value = round(value, 2)
                 history_entry = History(
                     device_tag_id=device_tag_id,
                     value=float(value),
