@@ -30,44 +30,58 @@ def get_device_tag_id(session, device_id, tag_id):
     return session.query(DeviceTag.ID).filter(DeviceTag.device_id == device_id, DeviceTag.tag_id == tag_id).scalar()
 
 def insert_alert(session, data):
+    bln_insert = True
     for i, entries in data.items():
         imei = entries[0]['IMEI']
         imei = imei.replace('"', '')
         time_stamp = entries[3]['date_time']
         tag_name, tag_value = next(iter(entries[1].items()))
-
         tag_id = get_tag_id(session, tag_name)
-        device_id = get_device_id(session, imei)
+        if tag_id == 1 or tag_name == 'AQ':
+            # logic for AQ tag as per discussion with client
+            tag_value = (-1) * ((float(tag_value) * 2) - 20)
+            tag_value = round(tag_value, 2)            # logic for AQ tag as per discussion with client
+            if tag_value == 15.06 or tag_value == 11.76:
+                    bln_insert = False
+    if bln_insert:
+        for i, entries in data.items():
+            imei = entries[0]['IMEI']
+            imei = imei.replace('"', '')
+            time_stamp = entries[3]['date_time']
+            tag_name, tag_value = next(iter(entries[1].items()))
 
-        # Check if tag_id exists in AlertConfig and meets your condition
-        alert_config = session.query(AlertConfig).filter(
-            AlertConfig.tag_id == tag_id,
-            AlertConfig.device_id == device_id
-        ).first()
+            tag_id = get_tag_id(session, tag_name)
+            device_id = get_device_id(session, imei)
 
-        if alert_config:  # Proceed if the alert_config record exists
-            alert_type = alert_config.alert_type  # Assuming alert_type is a field in AlertConfig
-            # print("alert",tag_id,tag_name,tag_value)
-            if tag_id == 1 or tag_name =='AQ':
-                # logic for AQ tag as per discussion with client
-                tag_value = (-1) * ((float(tag_value) * 2) - 20)
-                tag_value = round(tag_value,2)
+            # Check if tag_id exists in AlertConfig and meets your condition
+            alert_config = session.query(AlertConfig).filter(
+                AlertConfig.tag_id == tag_id,
+                AlertConfig.device_id == device_id
+            ).first()
 
-            if float(tag_value) < alert_config.tag_value_min or float(tag_value) > alert_config.tag_value_max:
-                alert = alert_values_out_of_range(
-                    tag_id=tag_id,
-                    tag_value=float(tag_value),
-                    tag_name=tag_name,
-                    alert_type=alert_type,
-                    time=time_stamp,
-                    device_serial_num=imei
-                )
-                session.add(alert)
-                session.commit()
-        else:
-            # Optionally, handle the case where the condition is not met
-            # print(f"No AlertConfig found for tag_id {tag_id} and device_id {device_id}")
-            pass
+            if alert_config:  # Proceed if the alert_config record exists
+                alert_type = alert_config.alert_type  # Assuming alert_type is a field in AlertConfig
+                # print("alert",tag_id,tag_name,tag_value)
+                if tag_id == 1 or tag_name =='AQ':
+                    # logic for AQ tag as per discussion with client
+                    tag_value = (-1) * ((float(tag_value) * 2) - 20)
+                    tag_value = round(tag_value,2)
+
+                if float(tag_value) < alert_config.tag_value_min or float(tag_value) > alert_config.tag_value_max:
+                    alert = alert_values_out_of_range(
+                        tag_id=tag_id,
+                        tag_value=float(tag_value),
+                        tag_name=tag_name,
+                        alert_type=alert_type,
+                        time=time_stamp,
+                        device_serial_num=imei
+                    )
+                    session.add(alert)
+                    session.commit()
+            else:
+                # Optionally, handle the case where the condition is not met
+                # print(f"No AlertConfig found for tag_id {tag_id} and device_id {device_id}")
+                pass
         
 
 def insert_history_data(session, data):
@@ -78,30 +92,44 @@ def insert_history_data(session, data):
         device_id = get_device_id(session, imei)
         # device_type_id = get_device_type(session, imei)
         # print('device_id',device_id)
+        bln_insert = True
         for entry in entries[1:]:
             for tag_description, value in entry.items():
-                if tag_description in ['status', 'date_time']:
-                    continue
 
-                tag_id = get_tag_id(session, tag_description)
-                device_tag_id = get_device_tag_id(session, device_id, tag_id)
                 if tag_description == 'AQ' or tag_id == 1:
                     # logic for AQ tag as per discussion with client
-                    value = (-1) * ((float(value)*2) - 20)
+                    value = (-1) * ((float(value) * 2) - 20)
                     value = round(value, 2)
-                history_entry = History(
-                    device_tag_id=device_tag_id,
-                    value=float(value),
-                    status=entries[2]['status'],
-                    recorded_date_time=entries[3]['date_time'],
-                    created_by = 'mqtt',
-                    created_at = datetime.now(),
-                    updated_by = 'mqtt' ,
-                    updated_at = datetime.now()
+                    if value == 15.06 or value == 11.76:
+                        bln_insert = False
+        if bln_insert:
 
-                )
-                session.add(history_entry)
-    session.commit()
+            for entry in entries[1:]:
+                for tag_description, value in entry.items():
+                    if tag_description in ['status', 'date_time']:
+                        continue
+
+                    tag_id = get_tag_id(session, tag_description)
+                    device_tag_id = get_device_tag_id(session, device_id, tag_id)
+                    if tag_description == 'AQ' or tag_id == 1:
+                        # logic for AQ tag as per discussion with client
+                        value = (-1) * ((float(value)*2) - 20)
+                        value = round(value, 2)
+                        # if(value == 15.06 or value == 11.76):
+
+                    history_entry = History(
+                        device_tag_id=device_tag_id,
+                        value=float(value),
+                        status=entries[2]['status'],
+                        recorded_date_time=entries[3]['date_time'],
+                        created_by = 'mqtt',
+                        created_at = datetime.now(),
+                        updated_by = 'mqtt' ,
+                        updated_at = datetime.now()
+
+                    )
+                    session.add(history_entry)
+        session.commit()
 
 
 @contextmanager
