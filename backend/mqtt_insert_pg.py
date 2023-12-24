@@ -111,10 +111,10 @@ def insert_history_data(session, data):
 
                     tag_id = get_tag_id(session, tag_description)
                     device_tag_id = get_device_tag_id(session, device_id, tag_id)
-                    if tag_description == 'AQ' or tag_id == 1:
-                        # logic for AQ tag as per discussion with client
-                        value = (-1) * ((float(value)*2) - 20)
-                        value = round(value, 2)
+                    # if tag_description == 'AQ' or tag_id == 1:
+                    #     # logic for AQ tag as per discussion with client
+                    #     value = (-1) * ((float(value)*2) - 20)
+                    #     value = round(value, 2)
                         # if(value == 15.06 or value == 11.76):
 
                     history_entry = History(
