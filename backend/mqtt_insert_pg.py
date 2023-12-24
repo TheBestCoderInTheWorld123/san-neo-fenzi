@@ -31,18 +31,18 @@ def get_device_tag_id(session, device_id, tag_id):
 
 def insert_alert(session, data):
     bln_insert = True
-    for i, entries in data.items():
-        imei = entries[0]['IMEI']
-        imei = imei.replace('"', '')
-        time_stamp = entries[3]['date_time']
-        tag_name, tag_value = next(iter(entries[1].items()))
-        tag_id = get_tag_id(session, tag_name)
-        if tag_id == 1 or tag_name == 'AQ':
-            # logic for AQ tag as per discussion with client
-            tag_value = (-1) * ((float(tag_value) * 2) - 20)
-            tag_value = round(tag_value, 2)            # logic for AQ tag as per discussion with client
-            if tag_value == 15.06 or tag_value == 11.76:
-                    bln_insert = False
+    # for i, entries in data.items():
+    #     imei = entries[0]['IMEI']
+    #     imei = imei.replace('"', '')
+    #     time_stamp = entries[3]['date_time']
+    #     tag_name, tag_value = next(iter(entries[1].items()))
+    #     tag_id = get_tag_id(session, tag_name)
+        # if tag_id == 1 or tag_name == 'AQ':
+        #     # logic for AQ tag as per discussion with client
+        #     tag_value = (-1) * ((float(tag_value) * 2) - 20)
+        #     tag_value = round(tag_value, 2)            # logic for AQ tag as per discussion with client
+        #     if tag_value == 15.06 or tag_value == 11.76:
+        #             bln_insert = False
     if bln_insert:
         for i, entries in data.items():
             imei = entries[0]['IMEI']
@@ -62,10 +62,10 @@ def insert_alert(session, data):
             if alert_config:  # Proceed if the alert_config record exists
                 alert_type = alert_config.alert_type  # Assuming alert_type is a field in AlertConfig
                 # print("alert",tag_id,tag_name,tag_value)
-                if tag_id == 1 or tag_name =='AQ':
-                    # logic for AQ tag as per discussion with client
-                    tag_value = (-1) * ((float(tag_value) * 2) - 20)
-                    tag_value = round(tag_value,2)
+                # if tag_id == 1 or tag_name =='AQ':
+                #     # logic for AQ tag as per discussion with client
+                #     tag_value = (-1) * ((float(tag_value) * 2) - 20)
+                #     tag_value = round(tag_value,2)
 
                 if float(tag_value) < alert_config.tag_value_min or float(tag_value) > alert_config.tag_value_max:
                     alert = alert_values_out_of_range(
@@ -93,15 +93,15 @@ def insert_history_data(session, data):
         # device_type_id = get_device_type(session, imei)
         # print('device_id',device_id)
         bln_insert = True
-        for entry in entries[1:]:
-            for tag_description, value in entry.items():
+        # for entry in entries[1:]:
+            # for tag_description, value in entry.items():
 
-                if tag_description == 'AQ':
-                    # logic for AQ tag as per discussion with client
-                    value = (-1) * ((float(value) * 2) - 20)
-                    value = round(value, 2)
-                    if value == 15.06 or value == 11.76:
-                        bln_insert = False
+                # if tag_description == 'AQ':
+                #     # logic for AQ tag as per discussion with client
+                #     value = (-1) * ((float(value) * 2) - 20)
+                #     value = round(value, 2)
+                #     if value == 15.06 or value == 11.76:
+                #         bln_insert = False
         if bln_insert:
 
             for entry in entries[1:]:
