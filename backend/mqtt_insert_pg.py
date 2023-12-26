@@ -66,16 +66,22 @@ def insert_alert(session, data):
                 #     # logic for AQ tag as per discussion with client
                 #     tag_value = (-1) * ((float(tag_value) * 2) - 20)
                 #     tag_value = round(tag_value,2)
-
-                if float(tag_value) < alert_config.tag_value_min or float(tag_value) > alert_config.tag_value_max:
+                alert_flag = False
+                if tag_name == 'AQ':
+                    if alert_config.tag_value_min < alert_config.tag_value_max:
+                        alert_flag = True
+                else:
+                    if float(tag_value) < alert_config.tag_value_min or float(tag_value) > alert_config.tag_value_max:
+                        alert_flag = True
+                if alert_flag:
                     alert = alert_values_out_of_range(
-                        tag_id=tag_id,
-                        tag_value=float(tag_value),
-                        tag_name=tag_name,
-                        alert_type=alert_type,
-                        time=time_stamp,
-                        device_serial_num=imei
-                    )
+                            tag_id=tag_id,
+                            tag_value=float(tag_value),
+                            tag_name=tag_name,
+                            alert_type=alert_type,
+                            time=time_stamp,
+                            device_serial_num=imei
+                        )
                     session.add(alert)
                     session.commit()
             else:
