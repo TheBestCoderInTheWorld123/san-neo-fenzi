@@ -68,12 +68,13 @@ def insert_alert(session, data):
                 #     tag_value = round(tag_value,2)
                 alert_flag = False
                 if tag_name == 'AQ':
-                    if alert_config.tag_value_min < alert_config.tag_value_max:
+                    if alert_config.tag_value_min < float(tag_value) < alert_config.tag_value_max:
                         alert_flag = True
                 else:
                     if float(tag_value) < alert_config.tag_value_min or float(tag_value) > alert_config.tag_value_max:
                         alert_flag = True
                 if alert_flag:
+                    print
                     alert = alert_values_out_of_range(
                             tag_id=tag_id,
                             tag_value=float(tag_value),
