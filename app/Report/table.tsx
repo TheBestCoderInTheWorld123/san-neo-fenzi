@@ -144,7 +144,9 @@ const TablePage = () => {
         <Col>
           <Card className="mb-3 px-6">
             <CardBody>
-              <Table hover>
+            <div className="card card-body" style={{ minHeight:'250px', maxHeight: '400px', overflowY: 'scroll' }}>
+                    
+              <Table table table-hover w-full>
                 <thead className="bg-blue-200">
                   <tr>
                     <th>Sr. No.</th>
@@ -178,6 +180,7 @@ const TablePage = () => {
                   ))}
                 </tbody>
               </Table>
+              </div>
             </CardBody>
           </Card>
         </Col>

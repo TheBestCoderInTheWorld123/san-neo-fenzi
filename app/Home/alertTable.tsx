@@ -14,6 +14,9 @@ export default function AlertTable() {
     const [alerts, setAlerts] = useState<Alert[]>([]);
     const [latestId, setLatestId] = useState<number | null>(null);
     const [blink, setBlink] = useState(false);
+    const [filteredData, setFilteredData] = useState<Alert[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -60,7 +63,40 @@ export default function AlertTable() {
         return index === 0; // Assuming the first record is the latest
     };
 
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(e.target.value);
+      };
+    
+
+    useEffect(() => {
+        // Filter data when searchTerm changes
+        const lowercasedFilter = searchTerm.toLowerCase();
+        const filtered = alerts.filter(alert =>
+            Object.keys(alert).some(key =>
+              typeof alert[key as keyof Alert] === 'string'
+                ? alert[key as keyof Alert].toString().toLowerCase().includes(lowercasedFilter)
+                : key === 'tag_value'
+                ? alert.tag_value.toString().toLowerCase().includes(lowercasedFilter)
+                : false
+            )
+          );
+      setFilteredData(filtered);
+      }, [searchTerm, alerts]);
+    
+
     return (
+        <div>
+        <div className="flex items-center mb-2 md:mb-0 mx-2">
+        <label className="mr-2 text-sm md:text-base">Filter:</label>
+          <input
+            type="text"
+            className="form-control border-1"
+            placeholder="Search all columns..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
+        </div>
+
         <Row>
             <Col>
                 <Card className="mb-3 px-6">
@@ -77,7 +113,7 @@ export default function AlertTable() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {alerts.map((alert, index) => (
+                                {filteredData.map((alert, index) => (
                                     <tr  className={index === 0 && blink ? 'blinking' : ''} key={alert.id}>
                                         <td>{alert.id}</td>
                                         <td>{formatDate(alert.time)}</td>
@@ -94,5 +130,6 @@ export default function AlertTable() {
                 </Card>
             </Col>
         </Row>
+        </div>
     );
 }
