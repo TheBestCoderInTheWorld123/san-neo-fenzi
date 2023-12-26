@@ -220,7 +220,7 @@ const TableDevices = () => {
         <Col>
           <Card className="mb-3 px-6">
             <CardBody>
-              <Table hover>
+              <Table hover style={{ maxHeight: '400px', overflowY: 'scroll' }}>
                 <thead className="bg-blue-200">
                   <tr>
                     <th>Sr. No.</th>

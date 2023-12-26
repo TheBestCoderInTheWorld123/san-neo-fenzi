@@ -64,7 +64,7 @@ export default function AlertTable() {
         <Row>
             <Col>
                 <Card className="mb-3 px-6">
-                    <div className="card card-body" style={{ maxHeight: '400px', overflowY: 'scroll' }}>
+                    <div className="card card-body" style={{ minHeight:'250px', maxHeight: '400px', overflowY: 'scroll' }}>
                         <table className="table table-hover w-full">
                             <thead className="bg-blue-200">
                                 <tr>
