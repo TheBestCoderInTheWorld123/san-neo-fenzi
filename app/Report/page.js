@@ -279,10 +279,18 @@ export default function Report() {
        alert('Please fill in all required fields correctly.');
        return;
     }  
-    const formattedToDateTime = new Date(toDateTime).toISOString().replace(/\.\d{3}Z$/, '').replace('T', ' '); 
-    const formattedFromDateTime = new Date(fromDateTime).toISOString().replace(/\.\d{3}Z$/, '').replace('T', ' '); 
+    // const formattedToDateTime = new Date(toDateTime).toISOString().replace(/\.\d{3}Z$/, '').replace('T', ' '); 
+    // const formattedFromDateTime = new Date(fromDateTime).toISOString().replace(/\.\d{3}Z$/, '').replace('T', ' '); 
+    function toLocalISOString(date) {
+      var offset = date.getTimezoneOffset() * 60000; // Offset in milliseconds
+      var adjustedDate = new Date(date.getTime() - offset);
+      return adjustedDate.toISOString().replace(/\.\d{3}Z$/, '').replace('T', ' ');
+  }
 
-    // console.log(formattedFromDateTime, formattedToDateTime, selectedColumn);
+  const formattedToDateTime = toLocalISOString(new Date(toDateTime));
+  const formattedFromDateTime = toLocalISOString(new Date(fromDateTime));
+
+     console.log(formattedFromDateTime, formattedToDateTime, selectedColumn);
 
     const queryParams = new URLSearchParams({
       sno: selectedColumn,
