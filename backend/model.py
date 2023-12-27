@@ -948,3 +948,26 @@ class alert_values_out_of_rangePydantic(BaseModel):
 class DeviceDefaultTagsPydantic(BaseModel):
     tag_id: int
     device_type_id: int
+
+class NewDevicePydantic(BaseModel):
+    location_type_id: int
+    device_id_root: int
+    device_serial_number: str
+    description: str
+    model_number: str
+    brand_name: str
+    is_active: bool
+    device_type_description: str
+    location_name: str
+    location_description: str
+    location_root: int
+    latitude: float
+    longitude: float
+    address_line_1: str
+    address_line_2: str
+    city: str
+    state: str
+    postal_code: str
+    country: str
+    contact_description: str
+    contact_type_description: str
