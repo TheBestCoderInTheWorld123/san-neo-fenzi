@@ -2002,3 +2002,54 @@ def delete_device_default_tag(device_default_tag_id: int, db: Session = Depends(
     db.commit()
     device_default_tag = sqlalchemy_to_dict(device_default_tag)
     return device_default_tag
+
+
+
+@app.post("/add_all_info_for_new_device")
+def add_all_info_for_new_device(new_device: NewDevicePydantic, db: Session = Depends(get_db)):
+        address = db.query(Address).filter(Address.address_line1 == new_device.address_line_1 and Address.address_line2 == new_device.address_line_2).first()
+        if not address:
+            address = Address(address_line1=new_device.address_line_1, address_line2=new_device.address_line_2, city=new_device.city, state=new_device.state, postal_code=new_device.postal_code, country=new_device.country, latitude=new_device.latitude, longitude=new_device.longitude, created_by="computer", created_at=datetime.now(), updated_by="computer", updated_at=datetime.now())
+            db.add(address)
+            db.commit()
+            db.refresh(address)
+        address = db.query(Address).filter(Address.address_line1 == new_device.address_line_1 and Address.address_line2 == new_device.address_line_2).first()
+        address = sqlalchemy_to_dict(address)
+        contacttype = db.query(ContactType).filter(ContactType.description == new_device.contact_type_description).first()
+        if not contacttype:
+            contacttype = ContactType(description=new_device.contact_type_description, created_by="computer", created_at=datetime.now(), updated_by="computer", updated_at=datetime.now())
+            db.add(contacttype)
+            db.commit()
+            db.refresh(contacttype)
+        contacttype = db.query(ContactType).filter(ContactType.description == new_device.contact_type_description).first()
+        contacttype = sqlalchemy_to_dict(contacttype)
+        contact = db.query(Contact).filter(Contact.contact_description == new_device.contact_description).first()
+        if not contact:
+            contact = Contact(contact_description=new_device.contact_description, contact_type_id=contacttype["contact_type_id"], created_by="computer", created_at=datetime.now(), updated_by="computer", updated_at=datetime.now())
+            db.add(contact)
+            db.commit()
+            db.refresh(contact)
+        contact = db.query(Contact).filter(Contact.contact_description == new_device.contact_description).first()
+        contact = sqlalchemy_to_dict(contact)
+        location = db.query(Location).filter(Location.location_desc == new_device.location_description and Location.location_name == new_device.location_name and Location.address_id == address["address_id"] and Location.contact_id == contact["contact_id"]).first()
+        if not location:
+            location = Location(location_name=new_device.location_name, location_desc=new_device.location_description, location_type_id=new_device.location_type_id, location_root=new_device.location_root, latitude=new_device.latitude, longitude=new_device.longitude, address_id=address["address_id"], contact_id=contact["contact_id"], created_by="computer", created_at=datetime.now(), updated_by="computer", updated_at=datetime.now())
+            db.add(location)
+            db.commit()
+            db.refresh(location)
+        location = db.query(Location).filter(Location.location_desc == new_device.location_description and Location.location_name == new_device.location_name and Location.address_id == address["address_id"] and Location.contact_id == contact["contact_id"]).first()
+        location = sqlalchemy_to_dict(location)
+        devicetype = db.query(DeviceType).filter(DeviceType.description == new_device.device_type_description).first()
+        if not devicetype:
+            devicetype = DeviceType(description=new_device.device_type_description, created_by="computer", created_at=datetime.now(), updated_by="computer", updated_at=datetime.now())
+            db.add(devicetype)
+            db.commit()
+            db.refresh(devicetype)
+        devicetype = db.query(DeviceType).filter(DeviceType.description == new_device.device_type_description).first()
+        devicetype = sqlalchemy_to_dict(devicetype)
+        device = Device(device_root_id=new_device.device_id_root, device_type_id=devicetype["device_type_id"], location_id=location["location_id"], device_serial_number=new_device.device_serial_number, description=new_device.description, model_number=new_device.model_number, brand_name=new_device.brand_name, is_active=new_device.is_active, created_by="computer", created_at=datetime.now(), updated_by="computer", updated_at=datetime.now())
+        db.add(device)
+        db.commit()
+        db.refresh(device)
+        device = sqlalchemy_to_dict(device)
+        return device
