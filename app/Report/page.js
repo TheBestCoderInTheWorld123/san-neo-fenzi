@@ -10,6 +10,9 @@ import { saveAs } from 'file-saver';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import domtoimage from 'dom-to-image';
 
+
+
+
 export default function Report() {
   const [data, setData] = useState([]);
   const [selectedColumn, setSelectedColumn] = useState("device_serial_number"); // Initialize selectedColumn state variable
@@ -29,9 +32,56 @@ export default function Report() {
     { value: 'table', label: 'Table' },
     { value: 'chart', label: 'Chart' }
   ];
+
+  const getDependentValues = (aqValue) => {
+    let dependentValues = {
+      Hydrogen: 0,
+      Hydrogen_Sulfide: 0,
+      Ammonia: 0,
+      Ethanol: 0,
+      Toluene: 0
+    };
+    // Mapping of AQ values to the dependent values
+    const mapping = [
+      { AQ: 0.01, Hydrogen: 0, Hydrogen_Sulfide: 0, Ammonia: 0, Ethanol: 0, Toluene: 0 },
+      { AQ: 0.02, Toluene: 20.85 },
+      { AQ: 0.03, Toluene: 11.63 },
+      { AQ: 0.04, Toluene: 7.64 },
+      { AQ: 0.05, Ethanol: 30, Toluene: 5.68 },
+      { AQ: 0.06, Ethanol: 27.49, Toluene: 4.52 },
+      { AQ: 0.07, Ethanol: 21.94, Toluene: 3.71 },
+      { AQ: 0.08, Ethanol: 18.06, Toluene: 3.11 },
+      { AQ: 0.09, Ethanol: 15.8, Toluene: 2.73 },
+      { AQ: 0.1, Ammonia: 30, Ethanol: 13.38, Toluene: 2.46 },
+      { AQ: 0.2, Ammonia: 11.63, Ethanol: 4.22, Toluene: 1.03 },
+      { AQ: 0.3, Ammonia: 6.28, Ethanol: 2.08 },
+      { AQ: 0.4, Ammonia: 4, Ethanol: 1.26 },
+      { AQ: 0.5, Ammonia: 2.78 },
+      { AQ: 0.6, Hydrogen: 30, Hydrogen_Sulfide: 2.45, Ammonia: 1.37 },
+      { AQ: 0.7, Hydrogen: 20, Hydrogen_Sulfide: 1.09 },
+      { AQ: 0.8, Hydrogen: 14.35, Hydrogen_Sulfide: 0.6 },
+      { AQ: 0.9, Hydrogen: 5, Hydrogen_Sulfide: 0.2 },
+      { AQ: 1, Hydrogen: 1, Hydrogen_Sulfide: 0.1 }
+      // { AQ: Number.POSITIVE_INFINITY } // Handle >1 case
+    ];
+  
+    // Find the closest matching AQ value in the mapping
+    const matchedMapping = mapping.find(item => aqValue <= item.AQ);
+  
+    // Assign the dependent values based on the matched mapping
+    if (matchedMapping) {
+      dependentValues = {
+        ...dependentValues,
+        ...matchedMapping // Assign matched values
+      };
+    }
+    // console.log("values are found");
+    return dependentValues;
+  };
+  
   const [selectedDisplayOption, setSelectedDisplayOption] = useState(displayOptions[0]);
 
-
+  
   const validateInputs = () => {
     // Basic validation: check if inputs are not empty
     if (!fromDateTime || !toDateTime || !selectedColumn) {
@@ -96,7 +146,7 @@ export default function Report() {
     doc.setFontSize(15);
   
     const title = `Report for Sr. No: ${selectedColumn}`;
-    const headers = [["Sr. No.", "Timestamp", "AQ", "HUM", "TMP"]];
+    const headers = [["Sr. No.", "Timestamp", "AQ", "HUM", "TMP","Hydrogen","Hydrogen_Sulfide","Ammonia","Ethanol","Toluene"]];
   
     const data_table = data.map((elt, index) => [
       index + 1, // Assuming you want to add a row index as "Sr. No."
@@ -104,6 +154,11 @@ export default function Report() {
       elt.tags.AQ,
       elt.tags.HUM,
       elt.tags.TMP,
+      elt.tags.Hydrogen,
+      elt.tags.Hydrogen_Sulfide,
+      elt.tags.Ammonia,
+      elt.tags.Ethanol,
+      elt.tags.Toluene
     ]);
   
     let content = {
@@ -125,6 +180,11 @@ export default function Report() {
     'AQ': item.tags.AQ,
     'HUM': item.tags.HUM,
     'TMP': item.tags.TMP,
+    'Hydrogen': item.tags.Hydrogen,
+    'Hydrogen_Sulfide': item.tags.Hydrogen_Sulfide,
+    'Ammonia': item.tags.Ammonia,
+    'Ethanol': item.tags.Ethanol,
+    'Toluene': item.tags.Toluene,
   })));
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
@@ -172,7 +232,7 @@ export default function Report() {
   }, []);
 
   useEffect(() => {
-    console.log("Options updated:", options);
+    // console.log("Options updated:", options);
   }, [options]);
 
 
@@ -201,6 +261,11 @@ export default function Report() {
       <td>{row.tags.AQ}</td>
       <td>{row.tags.HUM}</td>
       <td>{row.tags.TMP}</td>
+      <td>{row.tags.Hydrogen}</td>
+      <td>{row.tags.Hydrogen_Sulfide}</td>
+      <td>{row.tags.Ammonia}</td>
+      <td>{row.tags.Ethanol}</td>
+      <td>{row.tags.Toluene}</td>
     </tr>
   )) : null;
 
@@ -217,7 +282,7 @@ export default function Report() {
     const formattedToDateTime = new Date(toDateTime).toISOString().replace(/\.\d{3}Z$/, '').replace('T', ' '); 
     const formattedFromDateTime = new Date(fromDateTime).toISOString().replace(/\.\d{3}Z$/, '').replace('T', ' '); 
 
-    console.log(formattedFromDateTime, formattedToDateTime, selectedColumn);
+    // console.log(formattedFromDateTime, formattedToDateTime, selectedColumn);
 
     const queryParams = new URLSearchParams({
       sno: selectedColumn,
@@ -231,13 +296,27 @@ export default function Report() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const historyData = await response.json();
-      console.log(historyData);
-      setData(historyData.records);
+      
+      
+      const updatedRecords = historyData.records.map((record) => {
+        const dependentValues = getDependentValues(parseFloat(record.tags.AQ));
+        return {
+          ...record,
+          tags: {
+            ...record.tags,
+            ...dependentValues,
+          },
+        };
+      });
+      // setData(historyData.records);
+      setData(updatedRecords);
+      // console.log(updatedRecords);
 
       setShowTable(true);
     } catch (error) {
       console.error('Error fetching history data:', error);
     }
+    
   };
 
   const renderChart = () => {
@@ -246,7 +325,12 @@ export default function Report() {
       AQ: Number(item.tags.AQ),
       HUM: Number(item.tags.HUM),
       TMP: Number(item.tags.TMP),
-    }));
+      Hydrogen: Number(item.tags.Hydrogen), // Corrected property key
+      Hydrogen_Sulfide: Number(item.tags.Hydrogen_Sulfide), // Corrected property key
+      Ammonia: Number(item.tags.Ammonia), // Corrected property key
+      Ethanol: Number(item.tags.Ethanol), // Corrected property key
+      Toluene: Number(item.tags.Toluene), // Corrected property key
+      }));
   
     return (
       <ResponsiveContainer width="100%" height={400} id="chartId">
@@ -259,10 +343,16 @@ export default function Report() {
           <Line type="monotone" dataKey="AQ" stroke="#8884d8" activeDot={{ r: 8 }} />
           <Line type="monotone" dataKey="HUM" stroke="#82ca9d" />
           <Line type="monotone" dataKey="TMP" stroke="#ffc658" />
+          <Line type="monotone" dataKey="Hydrogen" stroke="red" />
+<Line type="monotone" dataKey="Hydrogen_Sulfide" stroke="blue" />
+<Line type="monotone" dataKey="Ammonia" stroke="green" />
+<Line type="monotone" dataKey="Ethanol" stroke="purple" />
+<Line type="monotone" dataKey="Toluene" stroke="orange" />
         </LineChart>
       </ResponsiveContainer>
     );
   };
+  
   
 
 
@@ -345,6 +435,11 @@ export default function Report() {
                                 <th>AQ</th>
                                 <th>HUM</th>
                                 <th>TMP</th>
+                                <th>Hydrogen</th>
+                                <th>H2S</th>
+                                <th>Ammonia</th>
+                                <th>Ethanol</th>
+                                <th>Toluene</th>
                               </tr>
                             </thead>
                             <tbody>{tableRows}</tbody>

@@ -21,7 +21,7 @@ def safe_strptime(date_str, format):
         return None
 def preprocess(data):
     data_split = data.split(',')
-    print(data_split)
+    # print(data_split)
     record =[]
     imei = ''
     j = 0 
@@ -30,13 +30,13 @@ def preprocess(data):
         status =''
         
         data_split_split=data_split[i].split(':')
-        print(data_split_split)
+        # print(data_split_split)
         if i == 0 :
             imei = data_split_split[1].replace("'",'')
-            print(imei)
+            # print(imei)
         if i >0 and i < len(data_split)-2:
             record_value = ''
-            print(data_split_split[1])
+            # print(data_split_split[1])
             for  character_in_data in data_split_split[1]:
                 if character_in_data not in '.0123456789':
                     status += character_in_data
@@ -47,7 +47,7 @@ def preprocess(data):
             # print(record_value)
             #date_str = (data_split[len(data_split)-2].split(':')[1] +" "+ data_split[len(data_split)-1]).strip("'")
             date_str = (data_split[len(data_split)-2].split(':')[1] + " " + data_split[len(data_split)-1]).strip("'\"")
-            print('data string', date_str)
+            # print('data string', date_str)
             date_time = safe_strptime(date_str, '%Y/%m/%d %H:%M')
             # date_time  = datetime.strptime(date_str,'%Y/%m/%d %H:%M')
 
