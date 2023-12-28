@@ -155,7 +155,7 @@ const TablePage = () => {
                     <th>AQ</th>
                     <th>HUM</th>
                     <th>TMP</th>
-                    <th>Hydrogen</th>
+                    {/* <th>Hydrogen</th> */}
                     <th>H2S</th>
                     <th>Ammonia</th>
                     <th>Ethanol</th>
@@ -171,7 +171,7 @@ const TablePage = () => {
                       <td>{row.tags.AQ}</td>
                       <td>{row.tags.HUM}</td>
                       <td>{row.tags.TMP}</td>
-                      <td>{row.tags.Hydrogen}</td>
+                      {/* <td>{row.tags.Hydrogen}</td> */}
                       <td>{row.tags.Hydrogen_Sulfide}</td>
                       <td>{row.tags.Ammonia}</td>
                       <td>{row.tags.Ethanol}</td>

@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 from model import * # Import your model classes
 from app import sqlalchemy_to_dict
-from datetime import datetime
+from datetime import datetime, timedelta
 import requests
 # Assuming your database URI is stored in 'DATABASE_URI'
 # DATABASE_URI = 'your_database_uri'
@@ -31,18 +31,6 @@ def get_device_tag_id(session, device_id, tag_id):
 
 def insert_alert(session, data):
     bln_insert = True
-    # for i, entries in data.items():
-    #     imei = entries[0]['IMEI']
-    #     imei = imei.replace('"', '')
-    #     time_stamp = entries[3]['date_time']
-    #     tag_name, tag_value = next(iter(entries[1].items()))
-    #     tag_id = get_tag_id(session, tag_name)
-        # if tag_id == 1 or tag_name == 'AQ':
-        #     # logic for AQ tag as per discussion with client
-        #     tag_value = (-1) * ((float(tag_value) * 2) - 20)
-        #     tag_value = round(tag_value, 2)            # logic for AQ tag as per discussion with client
-        #     if tag_value == 15.06 or tag_value == 11.76:
-        #             bln_insert = False
     if bln_insert:
         for i, entries in data.items():
             imei = entries[0]['IMEI']
@@ -52,44 +40,58 @@ def insert_alert(session, data):
 
             tag_id = get_tag_id(session, tag_name)
             device_id = get_device_id(session, imei)
+            device_tag_id = get_device_tag_id(session, device_id, tag_id)
 
             # Check if tag_id exists in AlertConfig and meets your condition
-            alert_config = session.query(AlertConfig).filter(
+            alert_configs = session.query(AlertConfig).filter(
                 AlertConfig.tag_id == tag_id,
                 AlertConfig.device_id == device_id
-            ).first()
+            ).all()
 
-            if alert_config:  # Proceed if the alert_config record exists
-                alert_type = alert_config.alert_type  # Assuming alert_type is a field in AlertConfig
-                # print("alert",tag_id,tag_name,tag_value)
-                # if tag_id == 1 or tag_name =='AQ':
-                #     # logic for AQ tag as per discussion with client
-                #     tag_value = (-1) * ((float(tag_value) * 2) - 20)
-                #     tag_value = round(tag_value,2)
+            # Iterate over each alert_config record
+            for alert_config in alert_configs:
+                alert_type = alert_config.alert_type
+                # Assuming alert_type is a field in AlertConfig
+                # current_tag_value = your_current_tag_value  # Replace with the current tag value you have
+                # Example timestamp
+                # Convert the string to a datetime object
+                timestamp = datetime.strptime(time_stamp, '%Y/%m/%d %H:%M')
+                time_threshold = timestamp - timedelta(minutes=30)  # Adjust the timedelta as needed
+
+                # Query to get records from the last 30 minutes for a specific tag_id
+                recent_records = session.query(History).filter(
+                    History.device_tag_id == device_tag_id,
+                    History.recorded_date_time >= time_threshold
+                ).all()
+
+                # Check if any of the recent records have the same tag_value
+                alert_needed = any(record.tag_value == float(tag_value) for record in recent_records)
+
                 alert_flag = False
-                if tag_name == 'AQ':
-                    if alert_config.tag_value_min < float(tag_value) < alert_config.tag_value_max:
-                        alert_flag = True
-                else:
-                    if float(tag_value) < alert_config.tag_value_min or float(tag_value) > alert_config.tag_value_max:
-                        alert_flag = True
+                # Generate an alert if needed
+                if alert_needed:
+                    if tag_name == 'AQ':
+                        if alert_config.tag_value_min < float(tag_value) < alert_config.tag_value_max:
+                            alert_flag = True
+                    else:
+                        if float(tag_value) < alert_config.tag_value_min or float(tag_value) > alert_config.tag_value_max:
+                            alert_flag = True
+
                 if alert_flag:
-                    print
+                    # Create an alert
                     alert = alert_values_out_of_range(
-                            tag_id=tag_id,
-                            tag_value=float(tag_value),
-                            tag_name=tag_name,
-                            alert_type=alert_type,
-                            time=time_stamp,
-                            device_serial_num=imei
-                        )
+                        tag_id=tag_id,
+                        tag_value=float(tag_value),
+                        tag_name=tag_name,
+                        alert_type=alert_type,
+                        time=time_stamp,
+                        device_serial_num=imei
+                    )
                     session.add(alert)
-                    session.commit()
-            else:
-                # Optionally, handle the case where the condition is not met
-                # print(f"No AlertConfig found for tag_id {tag_id} and device_id {device_id}")
-                pass
-        
+
+            # Commit all new alert records to the database
+            session.commit()
+
 
 def insert_history_data(session, data):
     for _, entries in data.items():
