@@ -2053,3 +2053,24 @@ def add_all_info_for_new_device(new_device: NewDevicePydantic, db: Session = Dep
         db.refresh(device)
         device = sqlalchemy_to_dict(device)
         return device
+
+
+
+
+app.get("/get_all_info_on_device/")
+def get_all_info_on_device(device_id: int, db: Session = Depends(get_db)):
+    device = db.query(Device).filter(Device.device_id == device_id).first()
+    if not device:
+        raise HTTPException(status_code=404, detail="Device not found")
+    device = sqlalchemy_to_dict(device)
+    location = db.query(Location).filter(Location.location_id == device["location_id"]).first()
+    location = sqlalchemy_to_dict(location)
+    address = db.query(Address).filter(Address.address_id == location["address_id"]).first()
+    address = sqlalchemy_to_dict(address)
+    contact = db.query(Contact).filter(Contact.contact_id == location["contact_id"]).first()
+    contact = sqlalchemy_to_dict(contact)
+    contact_type = db.query(ContactType).filter(ContactType.contact_id == contact["contact_type_id"]).first()
+    contact_type = sqlalchemy_to_dict(contact_type)
+    device_type = db.query(DeviceType).filter(DeviceType.device_type_id == device["device_type_id"]).first()
+    device_type = sqlalchemy_to_dict(device_type)
+    return [device, device_type, location, address, contact, contact_type]
