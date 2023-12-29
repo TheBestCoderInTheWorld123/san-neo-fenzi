@@ -55,8 +55,9 @@ def insert_alert(session, data):
                 # current_tag_value = your_current_tag_value  # Replace with the current tag value you have
                 # Example timestamp
                 # Convert the string to a datetime object
+                print('alert', timestamp)
                 timestamp = datetime.strptime(time_stamp, '%Y/%m/%d %H:%M')
-                print('alert',timestamp)
+
                 time_threshold = timestamp - timedelta(minutes=30)  # Adjust the timedelta as needed
 
                 # Query to get records from the last 30 minutes for a specific tag_id
