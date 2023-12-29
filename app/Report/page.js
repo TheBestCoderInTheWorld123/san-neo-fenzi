@@ -146,15 +146,15 @@ export default function Report() {
     doc.setFontSize(15);
   
     const title = `Report for Sr. No: ${selectedColumn}`;
-    const headers = [["Sr. No.", "Timestamp", "AQ", "HUM", "TMP","Hydrogen","Hydrogen_Sulfide","Ammonia","Ethanol","Toluene"]];
-  
+    // const headers = [["Sr. No.", "Timestamp", "AQ", "HUM", "TMP","Hydrogen","Hydrogen_Sulfide","Ammonia","Ethanol","Toluene"]];
+    const headers = [["Sr. No.", "Timestamp", "AQ", "HUM", "TMP","Hydrogen_Sulfide","Ammonia","Ethanol","Toluene"]];
     const data_table = data.map((elt, index) => [
       index + 1, // Assuming you want to add a row index as "Sr. No."
       elt.latest_recorded_date,
       elt.tags.AQ,
       elt.tags.HUM,
       elt.tags.TMP,
-      elt.tags.Hydrogen,
+      // elt.tags.Hydrogen,
       elt.tags.Hydrogen_Sulfide,
       elt.tags.Ammonia,
       elt.tags.Ethanol,
@@ -180,7 +180,7 @@ export default function Report() {
     'AQ': item.tags.AQ,
     'HUM': item.tags.HUM,
     'TMP': item.tags.TMP,
-    'Hydrogen': item.tags.Hydrogen,
+    // 'Hydrogen': item.tags.Hydrogen,
     'Hydrogen_Sulfide': item.tags.Hydrogen_Sulfide,
     'Ammonia': item.tags.Ammonia,
     'Ethanol': item.tags.Ethanol,
@@ -333,7 +333,7 @@ export default function Report() {
       AQ: Number(item.tags.AQ),
       HUM: Number(item.tags.HUM),
       TMP: Number(item.tags.TMP),
-      Hydrogen: Number(item.tags.Hydrogen), // Corrected property key
+      //Hydrogen: Number(item.tags.Hydrogen), // Corrected property key
       Hydrogen_Sulfide: Number(item.tags.Hydrogen_Sulfide), // Corrected property key
       Ammonia: Number(item.tags.Ammonia), // Corrected property key
       Ethanol: Number(item.tags.Ethanol), // Corrected property key
