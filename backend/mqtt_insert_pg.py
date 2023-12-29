@@ -55,10 +55,10 @@ def insert_alert(session, data):
                 # current_tag_value = your_current_tag_value  # Replace with the current tag value you have
                 # Example timestamp
                 # Convert the string to a datetime object
-                print('alert', datetime)
-                timestamp = datetime.strptime(time_stamp, '%Y/%m/%d %H:%M')
-                print('alert', timestamp)
-                time_threshold = timestamp - timedelta(minutes=30)  # Adjust the timedelta as needed
+                # print('alert', datetime)
+                # timestamp = datetime.strptime(time_stamp, '%Y/%m/%d %H:%M')
+                # print('alert', time_stamp)
+                time_threshold = time_stamp - timedelta(minutes=30)  # Adjust the timedelta as needed
 
                 # Query to get records from the last 30 minutes for a specific tag_id
                 recent_records = session.query(History).filter(
@@ -67,7 +67,8 @@ def insert_alert(session, data):
                 ).all()
 
                 # Check if any of the recent records have the same tag_value
-                alert_needed = any(record.tag_value == float(tag_value) for record in recent_records)
+                alert_needed = any(record.value == float(tag_value) for record in recent_records)
+                print('is alert needed for the tag value:', tag_value, ' ',alert_needed)
 
                 alert_flag = False
                 # Generate an alert if needed

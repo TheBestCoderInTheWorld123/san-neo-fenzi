@@ -261,7 +261,7 @@ export default function Report() {
       <td>{row.tags.AQ}</td>
       <td>{row.tags.HUM}</td>
       <td>{row.tags.TMP}</td>
-      <td>{row.tags.Hydrogen}</td>
+      {/* <td>{row.tags.Hydrogen}</td> */}
       <td>{row.tags.Hydrogen_Sulfide}</td>
       <td>{row.tags.Ammonia}</td>
       <td>{row.tags.Ethanol}</td>
@@ -351,7 +351,7 @@ export default function Report() {
           <Line type="monotone" dataKey="AQ" stroke="#8884d8" activeDot={{ r: 8 }} />
           <Line type="monotone" dataKey="HUM" stroke="#82ca9d" />
           <Line type="monotone" dataKey="TMP" stroke="#ffc658" />
-          <Line type="monotone" dataKey="Hydrogen" stroke="red" />
+          {/* <Line type="monotone" dataKey="Hydrogen" stroke="red" /> */}
 <Line type="monotone" dataKey="Hydrogen_Sulfide" stroke="blue" />
 <Line type="monotone" dataKey="Ammonia" stroke="green" />
 <Line type="monotone" dataKey="Ethanol" stroke="purple" />
@@ -443,7 +443,7 @@ export default function Report() {
                                 <th>AQ</th>
                                 <th>HUM</th>
                                 <th>TMP</th>
-                                <th>Hydrogen</th>
+                                {/* <th>Hydrogen</th> */}
                                 <th>H2S</th>
                                 <th>Ammonia</th>
                                 <th>Ethanol</th>
