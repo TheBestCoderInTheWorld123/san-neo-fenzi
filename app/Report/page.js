@@ -146,15 +146,15 @@ export default function Report() {
     doc.setFontSize(15);
   
     const title = `Report for Sr. No: ${selectedColumn}`;
-    const headers = [["Sr. No.", "Timestamp", "AQ", "HUM", "TMP","Hydrogen","Hydrogen_Sulfide","Ammonia","Ethanol","Toluene"]];
-  
+    // const headers = [["Sr. No.", "Timestamp", "AQ", "HUM", "TMP","Hydrogen","Hydrogen_Sulfide","Ammonia","Ethanol","Toluene"]];
+    const headers = [["Sr. No.", "Timestamp", "AQ", "HUM", "TMP","Hydrogen_Sulfide","Ammonia","Ethanol","Toluene"]];
     const data_table = data.map((elt, index) => [
       index + 1, // Assuming you want to add a row index as "Sr. No."
       elt.latest_recorded_date,
       elt.tags.AQ,
       elt.tags.HUM,
       elt.tags.TMP,
-      elt.tags.Hydrogen,
+      // elt.tags.Hydrogen,
       elt.tags.Hydrogen_Sulfide,
       elt.tags.Ammonia,
       elt.tags.Ethanol,
@@ -180,7 +180,7 @@ export default function Report() {
     'AQ': item.tags.AQ,
     'HUM': item.tags.HUM,
     'TMP': item.tags.TMP,
-    'Hydrogen': item.tags.Hydrogen,
+    // 'Hydrogen': item.tags.Hydrogen,
     'Hydrogen_Sulfide': item.tags.Hydrogen_Sulfide,
     'Ammonia': item.tags.Ammonia,
     'Ethanol': item.tags.Ethanol,
@@ -261,7 +261,7 @@ export default function Report() {
       <td>{row.tags.AQ}</td>
       <td>{row.tags.HUM}</td>
       <td>{row.tags.TMP}</td>
-      <td>{row.tags.Hydrogen}</td>
+      {/* <td>{row.tags.Hydrogen}</td> */}
       <td>{row.tags.Hydrogen_Sulfide}</td>
       <td>{row.tags.Ammonia}</td>
       <td>{row.tags.Ethanol}</td>
@@ -333,7 +333,7 @@ export default function Report() {
       AQ: Number(item.tags.AQ),
       HUM: Number(item.tags.HUM),
       TMP: Number(item.tags.TMP),
-      Hydrogen: Number(item.tags.Hydrogen), // Corrected property key
+      //Hydrogen: Number(item.tags.Hydrogen), // Corrected property key
       Hydrogen_Sulfide: Number(item.tags.Hydrogen_Sulfide), // Corrected property key
       Ammonia: Number(item.tags.Ammonia), // Corrected property key
       Ethanol: Number(item.tags.Ethanol), // Corrected property key
@@ -351,7 +351,7 @@ export default function Report() {
           <Line type="monotone" dataKey="AQ" stroke="#8884d8" activeDot={{ r: 8 }} />
           <Line type="monotone" dataKey="HUM" stroke="#82ca9d" />
           <Line type="monotone" dataKey="TMP" stroke="#ffc658" />
-          <Line type="monotone" dataKey="Hydrogen" stroke="red" />
+          {/* <Line type="monotone" dataKey="Hydrogen" stroke="red" /> */}
 <Line type="monotone" dataKey="Hydrogen_Sulfide" stroke="blue" />
 <Line type="monotone" dataKey="Ammonia" stroke="green" />
 <Line type="monotone" dataKey="Ethanol" stroke="purple" />
@@ -443,7 +443,7 @@ export default function Report() {
                                 <th>AQ</th>
                                 <th>HUM</th>
                                 <th>TMP</th>
-                                <th>Hydrogen</th>
+                                {/* <th>Hydrogen</th> */}
                                 <th>H2S</th>
                                 <th>Ammonia</th>
                                 <th>Ethanol</th>
