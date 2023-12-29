@@ -2054,10 +2054,63 @@ def add_all_info_for_new_device(new_device: NewDevicePydantic, db: Session = Dep
         device = sqlalchemy_to_dict(device)
         return device
 
+@app.put("/edit_all_device_data/{device_id}")
+def editalldevice_data(ndd: NewDevicePydantic, device_id: int, db: Session = Depends(get_db)):
+    device = db.query(Device).filter(Device.device_id == device_id).first()
+    if not device:
+        raise HTTPException(status_code=404, detail="Device not found")
+    location = db.query(Location).filter(Location.location_id == device["location_id"]).first()
+    address = db.query(Address).filter(Address.address_id == location["address_id"]).first()
+    contact = db.query(Contact).filter(Contact.contact_id == location["contact_id"]).first()
+    contact_type = db.query(ContactType).filter(ContactType.contact_id == contact["contact_type_id"]).first()
+    device_type = db.query(DeviceType).filter(DeviceType.device_type_id == device["device_type_id"]).first()
+    contact_type.description = ndd.contact_type_description
+    contact.updated_at = datetime.now()
+    contact.updated_by = "computer"
+    contact.contact_description = ndd.contact_description
+    contact_type.updated_at = datetime.now()
+    contact_type.updated_by = "computer"
+    address.address_line1 = ndd.address_line_1
+    address.address_line2 = ndd.address_line_2
+    address.city = ndd.city
+    address.postal_code = ndd.postal_code
+    address.country = ndd.country
+    address.latitude = ndd.latitude
+    address.longitude = ndd.longitude
+    address.updated_at = datetime.now()
+    address.updated_by = "computer"
+    location.location_name = ndd.location_name
+    location.location_desc = ndd.location_description
+    location.location_type_id = ndd.location_type_id
+    location.location_root = ndd.location_root
+    location.latitude = ndd.latitude
+    location.longitude = ndd.longitude
+    location.updated_at = datetime.now()
+    location.updated_by = "computer"
+    device_type.description = ndd.device_type_description
+    device_type.updated_at = datetime.now()
+    device_type.updated_by = "computer"
+    device.device_root_id = ndd.device_id_root
+    device.device_serial_number = ndd.device_serial_number
+    device.description = ndd.description
+    device.model_number = ndd.model_number
+    device.brand_name = ndd.brand_name
+    device.is_active = ndd.is_active
+    device.updated_at = datetime.now()
+    device.updated_by = "computer"
+    db.commit()
+    db.refresh(contact_type)
+    db.refresh(contact)
+    db.refresh(address)
+    db.refresh(location)
+    db.refresh(device_type)
+    db.refresh(device)
+    return [device, device_type, location, address, contact, contact_type]
 
 
 
-app.get("/get_all_info_on_device/")
+
+@app.get("/get_all_info_on_device/")
 def get_all_info_on_device(device_id: int, db: Session = Depends(get_db)):
     device = db.query(Device).filter(Device.device_id == device_id).first()
     if not device:
