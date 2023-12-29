@@ -68,7 +68,7 @@ def insert_alert(session, data):
 
                 # Check if any of the recent records have the same tag_value
                 alert_needed = any(record.value == float(tag_value) for record in recent_records)
-                print('is alert needed for the tag value:', tag_value, ' ',alert_needed)
+                # print('is alert needed for the tag value:', tag_value, ' ',alert_needed)
 
                 alert_flag = False
                 # Generate an alert if needed
