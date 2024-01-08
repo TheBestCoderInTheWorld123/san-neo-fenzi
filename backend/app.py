@@ -373,14 +373,20 @@ def history_by_device_serial_no(sno: str, tdate: datetime, fdate: datetime, db: 
     # fdate = datetime.strptime(fdate, "%Y-%m-%d %H:%M:%S")
     # # dth = db.query(DeviceTagHistory).filter(DeviceTagHistory.sr_no == sno and DeviceTagHistory.recorded_date_time >= fdate
     #                                         and DeviceTagHistory.recorded_date_time <= tdate).all()
+    # dth = db.query(DeviceTagHistory).filter(
+    #     DeviceTagHistory.sr_no == sno,
+    #     and_(
+    #         DeviceTagHistory.recorded_date_time >= fdate,
+    #         DeviceTagHistory.recorded_date_time <= tdate
+    #     )
+    # ).all()
     dth = db.query(DeviceTagHistory).filter(
         DeviceTagHistory.sr_no == sno,
         and_(
             DeviceTagHistory.recorded_date_time >= fdate,
             DeviceTagHistory.recorded_date_time <= tdate
         )
-    ).all()
-
+    ).order_by(desc(DeviceTagHistory.created_at)).limit(3).all()
     result = {}
     for record in dth:
         #device_id = record.devices_device_id

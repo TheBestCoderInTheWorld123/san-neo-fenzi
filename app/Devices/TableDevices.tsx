@@ -48,16 +48,27 @@ const TableDevices = () => {
     doc.setFontSize(15);
   
     const title = `Latest Device Data`;
-    const headers = [['Sr. No.', 'Status', 'Timestamp', 'AQ', 'HUM', 'TMP']];
+    const headers = [['Sr. No.', 'Status', 'Timestamp', 'AQ', 'HUM', 'TMP',"H2S","Ammonia","Ethanol","Toluene"]];
     console.log("Exporting data:", filteredData); // Debugging line
-    const data_table = filteredData.map((row, index) => [
+    const updatedData = filteredData.map(record => {
+      const dependentValues = getDependentValues(parseFloat(record.tags.AQ));
+      return {
+        ...record,
+        tags: {
+          ...record.tags,
+          ...dependentValues,
+        },
+      };
+    });
+    
+    const data_table = updatedData.map((row, index) => [
         row.device_serial_number,
         row.comm_satus,
         row.latest_recorded_date,
         row.tags.AQ,
         row.tags.HUM,
         row.tags.TMP,
-        row.tags.Hydrogen,
+        // row.tags.Hydrogen,
         row.tags.Hydrogen_Sulfide,
         row.tags.Ammonia,
         row.tags.Ethanol,
@@ -229,7 +240,7 @@ const TableDevices = () => {
                     <th>AQ</th>
                     <th>HUM</th>
                     <th>TMP</th>
-                    <th>Hydrogen</th>
+                    {/* <th>Hydrogen</th> */}
                     <th>H2S</th>
                     <th>Ammonia</th>
                     <th>Ethanol</th>
@@ -246,7 +257,7 @@ const TableDevices = () => {
                       <td>{row.tags.HUM}</td>
                       <td>{row.tags.TMP}</td>
                        {/* New columns based on updated mapping */}
-                      <td>{row.tags.Hydrogen}</td>
+                      {/* <td>{row.tags.Hydrogen}</td> */}
                       <td>{row.tags.Hydrogen_Sulfide}</td>
                       <td>{row.tags.Ammonia}</td>
                       <td>{row.tags.Ethanol}</td>

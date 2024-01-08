@@ -316,9 +316,9 @@ export default function Report() {
           },
         };
       });
-      // setData(historyData.records);
+      setData(historyData.records);
       setData(updatedRecords);
-      // console.log(updatedRecords);
+      console.log(updatedRecords);
 
       setShowTable(true);
     } catch (error) {
@@ -333,7 +333,6 @@ export default function Report() {
       AQ: Number(item.tags.AQ),
       HUM: Number(item.tags.HUM),
       TMP: Number(item.tags.TMP),
-      //Hydrogen: Number(item.tags.Hydrogen), // Corrected property key
       Hydrogen_Sulfide: Number(item.tags.Hydrogen_Sulfide), // Corrected property key
       Ammonia: Number(item.tags.Ammonia), // Corrected property key
       Ethanol: Number(item.tags.Ethanol), // Corrected property key
@@ -351,7 +350,6 @@ export default function Report() {
           <Line type="monotone" dataKey="AQ" stroke="#8884d8" activeDot={{ r: 8 }} />
           <Line type="monotone" dataKey="HUM" stroke="#82ca9d" />
           <Line type="monotone" dataKey="TMP" stroke="#ffc658" />
-          {/* <Line type="monotone" dataKey="Hydrogen" stroke="red" /> */}
 <Line type="monotone" dataKey="Hydrogen_Sulfide" stroke="blue" />
 <Line type="monotone" dataKey="Ammonia" stroke="green" />
 <Line type="monotone" dataKey="Ethanol" stroke="purple" />

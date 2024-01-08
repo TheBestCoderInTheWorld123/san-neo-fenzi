@@ -72,7 +72,7 @@ def insert_alert(session, data):
 
                 alert_flag = False
                 # Generate an alert if needed
-                if alert_needed:
+                if alert_needed and len(recent_records) > 50:
                     if tag_name == 'AQ':
                         if alert_config.tag_value_min < float(tag_value) < alert_config.tag_value_max:
                             alert_flag = True
