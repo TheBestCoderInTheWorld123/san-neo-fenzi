@@ -7,7 +7,7 @@ const LocDropdown = () => {
     const toggleLocDropdown = () => {
         setIsOpen(!isOpen);
     };
-    
+
 
     const closeLocDropdown = () => {
         setIsOpen(false);
@@ -18,9 +18,11 @@ const LocDropdown = () => {
             <div className="relative inline-block">
                 <button
                     type="button"
-                    className="px-4 py-2 text-white bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm inline-flex items-center"
+                    id="button"
+                    className="px-4 py-2 text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm inline-flex items-center"
                     onClick={toggleLocDropdown}
                 >
+
                     Location <svg className="w-2.5 h-2.5 ml-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
                     </svg>
@@ -60,7 +62,7 @@ const LocDropdown = () => {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     )
 }
 

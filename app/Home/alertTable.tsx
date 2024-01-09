@@ -2,7 +2,22 @@ import { Card, CardBody, CardHeader, Col, Row, Table } from 'reactstrap';
 
 export default function AlertTable() {
     return (
+<<<<<<< Updated upstream
                 
+=======
+        <div>
+        <div className="flex items-center mb-2 md:mb-0 mx-2">
+        <label className="mr-2 ml-4 text-sm md:text-base">Filter:</label>
+          <input
+            type="text"
+            className="form-control border-1"
+            placeholder="Search all columns..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
+        </div>
+
+>>>>>>> Stashed changes
         <Row>
             {/* <div className="font-extrabold text-lg mt-2 py-6 text-center w-full"> 
             {/* Center text */}

@@ -34,7 +34,7 @@ export default function Navbar() {
               <h1 className="text-md">Report</h1>
           </Link>   
           <Link href="./New" className="mx-3">
-            <h1 className="text-md">ComboBOX</h1>
+            <h1 className="text-md">Admin</h1>
           </Link>
         </div>
         <div>

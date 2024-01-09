@@ -96,9 +96,9 @@ const LogIn = () => {
                         {isLoading ? 'Processing...' : 'Log In'}
                     </button>
                 </div>
-                <div className="hidden md:block md:w-2/5 text-white rounded-br-2xl py-36 px-12 bg-blue-500">
+                <div id='login-side-div' className="hidden md:block md:w-2/5 text-white rounded-br-2xl py-36 px-12">
                     <h2 className="text-2xl sm:text-3xl font-black">Don&apos;t have an account?</h2>
-                    <button onClick={goToSignUp} className="hover:bg-white hover:text-blue-500 border-white border-2 text-white w-40 m-4 py-1 rounded-3xl text-lg font-semibold">Sign Up</button>
+                    <button onClick={goToSignUp} id='side-login-button' className="hover:bg-white hover:text-2f455c border-white border-2 text-white w-40 m-4 py-1 rounded-3xl text-lg font-semibold">Sign Up</button>
                 </div>
             </div>
         </div>
