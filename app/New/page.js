@@ -27,7 +27,7 @@ const Location = {
 
 const App = () => {
     const [options, setOptions] = useState([]);
-    const [selectedColumn, setSelectedColumn] = useState("device_serial_number"); // Initialize selectedColumn state variable
+    const [selectedColumn, setSelectedColumn] = useState("device_serial_number");
     const [location, setLocations] = useState([]);
     const [expanded, setExpanded] = useState([]);
     const [selected, setSelected] = useState("");
@@ -36,10 +36,12 @@ const App = () => {
     const [isAddDivVisible, setIsAddDivVisible] = useState(false);
     const [isUpdateDivVisible, setIsUpdateDivVisible] = useState(false);
     const [contextMenu, setContextMenu] = useState(null);
+    const [selectedTreeItemName, setSelectedTreeItemName] = useState("");
 
-
-    const handleClick = (event) => {
+    const handleClick = (treeItemName, event) => {
         event.preventDefault();
+        event.stopPropagation(); 
+        setSelectedTreeItemName(treeItemName);
         setContextMenu(
             contextMenu === null
                 ? { mouseX: event.clientX, mouseY: event.clientY }
@@ -48,20 +50,23 @@ const App = () => {
         setIsOpen(!isOpen);
     };
 
-    const handleClose = () => {
+    const handleClose = (event) => {
         setIsOpen(false);
         setContextMenu(null);
-        if (event.target.textContent === "Add") {
+
+        const action = event.target.textContent;
+        if (action === "Add") {
             setIsUpdateDivVisible(false);
             setIsAddDivVisible(true);
-        } else if (event.target.textContent === "Update") {
+        } else if (action === "Update") {
             setIsAddDivVisible(false);
             setIsUpdateDivVisible(true);
-        } else if (event.target.textContent === "Delete") {
+        } else if (action === "Delete") {
+            setIsAddDivVisible(false);
+            setIsUpdateDivVisible(false);
             setDeleteDialogOpen(true);
         }
     };
-
 
     const handleDeleteConfirm = () => {
         // Add your delete logic here
@@ -95,9 +100,10 @@ const App = () => {
 
     const handleSelect = (event, nodeId) => {
         setSelected(nodeId);
-        console.log("Selected node ID:", nodeId);
+        const selectedNode = event.target.textContent;
+        setSelectedTreeItemName(selectedNode);
+        console.log("Selected node ID:", nodeId, "Name:", selectedNode);
     };
-
 
     const buildTree = (data) => {
         let tree = {};
@@ -120,7 +126,7 @@ const App = () => {
             key={nodes.location_id}
             nodeId={nodes.location_id.toString()}
             label={nodes.location_name}
-            onContextMenu={handleClick}
+            onContextMenu={(event) => handleClick(nodes.location_name, event)}
         >
             {Array.isArray(nodes.children) && nodes.children.map((node) => renderTree(node))}
         </TreeItem>
@@ -156,12 +162,12 @@ const App = () => {
 
     return (
         <main className='h-full min-h-screen'>
-            <div>
+            <div className="w-full overflow-hidden">
                 <Navbar />
             </div>
             <div className='flex h-full'>
                 {/* Tree View */}
-                <div className="flex bg-cyan-950 w-1/5 h-full">
+                <div className="flex bg-cyan-950 w-1/5 h-full shadow-inner shadow-black">
                     <Box sx={{ height: '100%', flexGrow: 1, maxWidth: 350 }}>
                         <div className="px-2 mb-6 text-lg font-extrabold text-white items-center justify-center">
                             <p className="py-2 px-2 mt-2">Locations</p>
@@ -244,22 +250,24 @@ const App = () => {
                         <div>
                             {isAddDivVisible && (
                                 <main>
-                                    <div className="w-72 bg-cyan-950 m-4 rounded-2xl px-6 py-4 shadow-xl text-white font-medium text-md flex flex-col items-center">
+                                    <div className="w-80 border-cyan-950 border-4 mx-4 rounded-2xl px-6 py-4 shadow-neutral-600 shadow-lg font-medium text-md flex flex-col items-center">
                                         <div>
-                                            <p className="my-2">Location Root: Penguin</p>
-
+                                            <p className="my-2">Adding Device Under: {selectedTreeItemName}</p>
+                                            <p className="mt-3 mb-1">Device Status: Active</p>
                                             <p className="mt-3 mb-1">Serial Number</p>
-                                            <input type="text" className="px-4 py-1 rounded-3xl border-cyan-700 border-2 text-cyan-950 text-sm font-medium" />
-
-                                            <p className="mt-3 mb-1">Latitude</p>
-                                            <input type="text" className="px-4 py-1 rounded-3xl border-cyan-700 border-2 text-cyan-950 text-sm font-medium" />
-
-                                            <p className="mt-3 mb-1">Longitude</p>
-                                            <input type="text" className="px-4 py-1 rounded-3xl border-cyan-700 border-2 text-cyan-950 text-sm font-medium" />
+                                            <input type="text" className="add_device_input" />
+                                            <p className="mt-3 mb-1">Description</p>
+                                            <input type="text" className="add_device_input" />
+                                            <p className="mt-3 mb-1">Model Number</p>
+                                            <input type="text" className="add_device_input" />
+                                            <p className="mt-3 mb-1">Brand Name</p>
+                                            <input type="text" className="add_device_input" />
+                                            <p className="mt-3 mb-1">Device Type</p>
+                                            <input type="text" className="add_device_input" />
 
                                             <p></p>
                                             <div className="text-right">
-                                                <button className="mt-5 mb-2 text-white font-medium rounded-lg text-sm px-4 py-2 bg-blue-500 hover:bg-blue-700">Add Device</button>
+                                                <button className="mt-5 mb-2 shadow-md shadow-neutral-600 hover:shadow-lg hover:shadow-neutral-600 focus:shadow-md focus:shadow-neutral-600 text-white font-medium rounded-lg text-sm px-4 py-2 bg-blue-500 hover:bg-blue-700">Add Device</button>
                                             </div>
                                         </div>
                                     </div>

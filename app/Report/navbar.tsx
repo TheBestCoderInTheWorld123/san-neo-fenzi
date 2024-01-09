@@ -22,7 +22,7 @@ export default function Navbar() {
         window.location.href = '/Home/page';
     };
     return (
-      <div className="bg-cyan-950 text-white flex w-full h-full px-4 py-4 justify-between items-center border-b">
+      <div className="bg-cyan-950 text-white flex w-full h-full px-4 py-4 justify-between items-center">
         <div className="flex mt-2">
           <Link href="./Home" className="mx-3">
               <h1 className="text-md">Home</h1>

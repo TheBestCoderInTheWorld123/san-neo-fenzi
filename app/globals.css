@@ -211,3 +211,24 @@ thead {
   padding: 2px 4px;
   color: white;
 }
+
+.add_device_input {
+  width: 240px;
+  padding: 4px 16px;
+  border: 2px solid #0e7490;
+  border-radius: 24px;
+  color: #083344;
+  font-size: small;
+  font-weight: medium;
+  box-shadow: 0 2px 4px 0px #737373;
+}
+
+.add_device_input:focus {
+  outline: none;
+  border: 2px solid #164e63;
+}
+
+.add_device_input:hover {
+  box-shadow: 0 2px 4px 0 #262626;
+  border: 2px solid  #164e63;
+}
