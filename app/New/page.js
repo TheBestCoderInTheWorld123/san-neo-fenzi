@@ -246,7 +246,7 @@ const App = () => {
 
                         </div>
                     </div>
-                    <div className="">
+                    <div>
                         <div>
                             {isAddDivVisible && (
                                 <main>
@@ -267,7 +267,7 @@ const App = () => {
 
                                             <p></p>
                                             <div className="text-right">
-                                                <button className="mt-5 mb-2 shadow-md shadow-neutral-600 hover:shadow-lg hover:shadow-neutral-600 focus:shadow-md focus:shadow-neutral-600 text-white font-medium rounded-lg text-sm px-4 py-2 bg-blue-500 hover:bg-blue-700">Add Device</button>
+                                                <button id="button" className="mt-5 mb-2 shadow-md shadow-neutral-600 hover:shadow-lg hover:shadow-neutral-600 focus:shadow-md focus:shadow-neutral-600 text-white font-medium rounded-lg text-sm px-4 py-2">Add Device</button>
                                             </div>
                                         </div>
                                     </div>
@@ -277,12 +277,29 @@ const App = () => {
                         </div>
                         <div>
                             {isUpdateDivVisible && (
-                                <div id="myDiv" className="m-4">
-                                    <div className="flex">
-                                        <input type="text" placeholder="Update" className="px-2 py-2 placeholder-gray-400 mr-2 rounded-lg text-cyan-950 border-cyan-700 border-2 text-sm font-medium" />
-                                        <button className="text-white font-medium rounded-lg text-sm px-4 bg-blue-500 hover:bg-blue-700">Update</button>
+                                <main>
+                                <div className="w-80 border-cyan-950 border-4 mx-4 rounded-2xl px-6 py-4 shadow-neutral-600 shadow-lg font-medium text-md flex flex-col items-center">
+                                    <div>
+                                        <p className="my-2">Updating: {selectedTreeItemName}</p>
+                                        <p className="mt-3 mb-1">Device Status: Active</p>
+                                        <p className="mt-3 mb-1">Serial Number</p>
+                                        <input type="text" className="add_device_input" />
+                                        <p className="mt-3 mb-1">Description</p>
+                                        <input type="text" className="add_device_input" />
+                                        <p className="mt-3 mb-1">Model Number</p>
+                                        <input type="text" className="add_device_input" />
+                                        <p className="mt-3 mb-1">Brand Name</p>
+                                        <input type="text" className="add_device_input" />
+                                        <p className="mt-3 mb-1">Device Type</p>
+                                        <input type="text" className="add_device_input" />
+
+                                        <p></p>
+                                        <div className="text-right">
+                                            <button id="button" className="mt-5 mb-2 shadow-md shadow-neutral-600 hover:shadow-lg hover:shadow-neutral-600 focus:shadow-md focus:shadow-neutral-600 text-white font-medium rounded-lg text-sm px-4 py-2">Update</button>
+                                        </div>
                                     </div>
                                 </div>
+                            </main>
                             )}
                         </div>
                     </div>
