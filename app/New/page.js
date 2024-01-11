@@ -35,12 +35,14 @@ const App = () => {
     const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [isAddDivVisible, setIsAddDivVisible] = useState(false);
     const [isUpdateDivVisible, setIsUpdateDivVisible] = useState(false);
+    const [showDetailsDiv, setShowDetailsDiv] = useState(false);
+    const [deviceDetails, setDeviceDetails] = useState(null);
     const [contextMenu, setContextMenu] = useState(null);
     const [selectedTreeItemName, setSelectedTreeItemName] = useState("");
 
     const handleClick = (treeItemName, event) => {
         event.preventDefault();
-        event.stopPropagation(); 
+        event.stopPropagation();
         setSelectedTreeItemName(treeItemName);
         setContextMenu(
             contextMenu === null
@@ -103,6 +105,24 @@ const App = () => {
         const selectedNode = event.target.textContent;
         setSelectedTreeItemName(selectedNode);
         console.log("Selected node ID:", nodeId, "Name:", selectedNode);
+    
+        fetchDeviceDetails(nodeId);
+        setShowDetailsDiv(true);
+        console.log('Show Details Div set to true');
+    };
+    
+    const fetchDeviceDetails = async (nodeId) => {
+        try {
+            const response = await fetch(`http://51.20.249.252:8000/get_device_latest_records`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            setDeviceDetails(data);
+            console.log('Device Details:', data);
+        } catch (error) {
+            console.error("Error fetching device details:", error);
+        }
     };
 
     const buildTree = (data) => {
@@ -278,28 +298,35 @@ const App = () => {
                         <div>
                             {isUpdateDivVisible && (
                                 <main>
-                                <div className="w-80 border-cyan-950 border-4 mx-4 rounded-2xl px-6 py-4 shadow-neutral-600 shadow-lg font-medium text-md flex flex-col items-center">
-                                    <div>
-                                        <p className="my-2">Updating: {selectedTreeItemName}</p>
-                                        <p className="mt-3 mb-1">Device Status: Active</p>
-                                        <p className="mt-3 mb-1">Serial Number</p>
-                                        <input type="text" className="add_device_input" />
-                                        <p className="mt-3 mb-1">Description</p>
-                                        <input type="text" className="add_device_input" />
-                                        <p className="mt-3 mb-1">Model Number</p>
-                                        <input type="text" className="add_device_input" />
-                                        <p className="mt-3 mb-1">Brand Name</p>
-                                        <input type="text" className="add_device_input" />
-                                        <p className="mt-3 mb-1">Device Type</p>
-                                        <input type="text" className="add_device_input" />
+                                    <div className="w-80 border-cyan-950 border-4 mx-4 rounded-2xl px-6 py-4 shadow-neutral-600 shadow-lg font-medium text-md flex flex-col items-center">
+                                        <div>
+                                            <p className="my-2">Updating: {selectedTreeItemName}</p>
+                                            <p className="mt-3 mb-1">Device Status: Active</p>
+                                            <p className="mt-3 mb-1">Serial Number</p>
+                                            <input type="text" className="add_device_input" />
+                                            <p className="mt-3 mb-1">Description</p>
+                                            <input type="text" className="add_device_input" />
+                                            <p className="mt-3 mb-1">Model Number</p>
+                                            <input type="text" className="add_device_input" />
+                                            <p className="mt-3 mb-1">Brand Name</p>
+                                            <input type="text" className="add_device_input" />
+                                            <p className="mt-3 mb-1">Device Type</p>
+                                            <input type="text" className="add_device_input" />
 
-                                        <p></p>
-                                        <div className="text-right">
-                                            <button id="button" className="mt-5 mb-2 shadow-md shadow-neutral-600 hover:shadow-lg hover:shadow-neutral-600 focus:shadow-md focus:shadow-neutral-600 text-white font-medium rounded-lg text-sm px-4 py-2">Update</button>
+                                            <p></p>
+                                            <div className="text-right">
+                                                <button id="button" className="mt-5 mb-2 shadow-md shadow-neutral-600 hover:shadow-lg hover:shadow-neutral-600 focus:shadow-md focus:shadow-neutral-600 text-white font-medium rounded-lg text-sm px-4 py-2">Update</button>
+                                            </div>
                                         </div>
                                     </div>
+                                </main>
+                            )}
+                            {showDetailsDiv && deviceDetails && (
+                                <div className="w-full text-black">
+                                    <p>Details for: {selectedTreeItemName}</p>
+                                    <p>Device ID: {deviceDetails.device_serial_number}</p>
+                                    <p>{deviceDetails.tags}</p>
                                 </div>
-                            </main>
                             )}
                         </div>
                     </div>
