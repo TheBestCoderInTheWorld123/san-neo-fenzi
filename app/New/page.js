@@ -322,10 +322,12 @@ const App = () => {
                                 </main>
                             )}
                             {showDetailsDiv && deviceDetails && (
-                                <div className="w-full text-black">
-                                    <p>Details for: {selectedTreeItemName}</p>
-                                    <p>Device ID: {deviceDetails.device_serial_number}</p>
+                                <div className="w-full text-bold ml-4">
+                                    <div className="bg-gray-0 group block space-y-2 rounded-md border border-gray-200 p-6 pt-5 shadow-md shadow-black/5 transition-shadow duration-300 hover:shadow-lg">
+                                    <p>Details for : {selectedTreeItemName}</p>
+                                    <p>Device ID : {deviceDetails.device_serial_number}</p>
                                     <p>{deviceDetails.tags}</p>
+                                    </div>
                                 </div>
                             )}
                         </div>
