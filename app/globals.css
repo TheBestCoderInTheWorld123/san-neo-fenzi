@@ -83,25 +83,26 @@
   background-color: #2f455c;
 }
 
-#side-login-button:hover {
+#side-login-button:hover { 
   color: #2f455c;
-}
+ }
 
 #signup-button:hover {
-  color: white;
-  background-color: #2f455c;
-  border-color: #2f455c;
+  color: 2f455c;
+  background-color: white;
+  border-color: 2f455c;
+  
 }
 
 #signup-button {
-  color: #2f455c;
-  background-color: white;
-  border-color: #2f455c;
+  color: white;
+  background-color: 2f455c;
+  border-color: white;
 }
 
-#side-signup-button:hover {
+/* #side-signup-button:hover {
   color: #2f455c;
-}
+} */
 
 #text {
   font-size: 28px ;
@@ -113,6 +114,19 @@
   background-color: #2f455c;;
   border-color: #2f455c;
 }
+
+.bg-custom-color {
+  background-color: #2f455c;
+}
+
+.text-custom-color {
+color: antiquewhite;
+}
+
+.text-custom-color:hover {
+  color: #2f455c;
+}
+
 
 #login-button {
   color: #2f455c;
@@ -157,6 +171,10 @@ thead {
 
 #button {
   background-color: #2f455c;
+}
+
+#button:hover {
+  background-color: #0d4e68;
 }
 
 .tablebutton {

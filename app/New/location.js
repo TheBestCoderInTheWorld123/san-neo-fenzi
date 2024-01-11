@@ -27,7 +27,7 @@ const LocDropdown = () => {
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
                     </svg>
                 </button>
-
+{/* 
                 {isOpen && (
                     <div className="origin-top-right absolute right-0 mt-2 w-44 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                         <ul role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
@@ -60,7 +60,7 @@ const LocDropdown = () => {
                             </li>
                         </ul>
                     </div>
-                )}
+                )} */}
             </div>
         </div >
     )
