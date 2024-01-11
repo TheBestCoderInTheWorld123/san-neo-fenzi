@@ -100,7 +100,7 @@ const LogIn = () => {
                         <h2 className="text-2xl sm:text-3xl text-white font-black">Don't have an account?</h2>
                         <button
                             onClick={goToSignUp}
-                            // id='signup-button'
+                            id='side-signup-button'
                             className="hover:bg-white hover:text-2f455c border-white border-2 w-40 m-4 py-1 rounded-3xl text-lg font-semibold"
                         >
                             Sign Up

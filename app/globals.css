@@ -100,9 +100,12 @@
   border-color: white;
 }
 
-/* #side-signup-button:hover {
+#side-signup-button {
+  color: white;
+}
+#side-signup-button:hover {
   color: #2f455c;
-} */
+}
 
 #text {
   font-size: 28px ;
