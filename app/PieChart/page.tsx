@@ -7,7 +7,7 @@ const Pie = () => {
   const [data, setData] = useState([]);
 
   const fetchData = () => {
-    fetch('http://51.20.249.252:8000/get_device_pichart_data')
+    fetch('http://16.171.242.70:8000/get_device_pichart_data')
       .then(response => response.json())
       .then(fetchedJson => {
         setData(fetchedJson);

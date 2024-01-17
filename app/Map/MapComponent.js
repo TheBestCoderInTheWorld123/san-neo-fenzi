@@ -59,7 +59,7 @@ const MapComponent = () => {
   // Function to fetch locations
   const fetchLocations = async () => {
     try {
-      const response = await fetch('http://51.20.249.252:8000/locations/');
+      const response = await fetch('http://16.171.242.70:8000/locations/');
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
@@ -73,7 +73,7 @@ const MapComponent = () => {
   // Function to fetch devices
   const fetchDevices = async () => {
     try {
-      const response = await fetch('http://51.20.249.252:8000/devices/');
+      const response = await fetch('http://16.171.242.70:8000/devices/');
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
@@ -87,7 +87,7 @@ const MapComponent = () => {
   // Function to fetch device latest records
   const fetchDeviceRecords = async () => {
     try {
-      const response = await fetch('http://51.20.249.252:8000/get_device_latest_records/');
+      const response = await fetch('http://16.171.242.70:8000/get_device_latest_records/');
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }

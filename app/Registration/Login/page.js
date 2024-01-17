@@ -29,7 +29,7 @@ const LogIn = () => {
         };
 
         try {
-            const response = await fetch('http://51.20.249.252:8000/login', requestOptions);
+            const response = await fetch('http://16.171.242.70:8000/login', requestOptions);
             const data = await response.json();
             // console.log(data);
 

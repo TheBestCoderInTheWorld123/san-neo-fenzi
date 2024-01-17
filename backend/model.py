@@ -16,7 +16,7 @@ from sqlalchemy import select
 metadata = MetaData()
 
 # Update the database connection information
-db_host = '51.20.144.184'
+db_host = '13.48.70.123'
 db_username = 'iot_dev'
 db_password = 'iod@developer'
 db_name = 'iot_penguin'

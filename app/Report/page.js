@@ -206,7 +206,7 @@ export default function Report() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://51.20.249.252:8000/devices");
+        const response = await fetch("http://16.171.242.70:8000/devices");
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -238,7 +238,7 @@ export default function Report() {
 
 
   // useEffect(() => {
-  //   fetch("http://51.20.249.252:8000/history_by_device_serial_no")
+  //   fetch("http://16.171.242.70:8000/history_by_device_serial_no")
   //     .then((response) => response.json())
   //     .then((data) => {
   //       setData(data.records);
@@ -299,7 +299,7 @@ export default function Report() {
     });
 
     try {
-      const response = await fetch(`http://51.20.249.252:8000/history_by_device_serial_no?${queryParams}`);
+      const response = await fetch(`http://16.171.242.70:8000/history_by_device_serial_no?${queryParams}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

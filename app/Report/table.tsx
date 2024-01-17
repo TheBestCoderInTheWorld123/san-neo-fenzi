@@ -70,7 +70,7 @@ const TablePage = () => {
     return dependentValues;
   };
   const fetchData = () => {
-    fetch('http://51.20.249.252:8000/get_device_latest_records')
+    fetch('http://16.171.242.70:8000/get_device_latest_records')
       .then(response => response.json())
       .then((fetchedData: { records: DeviceRecord[] }) => { // Cast the fetched data to the expected shape
         const updatedData = fetchedData.records.map(record => {

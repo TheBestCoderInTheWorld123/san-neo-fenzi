@@ -18,7 +18,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy import delete
 from sqlalchemy import or_
 
-db_host = '51.20.144.184'
+db_host = '13.48.70.123'
 db_username = 'iot_dev'
 db_password = 'iod@developer'
 db_name = 'iot_penguin'

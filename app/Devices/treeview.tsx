@@ -20,7 +20,7 @@ export default function FileSystemNavigator() {
   useEffect(() => {
     async function fetchData() {
         try {
-            const response = await fetch('http://51.20.249.252:8000/locations/');
+            const response = await fetch('http://16.171.242.70:8000/locations/');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }

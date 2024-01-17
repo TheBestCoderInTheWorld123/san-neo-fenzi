@@ -21,7 +21,7 @@ export default function AlertTable() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('http://51.20.249.252:8000/latest_alerts');
+                const response = await fetch('http://16.171.242.70:8000/latest_alerts');
                 const data = await response.json();
                 const sortedData = data.sort((a: Alert, b: Alert) => new Date(b.time).getTime() - new Date(a.time).getTime());
                 //console.log(sortedData);

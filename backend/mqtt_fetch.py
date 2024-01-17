@@ -8,7 +8,7 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Broker details
-broker_ip = "13.53.173.47"
+broker_ip = "16.170.237.95"
 port = 1883  # Default MQTT port, change if yours is different
 topic = "devices/device_data"
 username = "iot_dev"
